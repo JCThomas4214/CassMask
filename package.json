@@ -1,10 +1,9 @@
 {
   "name": "cassmask",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A Simple Observable Driven Cassandra ORM",
   "main": "index.js",
   "files": [
-    "index.d.ts",
     "libs/create.js",
     "libs/createBatchQuery.js",
     "libs/createTable.js",
@@ -14,7 +13,18 @@
     "libs/remove.js",
     "libs/update.js",
     "libs/seam.js",
-    "libs/findOne.js"
+    "libs/findOne.js",
+    "index.ts",
+    "libs/create.ts",
+    "libs/createBatchQuery.ts",
+    "libs/createTable.ts",
+    "libs/find.ts",
+    "libs/findOne.ts",
+    "libs/parseModel.ts",
+    "libs/remove.ts",
+    "libs/update.ts",
+    "libs/seam.ts",
+    "libs/findOne.ts"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
