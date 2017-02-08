@@ -4,7 +4,7 @@
   "description": "A Simple Observable Driven Cassandra ORM",
   "main": "index.js",
   "files": [
-    "index.ts",
+    "index.d.ts",
     "libs/create.js",
     "libs/createBatchQuery.js",
     "libs/createTable.js",
