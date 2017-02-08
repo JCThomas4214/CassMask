@@ -1,9 +1,10 @@
 {
   "name": "cassmask",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A Simple Observable Driven Cassandra ORM",
   "main": "index.js",
   "files": [
+    "index.d.ts",
     "libs/create.js",
     "libs/createBatchQuery.js",
     "libs/createTable.js",
@@ -13,18 +14,7 @@
     "libs/remove.js",
     "libs/update.js",
     "libs/seam.js",
-    "libs/findOne.js",
-    "index.ts",
-    "libs/create.ts",
-    "libs/createBatchQuery.ts",
-    "libs/createTable.ts",
-    "libs/find.ts",
-    "libs/findOne.ts",
-    "libs/parseModel.ts",
-    "libs/remove.ts",
-    "libs/update.ts",
-    "libs/seam.ts",
-    "libs/findOne.ts"
+    "libs/findOne.js"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -45,13 +35,13 @@
     "url": "https://github.com/JCThomas4214/CassMask/issues"
   },
   "homepage": "https://github.com/JCThomas4214/CassMask#readme",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^7.0.5"
+  },
+  "peerDependencies": {
     "cassandra-driver": "^3.2.0",
     "immutable": "^3.8.1",
     "rxjs": "^5.1.0"
-  },
-  "devDependencies": {
-    "@types/node": "^7.0.5",
-    "dtsmake": "^0.0.9"
   }
 }
