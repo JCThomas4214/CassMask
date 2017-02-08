@@ -1,5 +1,6 @@
 
 [![npm version](https://img.shields.io/npm/v/cassmask.svg)](https://www.npmjs.com/package/cassmask)
+[![Dependency Status](https://img.shields.io/david/JCThomas4214/CassMask.svg)](https://david-dm.org/JCThomas4214/CassMask.svg)
 
 # CassMask
 
