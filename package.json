@@ -1,6 +1,6 @@
 {
   "name": "cassmask",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Simple Observable Driven Cassandra ORM",
   "main": "index.js",
   "files": [
@@ -41,6 +41,7 @@
     "rxjs": "^5.1.0"
   },
   "devDependencies": {
-    "@types/node": "^7.0.5"
+    "@types/node": "^7.0.5",
+    "dtsmake": "^0.0.9"
   }
 }
