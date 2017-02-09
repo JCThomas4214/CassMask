@@ -150,6 +150,7 @@ CassMask batches as much as possible. If all of your queries are batchable then 
 #### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object: [Object || Array\<Object\>] = {}): Schema
 
 <a name="TODO"></a>
+
 ## TODO
 
 + EventEmitter API (using Cassandra-driver events || Observable streams) to allow for event driven features like Socket.io
