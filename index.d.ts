@@ -12,8 +12,8 @@ interface Schema {
 
 	find(object?:Object, opts?:any): Schema;
 	findOne(object?:Object, opts?:any): Schema;
-	remove(object?:Object): Schema;
-	update(object:Object, change?:Object): Schema;
+	remove(object?:any): Schema;
+	update(object:any, change?:Object): Schema;
 	create(items: any): Schema;
 	seam(): Rx.Observable<any>;
 }

@@ -76,6 +76,6 @@ export function parseQueryDelete(items: any) {
     REMOVE() IS FOR DELETING FOUND ROWS OR TRUNCATING TABLE
  */
 
-export function remove(object: Object = {}) {      
+export function remove(object: any = {}) {      
     return Array.isArray(object) ? this.parseQueryDelete(object) : this.parseQueryDelete([object]);
 }

@@ -68,6 +68,6 @@ export function parseQueryUpdate(items: any) {
     IN THE TABLE
  */
 
-export function update(object: Object, change?: Object) {
+export function update(object: any, change?: Object) {
   return Array.isArray(object) ? this.parseQueryUpdate(object) : this.parseQueryUpdate([{ set: object, in: change }]);
 }
