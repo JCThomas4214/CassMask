@@ -3,6 +3,8 @@
 
 # CassMask
 
+This ORM is a work in progress and is not suggested for production as core features have not yet been implimented. Contributors are welcome to Fork and pull request. Visit the [TODO](#TODO) section for what needs to be done. 
+
 ## Quick Start
 
 ```sh
@@ -97,3 +99,31 @@ Model.create([{
 */
 ```
 > Note: UUID, TIMEUUID, and TIMESTAMP is auto generated on INSERT queries. Cassmask on first model instance query will insert a table based off the model if the table does not exist => Holder index might be index+1
+
+## Why Observables?
+
+Observables are basically fancy promises but they operate under event streams which give us very interesting oportunities to filter and seam sets of queries. For more information about observables and the [ReactiveX](http://reactivex.io/) RxJS library [click here](http://reactivex.io/rxjs/).
+
+## Every Query is a Observable.
+
+In CassMask every query executes in an observable stream. The more queries you seam together the more Observables will be [concatonated](http://reactivex.io/documentation/operators/concat.html) together, creating the final seamed observable that will be subscribed to.
+
+## Batching is Important!
+
+Batching not only reduces the amount of queries to the database but it also ensures atomicity, if one statement fails they all fail. You can read more about batching and it's importance [click here](https://docs.datastax.com/en/cql/3.3/cql/cql_using/useBatch.html).
+
+CassMask batches as much as possible. If all of your queries are batchable then there will only be one query (one observable) to the database. If in the middle of your statements you throw in a non-batchable query CassMask will act appropriately and batch as much in the beginning to create one query, create another query for the non-batchable, and batch as much for the rest before seaming all the observables together for the stream.
+
+# Features
+
++ It uses the most up to date [Cassandra-Driver](https://github.com/datastax/nodejs-driver) from DataStax so all the features it has CassMask will have too. 
++ It creates a table based off the model if it does not already exist. 
++ It gives you all the tools availiable in CQL mapped in an easy to use api.
++ It allows you to seam together queries, using observables, garunteeing all queries are executed in the proper sequence.
++ It minimizes the amount of queries as much as possible with batching while maintaining proper sequence.
+
+<a name="TODO"></a>
+# TODO
+
++ EventEmitter API (using Cassandra-driver events || Observable streams) to allow for event driven features like Socket.io
++ Virtual fields and trigger functions
