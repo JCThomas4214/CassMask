@@ -121,11 +121,12 @@ Observables are basically fancy promises but they operate under event streams wh
 
 In CassMask every query executes in an observable stream. The more queries you seam together the more Observables will be [concatonated](http://reactivex.io/documentation/operators/concat.html) together, creating the final seamed observable that will be subscribed to.
 
-## Batching is Important!
+<!-- ## Batching is Important!
 
 Batching not only reduces the amount of queries to the database but it also ensures atomicity, if one statement fails they all fail. You can read more about batching and it's importance [click here](https://docs.datastax.com/en/cql/3.3/cql/cql_using/useBatch.html).
 
 CassMask batches as much as possible. If all of your queries are batchable then there will only be one query (one observable) to the database. If in the middle of your statements you throw in a non-batchable query CassMask will act appropriately and batch as much in the beginning to create one query, create another query for the non-batchable, and batch as much for the rest before seaming all the observables together for the stream.
+-->
 
 # Features
 
@@ -133,7 +134,6 @@ CassMask batches as much as possible. If all of your queries are batchable then 
 + It creates a table based off the model if it does not already exist. 
 + It gives you all the tools availiable in CQL mapped in an easy to use api.
 + It allows you to seam together queries, using observables, garunteeing all queries are executed in the proper sequence.
-+ It minimizes the amount of queries as much as possible with batching while maintaining proper sequence.
 
 ## Query Functions
 
