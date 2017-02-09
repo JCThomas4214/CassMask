@@ -1,6 +1,5 @@
 import * as Rx from 'rxjs';
 import { List } from 'immutable';
-import cassandra from '../index';
 
 /*
      USES THE PARSED OBJECT FROM FIND() OR FINDONE() 
@@ -11,6 +10,7 @@ import cassandra from '../index';
  */
 
 export function seam() {
-  const obs = this.createBatchQuery();
+  const obs = this.createBatchQuery(this.obs.concat([]));
+  // console.log(obs.toArray());
   return obs.size > 1 ? Rx.Observable.concat.apply(this, obs.toArray()) : obs.first();
 }

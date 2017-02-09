@@ -1,6 +1,6 @@
 import * as Rx from 'rxjs';
 import { List } from 'immutable';
-import cassandra from '../index';
+import { cassandra } from '../index';
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
@@ -9,6 +9,7 @@ import cassandra from '../index';
 
 export function parseQueryDelete(items: any) {
   let q = [];
+  let obs = this.obs.concat([]);
 
   for(let x=0; x < items.length; x++) {
     q.push({ query: '', params: [] });
@@ -25,7 +26,7 @@ export function parseQueryDelete(items: any) {
   let batchable = this.batchable.concat(q);
 
   if (items.length === 0 || q[0].params.length === 0) {
-    this.obs = this.checkTable().push(Rx.Observable.create(observer => {
+    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
 
       let func = () => {
         return cassandra.client.execute(`TRUNCATE ${this.tableName}`);
@@ -47,9 +48,8 @@ export function parseQueryDelete(items: any) {
   return {
     tblChked: this.tblChked,
     model: this.model,
-    auto: this.auto,
     tableName: this.tableName,        
-    obs: this.obs,
+    obs: obs,
     batchable: batchable,
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,
@@ -63,8 +63,7 @@ export function parseQueryDelete(items: any) {
     findOne: this.findOne,
     update: this.update,
 
-    checkTable: this.checkTable,
-    createTable: this.createTable
+    checkTable: this.checkTable
   };
 }
 

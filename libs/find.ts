@@ -1,6 +1,6 @@
 import * as Rx from 'rxjs';
 import { List } from 'immutable';
-import cassandra from '../index';
+import { cassandra } from '../index';
 
 /*
       PARSES ATTR INTO FINDS OBJECT TO THEN QUERY THE DB
@@ -8,7 +8,7 @@ import cassandra from '../index';
 
 export function find(object?: Object, opts?: any) {
 
-  let obs = this.createBatchQuery().push(Rx.Observable.create(observer => {
+  const obs = this.createBatchQuery(this.obs.concat([])).push(Rx.Observable.create(observer => {
 
     let func = () => {
       let query = `SELECT * FROM ${this.tableName} WHERE`;
@@ -42,7 +42,6 @@ export function find(object?: Object, opts?: any) {
   return {
     tblChked: this.tblChked,
     model: this.model,
-    auto: this.auto,
     tableName: this.tableName,     
     obs: obs.concat([]),
     batchable: List<any>([]),

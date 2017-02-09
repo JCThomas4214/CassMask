@@ -9,7 +9,6 @@ interface Schema_static {
 }
 
 interface Schema {
-
 	find(object?:Object, opts?:any): Schema;
 	findOne(object?:Object, opts?:any): Schema;
 	remove(object?:any): Schema;
@@ -17,6 +16,10 @@ interface Schema {
 	create(items: any): Schema;
 	seam(): Rx.Observable<any>;
 }
+
+declare function now(): string;
+declare function uuid(): string;
+declare function toTimeStamp(timeuuid: string): string;
 
 declare namespace cassandra {
 	export var client : any;
@@ -27,8 +30,21 @@ declare namespace cassandra {
 	export var TIMESTAMP : string;
 
 	export function connect(config : any, cb : any): void;
-
-	export var Schema: Schema_static;
 }
 
-export = cassandra;
+declare namespace Schema {
+	export function find(object?:Object, opts?:any): Schema;
+	export function findOne(object?:Object, opts?:any): Schema;
+	export function remove(object?:any): Schema;
+	export function update(object:any, change?:Object): Schema;
+	export function create(items: any): Schema;
+	export function seam(): Rx.Observable<any>;
+}
+
+export {
+	cassandra,
+	Schema,
+	now,
+	uuid,
+	toTimeStamp
+};

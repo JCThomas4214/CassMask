@@ -1,6 +1,5 @@
 import * as Rx from 'rxjs';
 import { List } from 'immutable';
-import cassandra from '../index';
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
@@ -38,9 +37,8 @@ export function parseQueryUpdate(items: any) {
   return {
     tblChked: this.tblChked,
     model: this.model,
-    auto: this.auto,
     tableName: this.tableName,        
-    obs: this.obs,
+    obs: this.obs.concat([]),
     batchable: this.batchable.concat(q),
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,

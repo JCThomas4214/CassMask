@@ -1,6 +1,6 @@
 import * as Rx from 'rxjs';
 import { List } from 'immutable';
-import cassandra from '../index';
+import { cassandra } from '../index';
 
 /*
       CHANGES THE FIND1 VARIABLE TO TRUE
@@ -9,7 +9,7 @@ import cassandra from '../index';
 
 export function findOne(object?: Object, opts?: any) {
 
-  let obs = this.createBatchQuery().push(Rx.Observable.create(observer => {
+  let obs = this.createBatchQuery(this.obs.concat([])).push(Rx.Observable.create(observer => {
 
     let func = () => {
       let query = `SELECT * FROM ${this.tableName} WHERE`;
@@ -45,7 +45,6 @@ export function findOne(object?: Object, opts?: any) {
   return {
     tblChked: this.tblChked,
     model: this.model,
-    auto: this.auto,
     tableName: this.tableName,        
     obs: obs.concat([]),
     batchable: List<any>([]),

@@ -8,7 +8,17 @@ import {
   checkTable, createTable, createBatchQuery, parseModel
 } from './libs';
 
-export default class cassandra {
+export function now() {
+  return 'now()';
+}
+export function uuid() {
+  return 'uuid()';
+}
+export function toTimeStamp(timeuuid: string) {
+  return `toTimeStamp(${timeuuid})`;
+}
+
+export class cassandra {
   // client object
   static client: any;
 
@@ -37,16 +47,15 @@ export default class cassandra {
       return cb ? cb(err, result) : null;
     });
   }
+}
 
-  static Schema = class {
+export class Schema {
     private tblChked: boolean = false;
 
     private obs: List<Rx.Observable<any>> = List<Rx.Observable<any>>([]);
     private batchable: List<any> = List<any>([]);
 
     private model: any;
-    private auto: any = { cols: [], vals: [] };
-
     private tableName: string;
 
     // Default Options
@@ -78,4 +87,3 @@ export default class cassandra {
     public seam = seam;
 
   }
-}
