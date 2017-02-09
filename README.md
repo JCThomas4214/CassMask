@@ -122,8 +122,22 @@ CassMask batches as much as possible. If all of your queries are batchable then 
 + It allows you to seam together queries, using observables, garunteeing all queries are executed in the proper sequence.
 + It minimizes the amount of queries as much as possible with batching while maintaining proper sequence.
 
+## Query Functions
+
+#### [seam](https://github.com/JCThomas4214/CassMask/blob/master/libs/seam.ts)(): Rx.Observable\<any\>
+
+#### [find](https://github.com/JCThomas4214/CassMask/blob/master/libs/find.ts)(items?: Object, opts?: Object): Schema
+
+#### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: Object): Schema
+
+#### [create](https://github.com/JCThomas4214/CassMask/blob/master/libs/create.ts)(items: [Object || Array\<Object\>]): Schema
+
+#### [update](https://github.com/JCThomas4214/CassMask/blob/master/libs/update.ts)(object: [Object || Array\<Object\>], change?: Object): Schema
+
+#### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object: [Object || Array\<Object\>] = {}): Schema
+
 <a name="TODO"></a>
-# TODO
+## TODO
 
 + EventEmitter API (using Cassandra-driver events || Observable streams) to allow for event driven features like Socket.io
 + Virtual fields and trigger functions
