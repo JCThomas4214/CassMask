@@ -14,7 +14,7 @@ $ npm install cassmask rxjs immmutable cassandra-driver
 Connect to Cassandra with a [ClientOptions](http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/) object.
 
 ```ts
-import cassandra from 'cassmask';
+import { cassandra } from 'cassmask';
 
 // ClientOptions Object
 const config = {
@@ -32,9 +32,9 @@ cassandra.connect(config, (err, result) => {
 Create a model.
 
 ```ts
-import cassandra from 'cassmask';
+import { cassandra, Schema } from 'cassmask';
 
-let Model = new cassandra.Schema('TableName', {
+let Model = new Schema('TableName', {
   col1: cassandra.UUID,
   col2: cassandra.TIMEUUID,
   col2: cassandra.TIMESTAMP,
@@ -50,6 +50,7 @@ export default Model;
 Find, create, remove, update...
 
 ```ts
+import { now, uuid, toTimeStamp } from 'cassmask';
 import Model from 'path/to/model.ts';
 
 let holder = [];
@@ -64,17 +65,29 @@ let holder = [];
 */
 
 Model.create([{
-  col3: 'test1',
-  col4: 49
+  col1: uuid(),
+  col2: now(),
+  col3: toTimeStamp(now()),
+  col4: 'test1',
+  col5: 49
 }, {
-  col3: 'test2',
-  col4: 23
+  col1: uuid(),
+  col2: now(),
+  col3: toTimeStamp(now()),
+  col4: 'test2',
+  col5: 23
 }, {
-  col3: 'test3',
-  col4: 97
+  col1: uuid(),
+  col2: now(),
+  col3: toTimeStamp(now()),
+  col4: 'test3',
+  col5: 97
 }, {
-  col3: 'test4',
-  col4: 57
+  col1: uuid(),
+  col2: now(),
+  col3: toTimeStamp(now()),
+  col4: 'test4',
+  col5: 57
 }]).remove([{
   col1: 'generated uuid', // before2
   col2: 'generated timeuuid'
@@ -98,7 +111,7 @@ Model.create([{
   ]
 */
 ```
-> Note: UUID, TIMEUUID, and TIMESTAMP is auto generated on INSERT queries. Cassmask on first model instance query will insert a table based off the model if the table does not exist => Holder index might be index+1
+> Note: Cassmask on first model instance query will insert a table based off the model if the table does not exist => Holder index might be index+1
 
 ## Why Observables?
 
