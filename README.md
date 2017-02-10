@@ -125,7 +125,7 @@ In CassMask every query executes in an observable stream. The more queries you s
 
 Batching is not always the best solution to minimize queries in Cassandra. Because of the nature of Cassandra and how it partitions the data to Nodes/SSTables, batching is best practice if and only if the INSERTS, UPDATES, and DELETES are for a single partition. 
 
-In CassMask batching is currently only availiable per function basis and is off by default. If you would like ot enable it, simply pass in a Object with batch = true as the second argument.
+In CassMask batching is currently only availiable per function basis and is off by default. If you would like to enable it, simply pass in a Object with batch = true as the second argument.
 
 ```ts
 // Parititon key = catagory
