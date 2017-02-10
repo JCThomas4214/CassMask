@@ -11,6 +11,6 @@ import { List } from 'immutable';
 
 export function seam() {
   const obs = this.obs.concat([]);
-  console.log(obs.toArray());
+  // console.log(obs.toArray());
   return obs.size > 1 ? Rx.Observable.concat.apply(this, obs.toArray()) : obs.first();
 }
