@@ -9,7 +9,7 @@ import { cassandra } from '../index';
 
 export function findOne(object?: Object, opts?: any) {
 
-  let obs = this.createBatchQuery(this.obs.concat([])).push(Rx.Observable.create(observer => {
+  let obs = this.checkTable(this.obs.concat([])).push(Rx.Observable.create(observer => {
 
     let func = () => {
       let query = `SELECT * FROM ${this.tableName} WHERE`;
@@ -46,7 +46,7 @@ export function findOne(object?: Object, opts?: any) {
     tblChked: this.tblChked,
     model: this.model,
     tableName: this.tableName,        
-    obs: obs.concat([]),
+    obs: obs,
     batchable: List<any>([]),
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,

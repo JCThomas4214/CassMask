@@ -121,12 +121,38 @@ Observables are basically fancy promises but they operate under event streams wh
 
 In CassMask every query executes in an observable stream. The more queries you seam together the more Observables will be [concatonated](http://reactivex.io/documentation/operators/concat.html) together, creating the final seamed observable that will be subscribed to.
 
-<!-- ## Batching is Important!
+## Batching!
 
-Batching not only reduces the amount of queries to the database but it also ensures atomicity, if one statement fails they all fail. You can read more about batching and it's importance [click here](https://docs.datastax.com/en/cql/3.3/cql/cql_using/useBatch.html).
+Batching is not always the best solution to minimize queries in Cassandra. Because of the nature of Cassandra and how it patitions the data to Nodes/SSTables, batching is best practice if and only if the INSERTS, UPDATES, and DELETES are for a single partition. 
 
-CassMask batches as much as possible. If all of your queries are batchable then there will only be one query (one observable) to the database. If in the middle of your statements you throw in a non-batchable query CassMask will act appropriately and batch as much in the beginning to create one query, create another query for the non-batchable, and batch as much for the rest before seaming all the observables together for the stream.
--->
+In CassMask batching is currently only availiable per function basis and is off by default. If you would like ot enable it, simply pass in a Object with batch = true as the second argument.
+
+```ts
+// Parititon key = catagory
+Model.remove().create([{
+    catagory: 'cloud', 
+    id: now(),
+    name: 'SocketIO',
+    xcoor: 52,
+    ycoor: 15
+  }, {
+    catagory: 'cloud',
+    id: now(),
+    name: 'Cassandra',
+    xcoor: 35,
+    ycoor: 35
+  }, {
+    catagory: 'cloud',
+    id: now(),
+    name: 'Angular 2',
+    xcoor: 10,
+    ycoor: 65
+  }], { batch: true }).seam().subscribe(x => {}, err => console.log(err));
+``` 
+
+### Things to consider before batching.
+
+When batching, multiple queries are condenced into a single query with multiple statements. If you would like event driven features you will need to keep in mind that the CassMask Event API will only emit once per query response. Depending on your use case an emit per INSERT, UPDATE, and DELETE should be considered.
 
 # Features
 
@@ -143,15 +169,15 @@ CassMask batches as much as possible. If all of your queries are batchable then 
 
 #### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: Object): Schema
 
-#### [create](https://github.com/JCThomas4214/CassMask/blob/master/libs/create.ts)(items: [Object || Array\<Object\>]): Schema
+#### [create](https://github.com/JCThomas4214/CassMask/blob/master/libs/create.ts)(items: [Object || Array\<Object\>], opts?: Object): Schema
 
-#### [update](https://github.com/JCThomas4214/CassMask/blob/master/libs/update.ts)(object: [Object || Array\<Object\>], change?: Object): Schema
+#### [update](https://github.com/JCThomas4214/CassMask/blob/master/libs/update.ts)(object: [Object || Array\<Object\>], opts?: Object): Schema
 
-#### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object: [Object || Array\<Object\>] = {}): Schema
+#### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object?: [Object || Array\<Object\>], opts?: Object): Schema
 
 <a name="TODO"></a>
 
 ## TODO
 
-+ EventEmitter API (using Cassandra-driver events || Observable streams) to allow for event driven features like Socket.io
++ EventEmitter API (Observable streams) to allow for event driven features like Socket.io
 + Virtual fields and trigger functions

@@ -1,13 +1,15 @@
 import * as Rx from 'rxjs';
 import { List } from 'immutable';
+import { cassandra } from '../index';
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
 
-export function parseQueryInsert(items: any) {
+export function parseQueryInsert(items: any, options: any) {
   let q = [];
+  let obs = this.obs.concat([]);
 
   for(let x=0; x < items.length; x++) {
     q.push({ query: '', params: [] });
@@ -38,16 +40,45 @@ export function parseQueryInsert(items: any) {
     tmp2 = tmp2.substring(0, tmp2.length-2) + ')';
 
     q[x].query = tmp1 + tmp2;
+
+    if (!options.batch) {
+      obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+
+        const func = () => cassandra.client.execute(q[x].query, q[x].params, {prepare:true});
+
+        func().then(entity => {
+          observer.next(entity);
+          observer.complete();
+        }).catch(err => observer.error(err));
+
+        return function(){};
+      }));
+    } 
+
   }
 
-  // console.log(this.batchable.concat(q).toArray());
+  if (options.batch) {
+    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+
+      const func = () => cassandra.client.batch(this.batchable.concat(q).toArray(), {prepare:true});
+
+      func().then(entity => {
+        observer.next(entity);
+        observer.complete();
+      }).catch(err => observer.error(err));
+
+      return function(){};
+    }));
+  } 
+
+  // console.log(obs.toArray());
 
   return {
     tblChked: this.tblChked,
     model: this.model,
     tableName: this.tableName,        
-    obs: this.obs.concat([]),
-    batchable: this.batchable.concat(q),
+    obs: obs,
+    batchable: this.batchable,
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,
     parseQueryUpdate: this.parseQueryUpdate,
@@ -70,6 +101,6 @@ export function parseQueryInsert(items: any) {
         USES CASS DRIVER BATCH FUNCTION TO INSERT PARSED OBJECT ARRAY
  */
 
-export function create(items: any) {
-  return Array.isArray(items) ? this.parseQueryInsert(items) : this.parseQueryInsert([items]);
+export function create(items: any, options: Object = {}) {
+  return Array.isArray(items) ? this.parseQueryInsert(items, options) : this.parseQueryInsert([items], options);
 }

@@ -7,7 +7,7 @@ import { cassandra } from '../index';
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
 
-export function parseQueryDelete(items: any) {
+export function parseQueryDelete(items: any, options: any) {
   let q = [];
   let obs = this.obs.concat([]);
 
@@ -22,15 +22,27 @@ export function parseQueryDelete(items: any) {
     }
     q[x].query = tmp.substring(0, tmp.length-4);
 
+    if (!options.batch && q[0].params.length > 0) {
+      obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+
+        const func = () => cassandra.client.execute(q[x].query, q[x].params, {prepare:true});
+
+        func().then(entity => {
+          observer.next(entity);
+          observer.complete();
+        }).catch(err => observer.error(err));
+
+        return function(){};
+      }));
+    } 
+
   }
   let batchable = this.batchable.concat(q);
 
-  if (items.length === 0 || q[0].params.length === 0) {
+  if (q[0].params.length === 0) {
     obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
 
-      let func = () => {
-        return cassandra.client.execute(`TRUNCATE ${this.tableName}`);
-      };
+      let func = () => cassandra.client.execute(`TRUNCATE ${this.tableName}`);
 
       func().then(entity => {
         observer.next(entity);
@@ -41,9 +53,21 @@ export function parseQueryDelete(items: any) {
     }));
 
     batchable = List<any>([]);
+  } else if (options.batch) {
+    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+
+      const func = () => cassandra.client.batch(this.batchable.concat(q).toArray(), {prepare:true});
+
+      func().then(entity => {
+        observer.next(entity);
+        observer.complete();
+      }).catch(err => observer.error(err));
+
+      return function(){};
+    }));
   }
 
-  // console.log(batchable.toArray());
+  // console.log(obs.toArray());
 
   return {
     tblChked: this.tblChked,
@@ -75,6 +99,6 @@ export function parseQueryDelete(items: any) {
     REMOVE() IS FOR DELETING FOUND ROWS OR TRUNCATING TABLE
  */
 
-export function remove(object: any = {}) {      
-    return Array.isArray(object) ? this.parseQueryDelete(object) : this.parseQueryDelete([object]);
+export function remove(object: any = {}, options: Object = {}) {      
+    return Array.isArray(object) ? this.parseQueryDelete(object, options) : this.parseQueryDelete([object], options);
 }
