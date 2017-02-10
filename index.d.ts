@@ -24,7 +24,7 @@ declare class Schema {
 
 	find(object?:Object, opts?:any): Schema;
 	findOne(object?:Object, opts?:any): Schema;
-	remove(object:any, opts?: Object): Schema;
+	remove(object?:any, opts?: Object): Schema;
 	update(object:any, opts?: Object): Schema;
 	create(items: any, opts?: Object): Schema;
 	seam(): Rx.Observable<any>;
