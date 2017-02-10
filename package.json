@@ -1,6 +1,6 @@
 {
   "name": "cassmask",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "A Simple Observable Driven Cassandra ORM",
   "main": "index.js",
   "files": [
