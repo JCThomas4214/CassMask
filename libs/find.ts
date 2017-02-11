@@ -31,8 +31,12 @@ export function find(object?: Object, opts?: any) {
     };
 
     func().then(entity => {
-      observer.next(entity);
-      observer.complete();
+      if(this.findHook) {
+        this.findCb(observer, entity, cassandra.client);
+      } else {
+        observer.next(entity);
+        observer.complete();
+      }
     }).catch(err => observer.error(err));
 
     return function () {};
@@ -40,6 +44,15 @@ export function find(object?: Object, opts?: any) {
   }));
 
   return {
+    createHook: this.createHook,
+    updateHook: this.updateHook,
+    removeHook: this.removeHook,
+    findHook: this.findHook,
+    createCb: this.createCb,
+    updateCb: this.updateCb,
+    removeCb: this.removeCb,
+    findCb: this.findCb, 
+
     tblChked: this.tblChked,
     model: this.model,
     tableName: this.tableName,     

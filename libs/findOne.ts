@@ -30,12 +30,16 @@ export function findOne(object?: Object, opts?: any) {
       query += ' LIMIT 1';
       if (opts && opts.allowFiltering && params.length > 0) query += ' ALLOW FILTERING';
 
-      return cassandra.client.execute(query, params, {prepare:true});
+      return params.length > 0 ? cassandra.client.execute(query, params, {prepare:true}) : cassandra.client.execute(query);
     };
 
     func().then(entity => {
-      observer.next(entity);
-      observer.complete();
+      if(this.findHook) {
+        this.findCb(observer, entity, cassandra.client);
+      } else {
+        observer.next(entity);
+        observer.complete();
+      }
     }).catch(err => observer.error(err));
 
     return function () {};
@@ -43,6 +47,15 @@ export function findOne(object?: Object, opts?: any) {
   }));      
 
   return {
+    createHook: this.createHook,
+    updateHook: this.updateHook,
+    removeHook: this.removeHook,
+    findHook: this.findHook,
+    createCb: this.createCb,
+    updateCb: this.updateCb,
+    removeCb: this.removeCb,
+    findCb: this.findCb, 
+
     tblChked: this.tblChked,
     model: this.model,
     tableName: this.tableName,        

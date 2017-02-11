@@ -39,8 +39,12 @@ export function parseQueryUpdate(items: any, options: any) {
         const func = () => cassandra.client.execute(q[x].query, q[x].params, {prepare:true});
 
         func().then(entity => {
-          observer.next(entity);
-          observer.complete();
+          if(this.updateHook) {
+            this.updateCb(observer, entity, cassandra.client);
+          } else {
+            observer.next(entity);
+            observer.complete();
+          }
         }).catch(err => observer.error(err));
 
         return function(){};
@@ -55,8 +59,12 @@ export function parseQueryUpdate(items: any, options: any) {
       const func = () => cassandra.client.batch(this.batchable.concat(q).toArray(), {prepare:true});
 
       func().then(entity => {
-        observer.next(entity);
-        observer.complete();
+        if(this.updateHook) {
+          this.updateCb(observer, entity, cassandra.client);
+        } else {
+          observer.next(entity);
+          observer.complete();
+        }
       }).catch(err => observer.error(err));
 
       return function(){};
@@ -66,6 +74,15 @@ export function parseQueryUpdate(items: any, options: any) {
   // console.log(obs.toArray());
 
   return {
+    createHook: this.createHook,
+    updateHook: this.updateHook,
+    removeHook: this.removeHook,
+    findHook: this.findHook,
+    createCb: this.createCb,
+    updateCb: this.updateCb,
+    removeCb: this.removeCb,
+    findCb: this.findCb, 
+
     tblChked: this.tblChked,
     model: this.model,
     tableName: this.tableName,        

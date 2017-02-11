@@ -4,6 +4,13 @@
 
 import * as Rx from 'rxjs';
 
+// interface Events_static {
+// 	new (parent: Schema): Events;
+// }
+interface Events {
+	post(method: string, fn: Function): void;
+}
+
 declare function now(): string;
 declare function uuid(): string;
 declare function toTimeStamp(timeuuid: string): string;
@@ -28,6 +35,8 @@ declare class Schema {
 	update(object:any, opts?: Object): Schema;
 	create(items: any, opts?: Object): Schema;
 	seam(): Rx.Observable<any>;
+
+	schema: Events;
 }
 
 export {

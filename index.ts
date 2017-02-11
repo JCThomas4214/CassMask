@@ -58,6 +58,16 @@ export class Schema {
     private model: any;
     private tableName: string;
 
+    public createHook: boolean = false;
+    public removeHook: boolean = false;
+    public updateHook: boolean = false;
+    public findHook: boolean = false;
+
+    public createCb: Function;
+    public removeCb: Function;
+    public updateCb: Function;
+    public findCb: Function;
+
     // Default Options
     private options: any = {
 
@@ -86,4 +96,36 @@ export class Schema {
     public findOne = findOne;
     public seam = seam;
 
+    public schema = new Events(this);
+
   }
+
+ class Events {
+   private parent: Schema;
+
+   constructor(parent: Schema) {
+     this.parent = parent;
+   }
+
+   post(method: string, fn: Function): void {
+     switch (method) {
+       case "save":
+         this.parent.createHook = true;
+         this.parent.createCb = fn;
+         break;
+       case "update":
+         this.parent.updateHook = true;
+         this.parent.updateCb = fn;
+         break;
+       case "find":
+         this.parent.findHook = true;
+         this.parent.findCb = fn;
+         break;
+       case "remove":
+         this.parent.removeHook = true;
+         this.parent.removeCb = fn;
+         break;
+     }
+     return;
+   }
+ };
