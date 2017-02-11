@@ -29,7 +29,7 @@ export function parseQueryDelete(items: any, options: any) {
 
         func().then(entity => {
           if(this.removeHook) {
-            this.removeCb(observer, entity, cassandra.client);
+            this.removeCb(observer, items[x], cassandra.client);
           } else {
             observer.next(entity);
             observer.complete();
@@ -49,7 +49,7 @@ export function parseQueryDelete(items: any, options: any) {
       let func = () => cassandra.client.execute(`TRUNCATE ${this.tableName}`);
 
       func().then(entity => {
-        observer.next(entity);
+        observer.next(items);
         observer.complete();
       }).catch(err => observer.error(err));
 
@@ -64,7 +64,7 @@ export function parseQueryDelete(items: any, options: any) {
 
       func().then(entity => {
         if(this.removeHook) {
-          this.removeCb(observer, entity, cassandra.client);
+          this.removeCb(observer, items, cassandra.client);
         } else {
           observer.next(entity);
           observer.complete();

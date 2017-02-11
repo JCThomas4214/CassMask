@@ -40,7 +40,7 @@ export function parseQueryUpdate(items: any, options: any) {
 
         func().then(entity => {
           if(this.updateHook) {
-            this.updateCb(observer, entity, cassandra.client);
+            this.updateCb(observer, items[x], cassandra.client);
           } else {
             observer.next(entity);
             observer.complete();
@@ -60,7 +60,7 @@ export function parseQueryUpdate(items: any, options: any) {
 
       func().then(entity => {
         if(this.updateHook) {
-          this.updateCb(observer, entity, cassandra.client);
+          this.updateCb(observer, items, cassandra.client);
         } else {
           observer.next(entity);
           observer.complete();

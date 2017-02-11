@@ -3,6 +3,8 @@
 
 # CassMask
 
+### "Inspired by [MongooseJS](http://mongoosejs.com/) with a twist!"
+
 This ORM is a work in progress and is not suggested for production as core features have not yet been implimented. Contributors are welcome to Fork and pull request. Visit the [TODO](#TODO) section for what needs to be done. 
 
 ## Quick Start
@@ -113,7 +115,7 @@ Model.create([{
 ```
 > Note: Cassmask on first model instance query will insert a table based off the model if the table does not exist => Holder index might be index+1
 
-## Why Observables?
+# Why Observables?
 
 Observables are basically fancy promises but they operate under event streams which give us very interesting oportunities to filter and seam sets of queries. For more information about observables and the [ReactiveX](http://reactivex.io/) RxJS library [click here](http://reactivex.io/rxjs/).
 
@@ -121,7 +123,7 @@ Observables are basically fancy promises but they operate under event streams wh
 
 In CassMask every query executes in an observable stream. The more queries you seam together the more Observables will be [concatonated](http://reactivex.io/documentation/operators/concat.html) together, creating the final seamed observable that will be subscribed to.
 
-## Batching!
+### Batching!
 
 Batching is not always the best solution to minimize queries in Cassandra. Because of the nature of Cassandra and how it partitions the data to Nodes/SSTables, batching is best practice if and only if the INSERTS, UPDATES, and DELETES are for a single partition. 
 
@@ -154,12 +156,95 @@ Model.remove().create([{
 
 When batching, multiple queries are condenced into a single query with multiple statements. If you would like event driven features you will need to keep in mind that the CassMask Event API will only emit once per query response. Depending on your use case an emit per INSERT, UPDATE, and/or DELETE may be preferable.
 
+## Event Hooks
+
+In CassMask there are event hooks for 'save', 'update', 'remove', and 'find' that can be used to trigger a callback after a corresponding query. This callback is executed before the observer.next() and observer.complete() functions are called.
+
+### Socket.io example
+
+events.ts
+
+```ts
+import Model from './path/to/model.ts';
+
+let EventEmitter = require('events').EventEmitter;
+let ModelEvents = new EventEmitter();
+
+// Set max event listeners (0 == unlimited)
+ModelEvents.setMaxListeners(0);
+
+/* 
+  You have access to the observer which next() and complete() function must be called inside the callback
+    The lastEntity; for create(), update(), and remove(): json object that was originally passed into the query
+      for find() and findOne(): the rows found in the table
+    The client; this is the cassandra client, which can be used to execute additional queries
+ */
+Model.schema.post('save', function(observer, lastEntity, client) {
+  // callback code goes here
+
+  Model.Events.emit('save', lastEntity);
+
+  observer.next(lastEntity);
+  observer.complete();
+});
+
+export default ModelEvents;
+
+``` 
+
+socket.ts
+
+```ts
+/**
+ * Broadcast updates to client when the model changes
+ */
+
+import ModelEvents from './path/to/events.ts';
+
+// Model events to emit
+let events = ['save'];
+
+function modelRegister(socket) {
+  // Bind model events to socket events
+  for (let i = 0, eventsLength = events.length; i < eventsLength; i++) {
+    let event = events[i];
+    let listener = createListener('Model:' + event, socket);
+
+    // the Emiter will listen for changes in the model
+    ModelEvents.on(event, listener);
+    // when a disconnect comes from the socket then remove the listener
+    socket.on('disconnect', removeListener(event, listener));
+  }
+}
+
+// create listener funtion
+function createListener(event, socket) {
+  return function(row) {
+    // not sure
+    socket.emit(event, row);
+  };
+}
+
+// remove listener function
+function removeListener(event, listener) {
+  return function() {
+    // in certain events come from the client, disconnect listener
+    ModelEvents.removeListener(event, listener);
+  };
+}
+
+export default modelRegister;
+```
+
+execute modelRegister(socket) in your socketio.config onConnect function
+
 # Features
 
 + It uses the most up to date [Cassandra-Driver](https://github.com/datastax/nodejs-driver) from DataStax so all the features it has CassMask will have too. 
 + It creates a table based off the model if it does not already exist. 
 + It gives you all the tools availiable in CQL mapped in an easy to use api.
 + It allows you to seam together queries, using observables, garunteeing all queries are executed in the proper sequence.
++ It has an Events API that allow you to hook into query responses for event driven features
 
 ## Query Functions
 
@@ -179,5 +264,4 @@ When batching, multiple queries are condenced into a single query with multiple 
 
 ## TODO
 
-+ EventEmitter API (Observable streams) to allow for event driven features like Socket.io
 + Virtual fields and trigger functions

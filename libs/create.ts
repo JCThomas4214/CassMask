@@ -48,7 +48,7 @@ export function parseQueryInsert(items: any, options: any) {
 
         func().then(entity => {
           if(this.createHook) {
-            this.createCb(observer, entity, cassandra.client);
+            this.createCb(observer, items[x], cassandra.client);
           } else {
             observer.next(entity);
             observer.complete();
@@ -68,7 +68,7 @@ export function parseQueryInsert(items: any, options: any) {
 
       func().then(entity => {
         if(this.createHook) {
-          this.createCb(observer, entity, cassandra.client);
+          this.createCb(observer, items, cassandra.client);
         } else {
           observer.next(entity);
           observer.complete();
