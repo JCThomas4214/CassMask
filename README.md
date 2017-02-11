@@ -42,7 +42,7 @@ let Model = new Schema('TableName', {
   col2: cassandra.TIMESTAMP,
   col3: cassandra.TEXT,
   cal4: cassandra.INT,
-  // Primary Keys
+  // Primary Keys (Partition & Clustering Column)
   keys: ['col1', 'col2']
 });
 
@@ -117,15 +117,15 @@ Model.create([{
 
 # Why Observables?
 
-Observables are basically fancy promises but they operate under event streams which give us very interesting oportunities to filter and seam sets of queries. For more information about observables and the [ReactiveX](http://reactivex.io/) RxJS library [click here](http://reactivex.io/rxjs/).
+Observables are basically fancy promises that operate under event streams which give us very interesting opportunities to filter and seam sets of queries. For more information about observables and the [ReactiveX](http://reactivex.io/) RxJS library [click here](http://reactivex.io/rxjs/).
 
-## Every Query is a Observable.
+## Every Query is an Observable.
 
-In CassMask every query executes in an observable stream. The more queries you seam together the more Observables will be [concatonated](http://reactivex.io/documentation/operators/concat.html) together, creating the final seamed observable that will be subscribed to.
+In CassMask every query executes in an observable stream. The more queries you seam together the more Observables will be [concatenated](http://reactivex.io/documentation/operators/concat.html) together, creating the final seamed observable that will be subscribed to.
 
 ### Batching!
 
-Batching is not always the best solution to minimize queries in Cassandra. Because of the nature of Cassandra and how it partitions the data to Nodes/SSTables, batching is best practice if and only if the INSERTS, UPDATES, and DELETES are for a single partition. 
+Batching is not always practical in Cassandra because of how it partitions the data to Nodes/SSTables. Batching is best practice if and only if the INSERTS, UPDATES, and DELETES are for a single partition. 
 
 In CassMask batching is currently only availiable per function basis and is off by default. If you would like to enable it, simply pass in a Object with batch = true as the second argument.
 
@@ -154,7 +154,7 @@ Model.remove().create([{
 
 ### Things to consider before batching.
 
-When batching, multiple queries are condenced into a single query with multiple statements. If you would like event driven features you will need to keep in mind that the CassMask Event API will only emit once per query response. Depending on your use case an emit per INSERT, UPDATE, and/or DELETE may be preferable.
+When batching, multiple queries are condenced into a single query with multiple statements. If you would like event driven features you will need to keep in mind that the CassMask Event API will only be triggered (depending on the hook) once per query response. Depending on your use case an emit per INSERT, UPDATE, and/or DELETE may be preferable.
 
 ## Event Hooks
 
@@ -210,7 +210,7 @@ function modelRegister(socket) {
     let event = events[i];
     let listener = createListener('Model:' + event, socket);
 
-    // the Emiter will listen for changes in the model
+    // the Emitter will listen for changes in the model
     ModelEvents.on(event, listener);
     // when a disconnect comes from the socket then remove the listener
     socket.on('disconnect', removeListener(event, listener));
@@ -220,7 +220,6 @@ function modelRegister(socket) {
 // create listener funtion
 function createListener(event, socket) {
   return function(row) {
-    // not sure
     socket.emit(event, row);
   };
 }
@@ -228,7 +227,6 @@ function createListener(event, socket) {
 // remove listener function
 function removeListener(event, listener) {
   return function() {
-    // in certain events come from the client, disconnect listener
     ModelEvents.removeListener(event, listener);
   };
 }
@@ -250,15 +248,42 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 #### [seam](https://github.com/JCThomas4214/CassMask/blob/master/libs/seam.ts)(): Rx.Observable\<any\>
 
++ returns joined observables
+
 #### [find](https://github.com/JCThomas4214/CassMask/blob/master/libs/find.ts)(items?: Object, opts?: Object): Schema
+
++ first argument can be empty or an object
+  + If no arguments or empty object, will SELECT all rows in the table
++ first argument should contain the columns for the WHERE clause
+  + columns should be in the same order as the primary keys
++ query will return an array of object or a single object
 
 #### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: Object): Schema
 
++ first argument can be empty or an object
+  + If no arguments or empty object, will SELECT the first row in the table
++ first argument should contain the columns for the WHERE clause
+  + columns should be in the same order as the primary keys
++ query will return a single object
+
 #### [create](https://github.com/JCThomas4214/CassMask/blob/master/libs/create.ts)(items: [Object || Array\<Object\>], opts?: Object): Schema
+
++ first argument can be an object or array of objects
++ objects must contain all columns to be inserted into the row
+  + primary keys are mandatory
 
 #### [update](https://github.com/JCThomas4214/CassMask/blob/master/libs/update.ts)(object: [Object || Array\<Object\>], opts?: Object): Schema
 
++ first argument can be an object or array of objects
++ objects must contain two subobjects, 'set' and 'in', in that order
+  + 'set' should contain all the columns you wish to SET (primary keys not allowed)
+  + 'in' should contain the primary key columns to find the row to UPDATE
+
 #### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object?: [Object || Array\<Object\>], opts?: Object): Schema
+
++ first argument can be empty, an object, or array of objects
++ objects must contain the primary keys for the WHERE clause to DELETE the row
+  + Key Columns should be in their respective order
 
 <a name="TODO"></a>
 
