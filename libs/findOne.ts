@@ -1,44 +1,46 @@
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
-import { cassandra, IState } from '../index';
-import { Model } from './model';
+import { cassandra, Entity } from '../index';
 
 /*
       CHANGES THE FIND1 VARIABLE TO TRUE
         THIS WILL CAUSE EXEC TO LIMIT THE QUERY TO 1
  */
 
-export function findOne(object?: Object, opts?: any, state?: Map<IState, IState>) {
+export function findOne(object?: Object, opts?: any, state?: Map<any,any>) {
+  state = state ? state : this.state;
 
-  const st = this.checkTable(state ? state : this.state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
+  let query = `SELECT * FROM ${state.get('tableName')} WHERE`; // initialize query string to base starting query
+  let params = []; // initialize params array
 
-    let func = () => {
-      let query = `SELECT * FROM ${st.get('tableName')} WHERE`;
-      let params = [];
+  if (object) { // if object is not undefined
+    // for each key in object
+    for(let x in object) {
+      query += ` ${x} = ? AND`; // append key to query string
+      params.push(object[x]); // push value to params array
+    }
+    query = query.substring(0, query.length-4); // truncate last ' AND' from query string
 
-      if (object) {
+  } else { // if object is undefined select all from table
+    query = `SELECT * FROM ${state.get('tableName')}`;
+  }
 
-        for(let x in object) {
-          query += ` ${x} = ? AND`;
-          params.push(object[x]);
-        }
-        query = query.substring(0, query.length-4); 
-
-      } else {
-        query = `SELECT * FROM ${st.get('tableName')}`;
-      }
-
-      query += ' LIMIT 1';
-      if (opts && opts.allowFiltering && params.length > 0) query += ' ALLOW FILTERING';
-
-      return params.length > 0 ? cassandra.client.execute(query, params, {prepare:true}) : cassandra.client.execute(query);
-    };
-
-    func().then(entity => {
-      if(st.get('findHook')) {
-        st.get('findCb')(observer, entity, cassandra.client);
-      } else {
-        entity.rows ? observer.next(new Model(entity.rows[0], st.delete('obs').delete('batchable'))) : observer.next();
+  query += ' LIMIT 1'; // findOne limits to one row
+  if (opts && opts.allowFiltering && params.length > 0) query += ' ALLOW FILTERING'; // if allow filtering option is set append ALLOW FILTERING
+  // create new observable to push into parent state's observable List
+  state = this.checkTable(state).update('obs', obs => obs.push(Rx.Observable.create(observer => {
+    // create function to execute query whether object or no object
+    let func = () => params.length > 0 ? cassandra.client.execute(query, params, {prepare:true}) : cassandra.client.execute(query);
+    // execute function when subscribe() and wait for promise
+    func().then(entity => { // entity will be the object passed from DB, it WILL have all rows found in entity.rows array
+      if(state.getIn(['events', 'findHook'])) { // if find Event hook set
+        state.getIn(['events', 'findCb'])(new Entity(entity.rows[0], state), x => {
+          observer.next(x);
+          observer.complete();
+        }, cassandra.client); // execute
+      } else { // if no find hook set
+        // pass Enttiy object in next() argument if there was rows found
+        entity.rows.length > 0 ? observer.next(new Entity(entity.rows[0], state)) : observer.next();
         observer.complete();
       }
     }).catch(err => observer.error(err));
@@ -48,7 +50,7 @@ export function findOne(object?: Object, opts?: any, state?: Map<IState, IState>
   })));    
 
   return {
-    state: st.set('batchable', List<any>([])),
+    state: state.set('batchable', List<any>([])), // make sure parent state's batchable List is empty after
 
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,

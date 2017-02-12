@@ -17,5 +17,5 @@ export function seam() {
 		Rx.Observable.concat.apply(this, this.state.get('obs').toArray()) : 
 		this.state.get('obs').first();
 
-	return seamed.filter(x => x);
+	return seamed.filter(x => x); // filter out any undefined arguments from observer.next()
 }

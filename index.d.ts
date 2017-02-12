@@ -3,6 +3,7 @@
 // Definitions by: Jason Thomas <https://github.com/JCThomas4214>
 
 import * as Rx from 'rxjs';
+import { Map } from 'immutable'; 
 
 // interface Events_static {
 // 	new (parent: Schema): Events;
@@ -20,7 +21,7 @@ declare namespace cassandra {
 	export var TEXT : string;		
 	export var INT : string;	 
 	export var UUID : string;		
-	export var TIMEUUID : string;		
+	export var TIMEUUID : string;
 	export var TIMESTAMP : string;
 
 	export function connect(config : any, cb : any): void;
@@ -39,9 +40,17 @@ declare class Schema {
 	schema: Events;
 }
 
+declare class Entity {
+	constructor (items: any, state: Map<any,any>);
+
+	save(): Rx.Observable<any>;
+	remove(): Rx.Observable<any>;
+}
+
 export {
 	cassandra,
 	Schema,
+	Entity,
 	now,
 	uuid,
 	toTimeStamp

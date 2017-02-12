@@ -9,20 +9,20 @@ import { cassandra } from '../index';
  */
 
 export function parseModel(model: any): any {
-  let columns = [],
-      tmp = []
-
-  for (let x in model) {
-    if (x !== 'keys') {
-      columns.push(`${ x } ${ model[x] }`);
-      tmp.push(x);
+  let columns = [], // array for column names and data type
+      colName = [] // array for column names only
+  // for every key in the model JSON
+  for (let x in model) { 
+    if (x !== 'keys') { // if key is not the PRIMARY KEYS, 'keys'
+      columns.push(`${ x } ${ model[x] }`); // push name and datatype to columns array
+      colName.push(x); // push only column name to colName array
     }
   }
-
+  // return model object that will be used for query functions
   return {
     columns: columns.join(', '),
     keys: model['keys'].join(', '),
-    columnArr: List<any>(tmp),
-    keyArr: List<any>(model['keys'])
+    columnList: List<any>(colName),
+    keyList: List<any>(model['keys'])
   };
 }

@@ -1,6 +1,6 @@
 import * as Rx from 'rxjs';
-import { List } from 'immutable';
-import { cassandra } from '../index';
+import { List, Map } from 'immutable';
+import { cassandra, Entity } from '../index';
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
@@ -8,48 +8,58 @@ import { cassandra } from '../index';
  */
 
 export function parseQueryInsert(items: any, options: any, state: Map<any,any>) {
-  let q = [];
-
+  let q = []; // initialize q array to hold batched queries
+  // for all objects in items array
+  // if an object was passed into create() items will be an aray with that object
   for(let x=0; x < items.length; x++) {
-    q.push({ query: '', params: [] });
+    const item = items[x]; // hold onto current items object iteration for faster reads
+    q.push({ query: '', params: [] }); // push new batch syntax object into q array
+    // INSERT is a more complicated query that requies more feness
+    // // separate query into two parts, columns & values
+    let tmp1 = `INSERT INTO ${this.state.get('tableName')} (`; // columns will be appended to this
+    let tmp2 = `) VALUES (`; // values appended to this
+    // for all keys in the current object
+    for(let y in item) {
+        const val = item[y]; // hold onto key's value for faster reads
+        tmp1 += `${y}, `; // append iteration's key to columns string
+        // check to make sure that value is not a DB function
+        // if value is DB function
+        if (val === 'now()' || 
+          val === 'uuid()' || 
+          val === 'toTimeStamp(now())') {
 
-    let tmp1 = `INSERT INTO ${this.state.get('tableName')} (`;
-    let tmp2 = `) VALUES (`;
+          tmp2 += `${val}, `; // function must be appended to values string
 
-    for(let y in items[x]) {
-        const item = items[x][y];
-        tmp1 += `${y}, `;
+        } else { // if not a DB function
 
-        if (item === 'now()' || 
-          item === 'uuid()' || 
-          item === 'toTimeStamp(now())') {
-
-          tmp2 += `${item}, `;
-
-        } else {
-
-          tmp2 += '?, ';
-          q[x].params.push(item);
+          tmp2 += '?, '; // appends '?' as necessary for prepared queries
+          q[x].params.push(val); // push value into q's params array
 
         }
 
     }
+    tmp1 = tmp1.substring(0, tmp1.length-2); // truncate the last ', ' in the columns string
+    tmp2 = tmp2.substring(0, tmp2.length-2) + ')'; // truncate last ', ' in values string
 
-    tmp1 = tmp1.substring(0, tmp1.length-2);
-    tmp2 = tmp2.substring(0, tmp2.length-2) + ')';
+    q[x].query = tmp1 + tmp2; // q's query string set to concat of columns and values string
 
-    q[x].query = tmp1 + tmp2;
-
+    /*
+        create() has the option to batch but will be false by default
+          if batch is false
+     */
     if (!options.batch) {
-      state = this.checkTable(state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
-
+      state = this.checkTable(state).update('obs', obs => obs.push(Rx.Observable.create(observer => {
+        // create function to execute current query and params iteration
         const func = () => cassandra.client.execute(q[x].query, q[x].params, {prepare:true});
-
-        func().then(entity => {
-          if(this.state.get('createHook')) {
-            this.state.get('createCb')(observer, items[x], cassandra.client);
-          } else {
-            observer.next();
+        // execute function when subscribe() and wait for promise
+        func().then(entity => { // entity will be useless from DB
+          if(state.getIn(['events','saveHook'])) { // if save Event hook set
+            state.getIn(['events','saveCb'])(new Entity(item, state), x => { // execute the save hook callback
+              observer.next(x);
+              observer.complete();
+            }, cassandra.client);
+          } else { // if no save hook set
+            observer.next(new Entity(item, state)); // set next() argument to new Entity
             observer.complete();
           }
         }).catch(err => observer.error(err));
@@ -59,17 +69,25 @@ export function parseQueryInsert(items: any, options: any, state: Map<any,any>) 
     } 
 
   }
-
-  if (options.batch) {
-    state = this.checkTable(state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
-
+  // After for loop: if batch is true
+  if (options.batch) { // create new observable to be pushed into parent state observable List
+    state = this.checkTable(state).update('obs', obs => obs.push(Rx.Observable.create(observer => {
+      // create function to execute a batch query with q array and any batchable objects in the parent state
       const func = () => cassandra.client.batch(state.get('batchable').concat(q).toArray(), {prepare:true});
+      // execute function on subscribe() and wait for promise
+      func().then(entity => { // entity will be useless information about the DB
+        let tmp = []; // create array to hold Entity objects
+        items.forEach(val => { // forEach item in the items array
+          tmp.push(new Entity(val, state)); // create equivilant Entity object to push into array
+        });
 
-      func().then(entity => {
-        if(this.state.get('createHook')) {
-          this.state.get('createCb')(observer, items, cassandra.client);
-        } else {
-          observer.next();
+        if(state.getIn(['events','saveHook'])) { // if save Event hook set
+          state.getIn(['events','saveCb'])(tmp, x => { // execute save hook callback
+            observer.next(x);
+            observer.complete();
+          }, cassandra.client);
+        } else { // if no save hook set
+          observer.next(tmp); // next() argument set to Entity array
           observer.complete();
         }
       }).catch(err => observer.error(err));
