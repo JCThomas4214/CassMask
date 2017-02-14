@@ -1,12 +1,20 @@
 let cass = require('cassandra-driver');
 import * as Rx from 'rxjs';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 
 import { 
   seam, find, findOne, create, parseQueryInsert,
   update, parseQueryUpdate, remove, parseQueryDelete,
   checkTable, createTable, createBatchQuery, parseModel
 } from './libs';
+
+export interface IState {
+  obs: List<Rx.Observable<any>>;
+  batchable: List<any>;
+
+  options: Map<any,any>;
+  model: Map<any,any>;
+}
 
 export function now() {
   return 'now()';
@@ -50,33 +58,20 @@ export class cassandra {
 }
 
 export class Schema {
-    private tblChked: boolean = false;
+    // private obs: List<Rx.Observable<any>> = List<Rx.Observable<any>>([]);
+    // private batchable: List<any> = List<any>([]);
 
-    private obs: List<Rx.Observable<any>> = List<Rx.Observable<any>>([]);
-    private batchable: List<any> = List<any>([]);
-
-    private model: any;
-    private tableName: string;
-
-    public createHook: boolean = false;
-    public removeHook: boolean = false;
-    public updateHook: boolean = false;
-    public findHook: boolean = false;
-
-    public createCb: Function;
-    public removeCb: Function;
-    public updateCb: Function;
-    public findCb: Function;
-
-    // Default Options
-    private options: any = {
-
-    };
+    public state: Map<IState, IState> = Map<IState, IState>({
+      obs: List<Rx.Observable<any>>([]),
+      batchable: List<any>([])
+    });
 
     constructor(modelName: string, model: any, options?: any) {
-      this.model = this.parseModel(model);
-      this.tableName = modelName;
-      this.options = this.options || options;
+      if (options) this.state = this.state.setIn(['options'], Map<any,any>(options));
+
+      this.state = this.state
+        .setIn(['model'], Map<any,any>(this.parseModel(model)))
+        .setIn(['tableName'], modelName);
     }
 
     private parseModel = parseModel;
@@ -110,20 +105,24 @@ export class Schema {
    post(method: string, fn: Function): void {
      switch (method) {
        case "save":
-         this.parent.createHook = true;
-         this.parent.createCb = fn;
+         this.parent.state = this.parent.state
+           .setIn(['createHook'], true)
+           .setIn(['createCb'], fn);
          break;
        case "update":
-         this.parent.updateHook = true;
-         this.parent.updateCb = fn;
+         this.parent.state = this.parent.state
+           .setIn(['updateHook'], true)
+           .setIn(['updateCb'], fn);
          break;
        case "find":
-         this.parent.findHook = true;
-         this.parent.findCb = fn;
+         this.parent.state = this.parent.state
+           .setIn(['findHook'], true)
+           .setIn(['findCb'], fn);
          break;
        case "remove":
-         this.parent.removeHook = true;
-         this.parent.removeCb = fn;
+         this.parent.state = this.parent.state
+           .setIn(['removeHook'], true)
+           .setIn(['removeCb'], fn);
          break;
      }
      return;

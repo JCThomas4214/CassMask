@@ -7,14 +7,13 @@ import { cassandra } from '../index';
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
 
-export function parseQueryInsert(items: any, options: any) {
+export function parseQueryInsert(items: any, options: any, state: Map<any,any>) {
   let q = [];
-  let obs = this.obs.concat([]);
 
   for(let x=0; x < items.length; x++) {
     q.push({ query: '', params: [] });
 
-    let tmp1 = `INSERT INTO ${this.tableName} (`;
+    let tmp1 = `INSERT INTO ${this.state.get('tableName')} (`;
     let tmp2 = `) VALUES (`;
 
     for(let y in items[x]) {
@@ -42,60 +41,48 @@ export function parseQueryInsert(items: any, options: any) {
     q[x].query = tmp1 + tmp2;
 
     if (!options.batch) {
-      obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+      state = this.checkTable(state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
         const func = () => cassandra.client.execute(q[x].query, q[x].params, {prepare:true});
 
         func().then(entity => {
-          if(this.createHook) {
-            this.createCb(observer, items[x], cassandra.client);
+          if(this.state.get('createHook')) {
+            this.state.get('createCb')(observer, items[x], cassandra.client);
           } else {
-            observer.next(entity);
+            observer.next();
             observer.complete();
           }
         }).catch(err => observer.error(err));
 
         return function(){};
-      }));
+      })));
     } 
 
   }
 
   if (options.batch) {
-    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+    state = this.checkTable(state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
-      const func = () => cassandra.client.batch(this.batchable.concat(q).toArray(), {prepare:true});
+      const func = () => cassandra.client.batch(state.get('batchable').concat(q).toArray(), {prepare:true});
 
       func().then(entity => {
-        if(this.createHook) {
-          this.createCb(observer, items, cassandra.client);
+        if(this.state.get('createHook')) {
+          this.state.get('createCb')(observer, items, cassandra.client);
         } else {
-          observer.next(entity);
+          observer.next();
           observer.complete();
         }
       }).catch(err => observer.error(err));
 
       return function(){};
-    }));
+    })));
   } 
 
   // console.log(obs.toArray());
 
   return {
-    createHook: this.createHook,
-    updateHook: this.updateHook,
-    removeHook: this.removeHook,
-    findHook: this.findHook,
-    createCb: this.createCb,
-    updateCb: this.updateCb,
-    removeCb: this.removeCb,
-    findCb: this.findCb,    
+    state: state,
 
-    tblChked: this.tblChked,
-    model: this.model,
-    tableName: this.tableName,        
-    obs: obs,
-    batchable: this.batchable,
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,
     parseQueryUpdate: this.parseQueryUpdate,
@@ -118,6 +105,8 @@ export function parseQueryInsert(items: any, options: any) {
         USES CASS DRIVER BATCH FUNCTION TO INSERT PARSED OBJECT ARRAY
  */
 
-export function create(items: any, options: Object = {}) {
-  return Array.isArray(items) ? this.parseQueryInsert(items, options) : this.parseQueryInsert([items], options);
+export function create(items: any, options: Object = {}, state?: Map<any,any>) {  
+  const st = state ? state : this.state.concat({});
+
+  return Array.isArray(items) ? this.parseQueryInsert(items, options, st) : this.parseQueryInsert([items], options, st);
 }

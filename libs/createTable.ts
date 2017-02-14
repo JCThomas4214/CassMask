@@ -1,34 +1,34 @@
 import * as Rx from 'rxjs';
-import { List } from 'immutable';
-import { cassandra } from '../index';
+import { List, Map } from 'immutable';
+import { cassandra, IState } from '../index';
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
 
-export function createTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<any>> {
-  return obs.push(Rx.Observable.create(observer => {
+export function createTable(state: Map<IState, IState>): Map<IState, IState> {
+  return state.updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
     let func = () => {
-      const query = `CREATE TABLE IF NOT EXISTS ${this.tableName} (${ this.model.columns }, PRIMARY KEY (${ this.model.keys }))`;   
+      const query = `CREATE TABLE IF NOT EXISTS ${ this.state.get('tableName') } (${ this.state.getIn(['model', 'columns']) }, PRIMARY KEY (${ this.state.getIn(['model', 'keys']) }))`;   
       return cassandra.client.execute(query);
     };
 
     func().then(entity => {
-      observer.next(entity);
+      observer.next();
       observer.complete();
     }).catch(err => observer.error(err));
 
     return function () {};
 
-  }));
+  })));
 }
 
-export function checkTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<any>> {
-  if (!this.tblChked) {
-    this.tblChked = true;
-    return this.createTable(obs);
+export function checkTable(state: Map<any,any>): Map<any,any> {
+  if (!state.get('tblChked')) {
+    state = state.set('tblChked', true);
+    return this.createTable(state);
   }
-  return obs;
+  return state;
 }

@@ -1,18 +1,19 @@
 import * as Rx from 'rxjs';
-import { List } from 'immutable';
-import { cassandra } from '../index';
+import { List, Map } from 'immutable';
+import { cassandra, IState } from '../index';
+import { Model } from './model';
 
 /*
       CHANGES THE FIND1 VARIABLE TO TRUE
         THIS WILL CAUSE EXEC TO LIMIT THE QUERY TO 1
  */
 
-export function findOne(object?: Object, opts?: any) {
+export function findOne(object?: Object, opts?: any, state?: Map<IState, IState>) {
 
-  let obs = this.checkTable(this.obs.concat([])).push(Rx.Observable.create(observer => {
+  const st = this.checkTable(state ? state : this.state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
     let func = () => {
-      let query = `SELECT * FROM ${this.tableName} WHERE`;
+      let query = `SELECT * FROM ${st.get('tableName')} WHERE`;
       let params = [];
 
       if (object) {
@@ -24,7 +25,7 @@ export function findOne(object?: Object, opts?: any) {
         query = query.substring(0, query.length-4); 
 
       } else {
-        query = `SELECT * FROM ${this.tableName}`;
+        query = `SELECT * FROM ${st.get('tableName')}`;
       }
 
       query += ' LIMIT 1';
@@ -34,33 +35,21 @@ export function findOne(object?: Object, opts?: any) {
     };
 
     func().then(entity => {
-      if(this.findHook) {
-        this.findCb(observer, entity, cassandra.client);
+      if(st.get('findHook')) {
+        st.get('findCb')(observer, entity, cassandra.client);
       } else {
-        observer.next(entity);
+        entity.rows ? observer.next(new Model(entity.rows[0], st.delete('obs').delete('batchable'))) : observer.next();
         observer.complete();
       }
     }).catch(err => observer.error(err));
 
     return function () {};
 
-  }));      
+  })));    
 
   return {
-    createHook: this.createHook,
-    updateHook: this.updateHook,
-    removeHook: this.removeHook,
-    findHook: this.findHook,
-    createCb: this.createCb,
-    updateCb: this.updateCb,
-    removeCb: this.removeCb,
-    findCb: this.findCb, 
+    state: st.set('batchable', List<any>([])),
 
-    tblChked: this.tblChked,
-    model: this.model,
-    tableName: this.tableName,        
-    obs: obs,
-    batchable: List<any>([]),
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,
     parseQueryUpdate: this.parseQueryUpdate,

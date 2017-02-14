@@ -1,5 +1,5 @@
 import * as Rx from 'rxjs';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import { cassandra } from '../index';
 
 /*
@@ -7,14 +7,13 @@ import { cassandra } from '../index';
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
 
-export function parseQueryUpdate(items: any, options: any) {
+export function parseQueryUpdate(items: any, options: any, state: Map<any,any>) {
   let q = [];
-  let obs = this.obs.concat([]);
 
   for(let x=0; x < items.length; x++) {
     q.push({ query: '', params: [] });
 
-    let tmp = `UPDATE ${this.tableName} SET`;
+    let tmp = `UPDATE ${state.get('tableName')} SET`;
 
     for(let y in items[x].set) {
       tmp += ` ${y} = ?, `;
@@ -34,13 +33,13 @@ export function parseQueryUpdate(items: any, options: any) {
     q[x].query = tmp;
 
     if (!options.batch) {
-      obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+      state = this.checkTable(state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
         const func = () => cassandra.client.execute(q[x].query, q[x].params, {prepare:true});
 
         func().then(entity => {
-          if(this.updateHook) {
-            this.updateCb(observer, items[x], cassandra.client);
+          if(state.get('updateHook')) {
+            state.get('updateCb')(observer, items[x], cassandra.client);
           } else {
             observer.next(entity);
             observer.complete();
@@ -48,19 +47,19 @@ export function parseQueryUpdate(items: any, options: any) {
         }).catch(err => observer.error(err));
 
         return function(){};
-      }));
+      })));
     } 
 
   }
 
   if (options.batch) {
-    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+    state = this.checkTable(state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
-      const func = () => cassandra.client.batch(this.batchable.concat(q).toArray(), {prepare:true});
+      const func = () => cassandra.client.batch(state.get('batchable').concat(q).toArray(), {prepare:true});
 
       func().then(entity => {
-        if(this.updateHook) {
-          this.updateCb(observer, items, cassandra.client);
+        if(state.get('updateHook')) {
+          state.get('updateCb')(observer, items, cassandra.client);
         } else {
           observer.next(entity);
           observer.complete();
@@ -68,26 +67,14 @@ export function parseQueryUpdate(items: any, options: any) {
       }).catch(err => observer.error(err));
 
       return function(){};
-    }));
+    })));
   } 
 
   // console.log(obs.toArray());
 
   return {
-    createHook: this.createHook,
-    updateHook: this.updateHook,
-    removeHook: this.removeHook,
-    findHook: this.findHook,
-    createCb: this.createCb,
-    updateCb: this.updateCb,
-    removeCb: this.removeCb,
-    findCb: this.findCb, 
-
-    tblChked: this.tblChked,
-    model: this.model,
-    tableName: this.tableName,        
-    obs: obs,
-    batchable: this.batchable,
+    state: state,
+    
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,
     parseQueryUpdate: this.parseQueryUpdate,
@@ -114,6 +101,8 @@ export function parseQueryUpdate(items: any, options: any) {
     IN THE TABLE
  */
 
-export function update(object: any, options: Object = {}) {
-  return Array.isArray(object) ? this.parseQueryUpdate(object, options) : this.parseQueryUpdate([object], options);
+export function update(object: any, options: Object = {}, state?: Map<any,any>) {
+  const st = state ? state : this.state.concat({});
+
+  return Array.isArray(object) ? this.parseQueryUpdate(object, options, st) : this.parseQueryUpdate([object], options, st);
 }

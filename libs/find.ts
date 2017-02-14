@@ -6,12 +6,12 @@ import { cassandra } from '../index';
       PARSES ATTR INTO FINDS OBJECT TO THEN QUERY THE DB
  */
 
-export function find(object?: Object, opts?: any) {
+export function find(object?: Object, opts?: any, state?: Map<any,any>) {
 
-  const obs = this.checkTable(this.obs.concat([])).push(Rx.Observable.create(observer => {
+  const st = this.checkTable(state ? state : this.state).push(Rx.Observable.create(observer => {
 
     let func = () => {
-      let query = `SELECT * FROM ${this.tableName} WHERE`;
+      let query = `SELECT * FROM ${this.state.get('tableName')} WHERE`;
       let params = [];
 
       if (object) {
@@ -24,15 +24,15 @@ export function find(object?: Object, opts?: any) {
 
       }
 
-      if (params.length === 0) query = `SELECT * FROM ${this.tableName}`;
+      if (params.length === 0) query = `SELECT * FROM ${st.get('tableName')}`;
       if (opts && opts.allowFiltering && params.length > 0) query += ' ALLOW FILTERING';
 
       return cassandra.client.execute(query, params, {prepare:true});          
     };
 
     func().then(entity => {
-      if(this.findHook) {
-        this.findCb(observer, entity, cassandra.client);
+      if(st.get('findHook')) {
+        st.get('findCb')(observer, entity, cassandra.client);
       } else {
         observer.next(entity);
         observer.complete();
@@ -44,20 +44,8 @@ export function find(object?: Object, opts?: any) {
   }));
 
   return {
-    createHook: this.createHook,
-    updateHook: this.updateHook,
-    removeHook: this.removeHook,
-    findHook: this.findHook,
-    createCb: this.createCb,
-    updateCb: this.updateCb,
-    removeCb: this.removeCb,
-    findCb: this.findCb, 
+    state: st.set('batchable', List<any>([])),
 
-    tblChked: this.tblChked,
-    model: this.model,
-    tableName: this.tableName,     
-    obs: obs,
-    batchable: List<any>([]),
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,
     parseQueryUpdate: this.parseQueryUpdate,

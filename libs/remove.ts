@@ -1,5 +1,5 @@
 import * as Rx from 'rxjs';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import { cassandra } from '../index';
 
 /*
@@ -7,14 +7,13 @@ import { cassandra } from '../index';
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
 
-export function parseQueryDelete(items: any, options: any) {
+export function parseQueryDelete(items: any, options: any, state: Map<any,any>) {
   let q = [];
-  let obs = this.obs.concat([]);
 
   for(let x=0; x < items.length; x++) {
     q.push({ query: '', params: [] });
 
-    let tmp = `DELETE FROM ${this.tableName} WHERE`;
+    let tmp = `DELETE FROM ${state.get('tableName')} WHERE`;
 
     for(let y in items[x]) {
       tmp += ` ${y} = ? AND`;
@@ -23,75 +22,63 @@ export function parseQueryDelete(items: any, options: any) {
     q[x].query = tmp.substring(0, tmp.length-4);
 
     if (!options.batch && q[0].params.length > 0) {
-      obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+      state = this.checkTable(state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
         const func = () => cassandra.client.execute(q[x].query, q[x].params, {prepare:true});
 
         func().then(entity => {
-          if(this.removeHook) {
-            this.removeCb(observer, items[x], cassandra.client);
+          if(state.get('removeHook')) {
+            state.get('removeCb')(observer, items[x], cassandra.client);
           } else {
-            observer.next(entity);
+            observer.next();
             observer.complete();
           }
         }).catch(err => observer.error(err));
 
         return function(){};
-      }));
+      })));
     } 
 
   }
-  let batchable = this.batchable.concat(q);
 
   if (q[0].params.length === 0) {
-    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+    state = this.checkTable(state)
+      .updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
-      let func = () => cassandra.client.execute(`TRUNCATE ${this.tableName}`);
+        let func = () => cassandra.client.execute(`TRUNCATE ${state.get('tableName')}`);
 
-      func().then(entity => {
-        observer.next(items);
-        observer.complete();
-      }).catch(err => observer.error(err));
+        func().then(entity => {
+          observer.next();
+          observer.complete();
+        }).catch(err => observer.error(err));
 
-      return function() {};
-    }));
-
-    batchable = List<any>([]);
+        return function() {};
+      })))
+      .updateIn(['batchable'], batchable => List<any>([]));
+      
   } else if (options.batch) {
-    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+    state = this.checkTable(state).updateIn(['obs'], obs => obs.push(Rx.Observable.create(observer => {
 
-      const func = () => cassandra.client.batch(this.batchable.concat(q).toArray(), {prepare:true});
+      const func = () => cassandra.client.batch(state.get('batchable').concat(q).toArray(), {prepare:true});
 
       func().then(entity => {
-        if(this.removeHook) {
-          this.removeCb(observer, items, cassandra.client);
+        if(state.get('removeHook')) {
+          state.get('removeCb')(observer, items, cassandra.client);
         } else {
-          observer.next(entity);
+          observer.next();
           observer.complete();
         }
       }).catch(err => observer.error(err));
 
       return function(){};
-    }));
+    })));
   }
 
   // console.log(obs.toArray());
 
   return {
-    createHook: this.createHook,
-    updateHook: this.updateHook,
-    removeHook: this.removeHook,
-    findHook: this.findHook,
-    createCb: this.createCb,
-    updateCb: this.updateCb,
-    removeCb: this.removeCb,
-    findCb: this.findCb, 
+    state: state,
 
-    tblChked: this.tblChked,
-    model: this.model,
-    tableName: this.tableName,        
-    obs: obs,
-    batchable: batchable,
     createBatchQuery: this.createBatchQuery,
     parseQueryInsert: this.parseQueryInsert,
     parseQueryUpdate: this.parseQueryUpdate,
@@ -104,7 +91,8 @@ export function parseQueryDelete(items: any, options: any) {
     findOne: this.findOne,
     update: this.update,
 
-    checkTable: this.checkTable
+    checkTable: this.checkTable,
+    createTable: this.createTable
   };
 }
 
@@ -116,6 +104,8 @@ export function parseQueryDelete(items: any, options: any) {
     REMOVE() IS FOR DELETING FOUND ROWS OR TRUNCATING TABLE
  */
 
-export function remove(object: any = {}, options: Object = {}) {      
-    return Array.isArray(object) ? this.parseQueryDelete(object, options) : this.parseQueryDelete([object], options);
+export function remove(object: any = {}, options: Object = {}, state?: Map<any,any>) { 
+    const st = state ? state : this.state.concat({});
+
+    return Array.isArray(object) ? this.parseQueryDelete(object, options, st) : this.parseQueryDelete([object], options, st);
 }

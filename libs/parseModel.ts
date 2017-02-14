@@ -9,16 +9,20 @@ import { cassandra } from '../index';
  */
 
 export function parseModel(model: any): any {
-  let columns = [];
+  let columns = [],
+      tmp = []
 
   for (let x in model) {
     if (x !== 'keys') {
       columns.push(`${ x } ${ model[x] }`);
+      tmp.push(x);
     }
   }
 
   return {
     columns: columns.join(', '),
-    keys: model['keys'].join(', ')
+    keys: model['keys'].join(', '),
+    columnArr: List<any>(tmp),
+    keyArr: List<any>(model['keys'])
   };
 }
