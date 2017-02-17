@@ -40,7 +40,7 @@ This ORM is in alpha and is not suggested for production as core features have n
 ## Quick Start
 
 ```sh
-$ npm install cassmask rxjs immmutable cassandra-driver
+$ npm install cassmask
 ```
 
 Connect to Cassandra with a [ClientOptions](http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/) object.
