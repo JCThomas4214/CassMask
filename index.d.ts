@@ -5,13 +5,6 @@
 import * as Rx from 'rxjs';
 import { Map } from 'immutable'; 
 
-// interface Events_static {
-// 	new (parent: Schema): Events;
-// }
-interface Events {
-	post(method: string, fn: Function): void;
-}
-
 declare function now(): string;
 declare function uuid(): string;
 declare function toTimeStamp(timeuuid: string): string;
@@ -28,7 +21,7 @@ declare namespace cassandra {
 }
 
 declare class Schema {
-	constructor (modelName : any, model : any, options? : any);
+	constructor (modelName : string | Map<any,any>, model : any, options? : any);
 
 	find(object?:Object, opts?:any): Schema;
 	findOne(object?:Object, opts?:any): Schema;
@@ -37,7 +30,10 @@ declare class Schema {
 	create(items: any, opts?: Object): Schema;
 	seam(): Rx.Observable<any>;
 
-	schema: Events;
+	post(hook: string, fn: Function): void;
+	pre(hook: string, fn: Function): void;
+
+	newEntity(item: Object): Entity;
 }
 
 declare class Entity {

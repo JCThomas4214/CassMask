@@ -28,6 +28,10 @@ immutable@^3.8.1:
   version "3.8.1"
   resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.1.tgz#200807f11ab0f72710ea485542de088075f68cd2"
 
+lodash@^4.17.4:
+  version "4.17.4"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
+
 long@^2.2.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/long/-/long-2.4.0.tgz#9fa180bb1d9500cdc29c4156766a1995e1f4524f"
@@ -37,6 +41,10 @@ rxjs@^5.1.1:
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.1.1.tgz#fc48922965bc6c5efbcc0fe46e90a3af64137a7b"
   dependencies:
     symbol-observable "^1.0.1"
+
+self@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/self/-/self-1.0.0.tgz#6355f6f6502507cfc788811e0cc1c6d6269e16b8"
 
 symbol-observable@^1.0.1:
   version "1.0.4"

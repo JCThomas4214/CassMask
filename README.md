@@ -5,15 +5,13 @@
 
 ### "Inspired by [MongooseJS](http://mongoosejs.com/) with a twist!"
 
-This ORM is in alpha and is not suggested for production as core features have not yet been implimented/finalized. If you would like to contribute you are welcome to Fork and pull request. Visit the [TODO](#TODO) section for points of interest. All files have been thoroughly commented 
+This ORM is in alpha and is not suggested for production as core features have not yet been implemented/finalized. If you would like to contribute you are welcome to Fork and pull request. Visit the [TODO](#TODO) section for points of interest. All files have been thoroughly commented 
 
-#### Currently supported Data Types
+#### Currently unsupported data types
 
-+ INT
-+ TEXT
-+ UUID
-+ TIMEUUID
-+ TIMESTAMP
++ Counter (has not been tested yet)
++ Maps
++ User Defined Data types
 
 ## Table of Contents
 
@@ -67,11 +65,20 @@ Create a model.
 import { cassandra, Schema } from 'cassmask';
 
 let Model = new Schema('TableName', {
-  col1: cassandra.UUID,
-  col2: cassandra.TIMEUUID,
-  col2: cassandra.TIMESTAMP,
-  col3: cassandra.TEXT,
-  cal4: cassandra.INT,
+  col1: {
+    Type: cassandra.UUID,
+    Default: uuid()
+  },
+  col2: {
+    Type: cassandra.TIMEUUID,
+    Default: now()
+  },
+  col3: {
+    Type: cassandra.TIMESTAMP,
+    Default: toTimeStamp(now())
+  },
+  col4: cassandra.TEXT,
+  cal5: cassandra.INT,
   // Primary Keys (Partition & Clustering Column)
   keys: ['col1', 'col2']
 });
@@ -97,27 +104,15 @@ let holder = [];
 */
 
 Model.create([{
-  col1: uuid(),
-  col2: now(),
-  col3: toTimeStamp(now()),
   col4: 'test1',
   col5: 49
 }, {
-  col1: uuid(),
-  col2: now(),
-  col3: toTimeStamp(now()),
   col4: 'test2',
   col5: 23
 }, {
-  col1: uuid(),
-  col2: now(),
-  col3: toTimeStamp(now()),
   col4: 'test3',
   col5: 97
 }, {
-  col1: uuid(),
-  col2: now(),
-  col3: toTimeStamp(now()),
   col4: 'test4',
   col5: 57
 }]).remove([{
@@ -199,7 +194,7 @@ Model.findOne().find().seam().subscribe( // two queries are executed and two nex
         { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test4', col5: 57 }
     */  
 
-    holder[0].save.subscribe(model => {
+    holder[0].save().subscribe(model => {
 
       holder[1].forEach(entity => { // holder[1] is an array of Entity Object from find()
         entity.col4 = 'awesome_example2';
@@ -289,7 +284,7 @@ ModelEvents.setMaxListeners(0);
   The client; this is the cassandra client, which can be used to execute additional queries
 
  */
-Model.schema.post('save', function(lastEntity, next, client) {
+Model.postHook('save', function(lastEntity, next, client) {
   // callback code goes here
 
   Model.Events.emit('save', lastEntity);
@@ -432,7 +427,7 @@ const object = {
   col5: 67
 };
 
-const entity = new Entity(object, Model.state);
+let entity = new Entity(object, Model.state);
 entity.save();
 ```
 
