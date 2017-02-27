@@ -72,6 +72,7 @@ function parseModel(model: any): any {
   return {
     columns: columns.join(', '),
     keys: keys.join(', '),
+    allCol: List<any>(colName),
     columnList: List<any>(objDiff(colName, keys)),
     keyList: List<any>(keys),
     defaults: Map<any,any>(defaults)
@@ -171,27 +172,26 @@ export class cassandra {
 
 export class Schema {
     public state: Map<any, any>;
-    public helpers: any;
+    public helper: any;
 
-    constructor(modelName: string | Map<any,any>, model?: any, options?: any) {
-      if (modelName instanceof Map) {
-        this.state = Map<any,any>(modelName);
+    constructor(modelName: string | Schema, model?: any, options?: any) {
+      if (modelName instanceof Schema) {
 
-        const hookCb = this.state.get('events').toObject();
-        for(let x in hookCb) this[x] = hookCb[x];
+        this.state = Map<any,any>(model);
+        this.helper = modelName.helper;
 
-        const helpers = this.state.get('helpers');
-        if (helpers) this.helperMethods(helpers.toObject());
       } else {
+
         this.state = Map<any,any>({
-          obs: List<Rx.Observable<any>>([]),
-          batchable: List<any>([]),
-          events: Map<any,any>([])
+          obs: List<Rx.Observable<any>>([])
         })
         .set('model', Map<any,any>(parseModel(model)))
         .set('tableName', modelName);
 
         if (options) this.state = this.state.set('options', Map<any,any>(options));   
+
+        this.helper = new Helper();
+
       }
     }
 
@@ -209,7 +209,7 @@ export class Schema {
         PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
           THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
      */
-    private parseQueryInsert(item: any, options: any): Rx.Observable<any> {
+    private parseQueryInsert(item: Entity, options: any): Rx.Observable<any> {
 
       return Rx.Observable.create(observer => {
         let params = [];
@@ -220,12 +220,13 @@ export class Schema {
         // for all keys in the current object
         for(let y in item) {
             const val = item[y]; // hold onto key's value for faster reads
-            tmp1 += `${y}, `; // append iteration's key to columns string
             // check to make sure that value is not a DB function
             // if value is DB function
             if (val === 'now()' || val === 'uuid()' || val === 'toTimeStamp(now())') {
+              tmp1 += `${y}, `; // append iteration's key to columns string
               tmp2 += `${val}, `; // function must be appended to values string
-            } else { // if not a DB function
+            } else if (val && typeof val !== 'function' && y !== 'modified' && y !== 'state') { // if not a DB function
+              tmp1 += `${y}, `; // append iteration's key to columns string
               tmp2 += '?, '; // appends '?' as necessary for prepared queries
               params.push(val); // push value into q's params array
             }
@@ -233,14 +234,14 @@ export class Schema {
 
         const query = tmp1.substring(0, tmp1.length-2) + tmp2.substring(0, tmp2.length-2) + ')'; // q's query string set to concat of columns and values string
 
-        cassandra.client.execute(query, params, {prepare:true}).then(entity => { // entity will be useless from DB
-          if(this['postSaveCb']) { // if save Event hook set
-            this['postSaveCb'](new Entity(item, this), x => { // execute the save hook callback
+        cassandra.client.execute(query, params, {prepare:true}).then(response => { // entity will be useless from DB
+          if(this.helper.postSaveCb) { // if save Event hook set
+            item.postSaveCb(item, x => { // execute the save hook callback
               observer.next(x);
               observer.complete();
             }, cassandra.client);
           } else { // if no save hook set
-            observer.next(new Entity(item, this)); // set next() argument to new Entity
+            observer.next(item); // set next() argument to new Entity
             observer.complete();
           }
         }).catch(err => observer.error(err));
@@ -256,7 +257,7 @@ export class Schema {
           THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
      */
 
-    private parseQueryDelete(item: any, options: any): Rx.Observable<any> {
+    private parseQueryDelete(entity: Entity, item: any, options: any): Rx.Observable<any> {
 
       return Rx.Observable.create(observer => {
           let params = [];
@@ -269,14 +270,14 @@ export class Schema {
           }
           const query = tmp.substring(0, tmp.length-4); // truncate last ' AND' on the string
 
-          cassandra.client.execute(query, params, {prepare:true}).then(entity => { // entity will be useless information about the DB
-            if(this['postRemoveCb']) { // if remvoe event hook was set
-              this['postRemoveCb'](new Entity(item, this), x => { // execute remove hook callback
+          cassandra.client.execute(query, params, {prepare:true}).then(response => { // entity will be useless information about the DB
+            if(this.helper.postRemoveCb) { // if remvoe event hook was set
+              entity.postRemoveCb(entity, x => { // execute remove hook callback
                 observer.next(x);
                 observer.complete();
               }, cassandra.client);
             } else { // if remvoe hook was not set
-              observer.next(new Entity(item, this)); // set next() argument to new Entity aligned with items iteration
+              observer.next(entity); // set next() argument to new Entity aligned with items iteration
               observer.complete();
             }
           }).catch(err => observer.error(err));
@@ -315,9 +316,9 @@ export class Schema {
           const query = tmp.substring(0, tmp.length-4) + ' IF EXISTS'; // set the query key in q array to new query string
 
           cassandra.client.execute(query, params, {prepare:true}).then(entity => { // if the event hook was set
-            if(this['postSaveCb']) { // in state.events.saveHook will indicator boolean
+            if(this.helper.postSaveCb) { // in state.events.saveHook will indicator boolean
               // execute the hook callback and create newEntity object with current entity JSON
-              this['postSaveCb'](new Entity(ent, this), x => {
+              this.helper.postSaveCb(new Entity(ent, this), x => {
                 observer.next(x);
                 observer.complete();
               }, cassandra.client);
@@ -332,6 +333,10 @@ export class Schema {
 
     }
 
+    /*
+        PARSES THE INPUTTED OBJECT
+          THEN RETURNS AN OBSERVABLE QUERY 
+     */
     private parseQuerySelect(item?: any, options?: any): Rx.Observable<any> {
 
       return Rx.Observable.create(observer => {
@@ -352,22 +357,26 @@ export class Schema {
         if (options && options.limitOne) query += ' LIMIT 1';
         // options for allow filtering
         if (options && options.allowFiltering && params.length > 0) query += ' ALLOW FILTERING';
-       
-        console.log(query);
 
         cassandra.client.execute(query, params, {prepare:true}).then(entity => {
           // all rows in the response will be stored in a Entity class inside items array
           const rows = entity.rows;
-          let items = [];
-          for (let z = 0; z < rows.length; z++) {
-            items.push(new Entity(rows[z], this))
+          let items;
+
+          if (rows.length === 0) {
+            observer.error({ message: 'No Entities were found', statusCode: 404 });
+          } else if (rows.length > 1) {
+            items = [];
+            for (let z = 0; z < rows.length; z++) {
+              items.push(new Entity(rows[z], this))
+            }
+          } else {
+            items = new Entity(rows[0] || {}, this);
           }
-          // make items a single object if only one object exists in the array
-          items = items.length > 1 ? items : items[0];
 
           // If the find event hook was initialized
-          if(this['postFindCb']) { // if find Event hook set
-            this['postFindCb'](items, x => { // execute the find hook callback
+          if(this.helper.postFindCb) { // if find Event hook set
+            this.helper.postFindCb(items, x => { // execute the find hook callback
               observer.next(x);
               observer.complete();
             }, cassandra.client);
@@ -400,20 +409,21 @@ export class Schema {
         // iterate through all items in the items array
         for (let x = 0; x < items.length; x++) {
           const item = items[x];
+          let entity = new Entity(item, this);
 
-          if (this['preRemoveCb']) {
+          if (this.helper.preRemoveCb) {
             preArr.push(Rx.Observable.create(observer => {
-              this['preRemoveCb'](item, () => {
+              entity.preRemoveCb(item, () => {
                 observer.next();
                 observer.complete();
               }, err => observer.error(err));
             }));
           }
 
-          parseArr.push(this.parseQueryDelete(item, options));
+          parseArr.push(this.parseQueryDelete(entity, item, options));
         }
 
-        if (this['preRemoveCb']) {  
+        if (this.helper.preRemoveCb) {  
           state = checkTable(state).update('obs', obs => obs.push(
             preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]));
         } 
@@ -433,7 +443,7 @@ export class Schema {
 
       }
 
-      return new Schema(state);
+      return new Schema(this, state);
     }
 
     /*
@@ -455,9 +465,9 @@ export class Schema {
       for (let x = 0; x < items.length; x++) {
         const item = items[x];
 
-        if (this['preSaveCb']) {
+        if (this.helper.preSaveCb) {
           preArr.push(Rx.Observable.create(observer => {
-            this['preSaveCb'](item, () => {
+            this.helper.preSaveCb(item, () => {
               observer.next();
               observer.complete();
             }, err => observer.error(err));
@@ -467,14 +477,14 @@ export class Schema {
         parseArr.push(this.parseQueryUpdate(item, options));
       }
 
-      if (this['preSaveCb']) {  
+      if (this.helper.preSaveCb) {  
         state = checkTable(state).update('obs', obs => obs.push(
           preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]));
       } 
 
       state = checkTable(state).update('obs', obs => obs.concat(parseArr));
 
-      return new Schema(state);
+      return new Schema(this, state);
     }
 
     /*
@@ -493,16 +503,17 @@ export class Schema {
       const defaults = this.state.getIn(['model', 'defaults']).toObject();
       // merge default values with each item in the items array
       for(let x = 0; x < items.length; x++) {
-        const item = items[x];
+        let item = items[x];
         // Any value that has a default but is not indicated in the item will be default
         // _.mergeWith(items[x], defaults, objVal => objVal);
         for(let y in defaults) { // go through all items in object
           if (!item[y]) item[y] = defaults[y]; // if a default property does not exist, make it
         }
-        // if 
-        if (this['preSaveCb']) {
+        item = new Entity(item, this);
+        // item = new Entity(item, this);
+        if (this.helper.preSaveCb) {
           preArr.push(Rx.Observable.create(observer => {
-            this['preSaveCb'](item, () => {
+            item.preSaveCb(() => {
               observer.next();
               observer.complete();
             }, err => observer.error(err));
@@ -512,14 +523,14 @@ export class Schema {
         parseArr.push(this.parseQueryInsert(item, options));
       }
 
-      if (this['preSaveCb']) {  
+      if (this.helper.preSaveCb) {  
         state = checkTable(state).update('obs', obs => obs.push(
           preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]));
       } 
 
       state = checkTable(state).update('obs', obs => obs.concat(parseArr));
 
-      return new Schema(state);
+      return new Schema(this, state);
     }
     
     /*
@@ -529,9 +540,9 @@ export class Schema {
     find(object?: Object, options?: any): Schema {
       let state = Map<any,any>(this.state);
 
-      if (this['preFindCb']) {
+      if (this.helper.preFindCb) {
         state = state.update('obs', obs => obs.push(Rx.Observable.create(observer => {
-          this['preFindCb'](object, () => {
+          this.helper.preFindCb(object, () => {
             observer.next();
             observer.complete();
           }, err => observer.error(err));
@@ -540,7 +551,7 @@ export class Schema {
       
       state = state.update('obs', obs => obs.push(this.parseQuerySelect(object, options)));
 
-      return new Schema(state);
+      return new Schema(this, state);
     }
    
     /*
@@ -554,9 +565,9 @@ export class Schema {
       if (!options) options = {};
       options.limitOne = true; // Make sure we limit the response to one row
 
-      if (this['preFindCb']) {
+      if (this.helper.preFindCb) {
         state = state.update('obs', obs => obs.push(Rx.Observable.create(observer => {
-          this['preFindCb'](object, () => {
+          this.helper.preFindCb(object, () => {
             observer.next();
             observer.complete();
           }, err => observer.error(err));
@@ -565,7 +576,62 @@ export class Schema {
       
       state = state.update('obs', obs => obs.push(this.parseQuerySelect(object, options)));
 
-      return new Schema(state);
+      return new Schema(this, state);
+    }
+
+    /*
+          SELECTS FROM THE DATABASE WITH ONLY AN ID
+            IF NO ID SET IN THE MODEL THIS SHOULD BE A UUID THAT HAS A SECONDARY INDEX
+     */
+    findById(id: string): Schema {
+      let state = Map<any,any>(this.state);
+
+      if (this.helper.preFindCb) {
+        state = state.update('obs', obs => obs.push(Rx.Observable.create(observer => {
+          this.helper.preFindCb({ id: id }, () => {
+            observer.next();
+            observer.complete();
+          }, err => observer.error(err));
+        })));
+      }
+
+      state = state.update('obs', obs => obs.push(Rx.Observable.create(observer => {
+        const query = `SELECT * FROM ${this.state.get('tableName')} WHERE id = ${id}`
+
+        cassandra.client.execute(query).then(entity => {
+          // all rows in the response will be stored in a Entity class inside items array
+          const rows = entity.rows;
+          let items;
+
+          if (rows.length === 0) {
+            observer.error({ message: 'No Entities were found', statusCode: 404 });
+          } else if (rows.length > 1) {
+            items = [];
+            for (let z = 0; z < rows.length; z++) {
+              items.push(new Entity(rows[z], this))
+            }
+          } else {
+            items = new Entity(rows[0] || {}, this);
+          }
+
+
+
+          // If the find event hook was initialized
+          if(this.helper.postFindCb) { // if find Event hook set
+            this.helper.postFindCb(items, x => { // execute the find hook callback
+              observer.next(x);
+              observer.complete();
+            }, cassandra.client);
+          } else { // if no find hook set
+            observer.next(items); // set next() argument to Entity array
+            observer.complete();
+          }
+        }).catch(err => observer.error(err));
+
+        return function () {};
+      })));
+
+      return new Schema(this, state);
     }
 
     /*
@@ -588,31 +654,19 @@ export class Schema {
       return seamed.filter(x => x); // filter out any undefined arguments from observer.next()
     }
 
-    helperMethods(scope: Object): void {
-      this.helpers = scope;
-      this.state = this.state.set('helpers', Map<any,any>(scope));
-      for (let x in scope) this[x] = scope[x];
-    }
-
     // post() is the event hook setting function
     // pass in the hook event; 'save', 'remove', 'find'
     // pass in a callback function that will be executed upon event
     post(hook: string, fn: Function): void {
       switch (hook) {
         case "save":
-          this.state = this.state
-            .setIn(['events', 'postSaveCb'], fn);
-          this['postSaveCb'] = fn;
+          this.helper.postSaveCb = fn;
           break;
         case "find":
-          this.state = this.state
-            .setIn(['events', 'postFindCb'], fn);
-            this['postFindCb'] = fn;
+            this.helper.postFindCb = fn;
           break;
         case "remove":
-          this.state = this.state
-            .setIn(['events', 'postRemoveCb'], fn);
-            this['postRemoveCb'] = fn;
+            this.helper.postRemoveCb = fn;
           break;
       }
       return;
@@ -623,25 +677,36 @@ export class Schema {
     pre(hook: string, fn: Function): void {
       switch (hook) {
         case "save":
-          this.state = this.state
-            .setIn(['events', 'preSaveCb'], fn);
-            this['preSaveCb'] = fn;
+            this.helper.preSaveCb = fn;
           break;
         case "find":
-          this.state = this.state
-            .setIn(['events', 'preFindCb'], fn);
-            this['preFindCb'] = fn;
+            this.helper.preFindCb = fn;
           break;
         case "remove":
-          this.state = this.state
-            .setIn(['events', 'preRemoveCb'], fn);
-            this['preRemoveCb'] = fn;
+            this.helper.preRemoveCb = fn;
           break;
       }
       return;
     }
 
   }
+
+ class Helper {
+   private preSaveCb: Function;
+   private preRemoveCb: Function;
+   private preFindCb: Function;
+   private postSaveCb: Function;
+   private postRemoveCb: Function;
+   private postFindCb: Function;
+
+   constructor() {
+
+   }
+
+   methods(scope: Object): void {
+     for (let x in scope) this[x] = scope[x];
+   }
+ }
 
  /*
       Entity class is the object that will be instantiated with the DB response row data
@@ -651,100 +716,99 @@ export class Schema {
  export class Entity {
    public toJSON: Function;
    private state: any;
+   private modified: Object = {};
+
+   public preSaveCb: Function;
+   public preRemoveCb: Function;
+   public preFindCb: Function;
+   public postSaveCb: Function;
+   public postRemoveCb: Function;
+   public postFindCb: Function;
 
    constructor(item: any, parent: Schema, isnew?: boolean) {
-     // create functions for parent based off of the Schema state
-     if (parent.helpers) this.integrateMethods(parent.helpers);
-     // create class properties cooresponding to column values
-     this.integrateItem(item, isnew ? isnew : false);
      // remove all exploitable properties from the item
      // when passed back through express response
      this.toJSON = function() {
        let obj = this;
        delete obj.state;
+       delete obj.modified;
        return obj;
      };
 
-     this.state = parent.state
-       .delete('obs')
-       .delete('batchable')
-       .delete('tblChked')
-       .delete('methods')
-       .toJS();
+     this.state = parent.state.toJS();
+     // this.state['removeQ'] = this.removeQuery();
+     // this.state['saveQ'] = this.saveQuery();
 
-     this.state['removeQ'] = this.removeQuery();
-     // UPDATE query string
-     this.state['saveQ'] = this.saveQuery();
+     // create functions for parent based off of the Schema state
+     if (parent.helper) this.integrateMethods(parent.helper);  
+     // create class properties cooresponding to column values
+     this.integrateItem(item, isnew ? isnew : false);
+     // console.log(this);
    }
    // integrate the JSON into the parent object
    private integrateItem(item: any, isnew: boolean): void {
-     for (let x in item) {
-       const val = item[x];
-       if (val && val !== 'now()' && val !== 'uuid()' && val !== 'toTimeStamp(now())' || isnew)
-         this[x] = val;
+     const cols = this.state.model.allCol;
+
+     for (let y = 0; y < cols.length; y++) {
+       let prop = cols[y];
+       let val = item[prop];
+
+       this[prop] = val;
+
+       if (typeof val !== 'function')
+         Object.defineProperty(this, prop, {
+           get: function() {
+             return val;
+           },
+           set: function(value) {
+             val = value;
+             this.modified[prop] = true;
+           }
+         });
      }
    }
    // integrate methods into parent object
    private integrateMethods(methods: any) {
      for (let x in methods) {
-       this[x] = methods[x];
+       if (x !== 'methods')
+         this[x] = methods[x];
      }
-   }
-   // creates DELETE query string for this table
-   private removeQuery(): string {
-     let query: string = `DELETE FROM ${this.state.tableName} WHERE `;
-     const keyList = this.state.model.keyList;
-
-     for(let x = 0; x < keyList.length; x++) {
-       query += `${keyList[x]} = ? AND `;
-     }
-     query = query.substring(0, query.length-4);
-
-     return query;
-   }
-
-   // creates UPDATE query strign for this table
-   private saveQuery(): string {
-     let q1: string = `UPDATE ${this.state.tableName} SET `,
-         q2: string = ` WHERE `;
-     const keyList = this.state.model.keyList;
-     const columnList = this.state.model.columnList;
-
-     for(let x = 0; x < columnList.length; x++) {
-       q1 += `${columnList[x]} = ?, `;
-     }
-     for(let y = 0; y < keyList.length; y++) {
-       q2 += `${keyList[y]} = ? AND `;
-     }
-
-     return q1.substring(0, q1.length-2) + q2.substring(0, q2.length-4);
    }
 
    // UPDATEs the DB with the current object column values
    save(): Rx.Observable<any> {
-     // two arrays for SET and WHERE
-     let arr1 = [],
-         arr2 = [];
-     const keyList = this.state.model.keyList;
-     const columnList = this.state.model.columnList;
-
-
-     // For all columns in the table if column is not a key add to SET array
-     // if column is a key add value to WHERE array
-     for(let x = 0; x < columnList.length; x++) {
-       arr1.push(this[columnList[x]]);
-     }
-     for(let y = 0; y < keyList.length; y++) {
-       arr2.push(this[keyList[y]]);
-     }
-
-     // return observable that executes the UPDATE query with SET array + WHERE array as params
+     // observable that executes the UPDATE query with SET array + WHERE array as params
      return Rx.Observable.create(observer => {
-       const func = () => cassandra.client.execute(this.state.saveQ, arr1.concat(arr2), {prepare:true});
+       // two arrays for SET and WHERE
+       let arr1 = [],
+           arr2 = [];
+       const keyList = this.state.model.keyList;
+       const columnList = this.state.model.columnList;
 
-       func().then(entity => {
-         if(this.state.events && this.state.events.postSaveCb) { // if save Event hook set
-           this.state.events.postSaveCb(this, x => { // execute save hook callback
+       let q1: string = `UPDATE ${this.state.tableName} SET `,
+           q2: string = ` WHERE `;
+
+       for(let x = 0; x < columnList.length; x++) {
+         const val = columnList[x];
+         if (this[val]) {
+           q1 += `${val} = ?, `;  
+           arr1.push(this[val]);
+         }
+         
+       }
+       for(let y = 0; y < keyList.length; y++) {
+         const val = keyList[y];
+         if (this[val]) {
+           q2 += `${val} = ? AND `;
+           arr2.push(this[val]);
+         }
+       }
+
+       cassandra.client.execute(q1.substring(0, q1.length-2) + q2.substring(0, q2.length-4), 
+         arr1.concat(arr2), {prepare:true}).then(entity => {
+
+         if(this.postSaveCb) { // if save Event hook set
+           this.postSaveCb(this, x => { // execute save hook callback
              observer.next(x);
              observer.complete();
            }, cassandra.client);
@@ -760,23 +824,25 @@ export class Schema {
 
    // REMOVEs row from the DB
    remove(): Rx.Observable<any> {
-     // One array for WHERE
-     let arr = [];
-     const keyList = this.state.model.keyList;
-
-     // WHERE clause only cares about key values
-     // push key values into WHERE array
-     for(let y = 0; y < keyList.length; y++) {
-       arr.push(this[keyList[y]]);
-     }
-
      // create observable that executes the DELETE query with WHERE array as params
      return Rx.Observable.create(observer => {
-       const func = () => cassandra.client.execute(this.state.removeQ, arr, {prepare:true});
+       // One array for WHERE
+       let arr = [];
 
-       func().then(entity => {
-         if(this.state.events.postRemoveCb) { // if remove Event hook set
-           this.state.events.postRemoveCb(this, x => { // executes remvoe hook callback
+       let query: string = `DELETE FROM ${this.state.tableName} WHERE `;
+       const keyList = this.state.model.keyList;
+
+       for(let x = 0; x < keyList.length; x++) {
+         const val = keyList[x];
+         if (this[val]) {
+           query += `${val} = ? AND `;
+           arr.push(this[val]);
+         }
+       }
+
+       cassandra.client.execute(query.substring(0, query.length-4), arr, {prepare:true}).then(entity => {
+         if(this.postRemoveCb) { // if remove Event hook set
+           this.postRemoveCb(this, x => { // executes remvoe hook callback
              observer.next(x);
              observer.complete();
            }, cassandra.client);

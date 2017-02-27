@@ -20,11 +20,16 @@ declare namespace cassandra {
 	export function connect(config : any, cb : any): void;
 }
 
+interface Helper {
+	methods(scope: Object): void;
+}
+
 declare class Schema {
 	constructor (modelName : string | Map<any,any>, model : any, options? : any);
 
 	find(object?:Object, opts?:any): Schema;
 	findOne(object?:Object, opts?:any): Schema;
+	findById(id:string): Schema;
 	remove(object?:any, opts?: Object): Schema;
 	update(object:any, opts?: Object): Schema;
 	create(items: any, opts?: Object): Schema;
@@ -34,6 +39,8 @@ declare class Schema {
 	pre(hook: string, fn: Function): void;
 
 	newEntity(item: Object): Entity;
+
+	helper: Helper;
 }
 
 declare class Entity {
