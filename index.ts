@@ -614,7 +614,7 @@ export class Schema {
       let obs = List<Rx.Observable<any>>(this.obs);
       let item: Entity = new Entity({ id : id }, this);
 
-      if (this.helper.preFindCb) {
+      if (item.preFindCb) {
         obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
           item.preFindCb(() => {
             observer.next();
@@ -624,7 +624,7 @@ export class Schema {
       }
 
       obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
-        const query = `SELECT * FROM ${this.state.get('tableName')} WHERE id = ${id}`
+        const query = `SELECT * FROM ${this.tableName} WHERE id = ${id}`
 
         cassandra.client.execute(query).then(entity => {
           // all rows in the response will be stored in a Entity class inside items array
@@ -639,12 +639,12 @@ export class Schema {
               items.push(new Entity(rows[z], this))
             }
           } else {
-            items = new Entity(rows[0] || {}, this);
+            items = new Entity(rows[0], this);
           }
 
           // If the find event hook was initialized
-          if(this.helper.postFindCb) { // if find Event hook set
-            this.helper.postFindCb(items, x => { // execute the find hook callback
+          if(item.postFindCb) { // if find Event hook set
+            item.postFindCb(items, x => { // execute the find hook callback
               observer.next(x);
               observer.complete();
             }, cassandra.client);
@@ -783,7 +783,7 @@ export class Schema {
        let val = item[prop];
 
        this[prop] = val;
-       this.attributes[prop] = val;
+       if (val) this.attributes[prop] = val;
 
        if (typeof val !== 'function')
          Object.defineProperty(this, prop, {
