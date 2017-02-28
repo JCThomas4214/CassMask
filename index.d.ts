@@ -46,6 +46,8 @@ declare class Schema {
 declare class Entity {
 	constructor (items: any, state: Map<any,any>);
 
+	isEmpty(): boolean;
+	merge(object: Object): Entity;
 	save(): Rx.Observable<any>;
 	remove(): Rx.Observable<any>;
 }

@@ -4,18 +4,7 @@
   "description": "A Simple Observable Driven Apache Cassandra ORM",
   "main": "index.js",
   "files": [
-    "index.d.ts",
-    "libs/create.js",
-    "libs/createBatchQuery.js",
-    "libs/createTable.js",
-    "libs/find.js",
-    "libs/findOne.js",
-    "libs/parseModel.js",
-    "libs/remove.js",
-    "libs/update.js",
-    "libs/seam.js",
-    "libs/findOne.js",
-    "libs/entity.js"
+    "index.d.ts"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
