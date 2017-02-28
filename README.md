@@ -29,13 +29,16 @@ This ORM is in alpha and is not suggested for production as core features have n
   1. [seam](#seam)
   2. [find](#find)
   3. [findOne](#findOne)
-  4. [create](#create)
-  5. [update](#update)
-  6. [remove](#remove)
-  7. [post](#post)
-  8. [pre](#pre)
+  4. [findById](#findById)
+  5. [create](#create)
+  6. [update](#update)
+  7. [remove](#remove)
+  8. [post](#post)
+  9. [pre](#pre)
 7. [Entity API](#entityAPI)
   1. [constructor](#entityconstructor)
+  2. [isEmpty](#entityisempty)
+  2. [merge](#entitymerge)
   2. [save](#entitysave)
   3. [remove](#entityremove)
 8. [TODO](#TODO)
@@ -361,7 +364,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="connect"></a>
 
-#### [connect]()(config: [ClientOptions](http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/), cb: Function): void 
+#### [connect](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(config: [ClientOptions](http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/), cb: Function): void 
 
 + connects to the cassandra nodes
 + cb function to be fired once connection sring returns
@@ -372,13 +375,13 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="seam"></a>
 
-#### [seam]()(): Rx.Observable\<any\>
+#### [seam](https://github.com/JCThomas4214/CassMask/blob/master/libs/seam.ts)(): Rx.Observable\<any\>
 
 + returns joined observables
 
 <a name="find"></a>
 
-#### [find]()(items?: Object, opts?: Object): Schema
+#### [find](https://github.com/JCThomas4214/CassMask/blob/master/libs/find.ts)(items?: Object, opts?: Object): Schema
 
 + first argument can be empty or an object
   + If no arguments or empty object, will SELECT all rows in the table
@@ -388,7 +391,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="findOne"></a>
 
-#### [findOne]()(items?: Object, opts?: Object): Schema
+#### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: Object): Schema
 
 + first argument can be empty or an object
   + If no arguments or empty object, will SELECT the first row in the table
@@ -396,9 +399,16 @@ execute modelRegister(socket) in your socketio.config onConnect function
   + columns should be in the same order as the primary keys
 + query will return a single object
 
+<a name="findById"></a>
+
+#### [findById](https://github.com/JCThomas4214/CassMask/blob/master/libs/findById.ts)(id: string): Schema
+
++ first argument must be an id
++ query will return a single or array of objects depending schema design
+
 <a name="create"></a>
 
-#### [create]()(items: [Object || Array\<Object\>], opts?: Object): Schema
+#### [create](https://github.com/JCThomas4214/CassMask/blob/master/libs/create.ts)(items: Object | Array\<Object\>, opts?: Object): Schema
 
 + first argument can be an object or array of objects
 + objects must contain all columns to be inserted into the row
@@ -406,7 +416,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="update"></a>
 
-#### [update]()(object: [Object || Array\<Object\>], opts?: Object): Schema
+#### [update](https://github.com/JCThomas4214/CassMask/blob/master/libs/update.ts)(object: Object | Array\<Object\>, opts?: Object): Schema
 
 + first argument can be an object or array of objects
 + objects must contain two subobjects, 'set' and 'where'
@@ -415,14 +425,14 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="remove"></a>
 
-#### [remove]()(object?: [Object || Array\<Object\>], opts?: Object): Schema
+#### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object?: Object | Array\<Object\>, opts?: Object): Schema
 
 + first argument can be empty, an object, or array of objects
 + objects must contain the primary keys for the WHERE clause to DELETE the row
 
 <a name="post"></a>
 
-#### [post]()(hook: string | Array<string>, cb: Function): void;
+#### [post](https://github.com/JCThomas4214/CassMask/blob/master/libs/events.ts)(hook: string | Array<string>, cb: Function): void;
 
 + specify one or multiple hooks ('create', 'update', 'remove', or 'find') as the first argument
 + specify the callback as the function to execute
@@ -431,7 +441,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="pre"></a>
 
-#### [pre]()(hook: string | Array<string>, cb: Function): void;
+#### [pre](https://github.com/JCThomas4214/CassMask/blob/master/libs/events.ts)(hook: string | Array<string>, cb: Function): void;
 
 + specify one or multiple hooks ('create', 'update', 'remove', or 'find') as the first argument
 + specify the callback as the function to execute
@@ -444,7 +454,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="entityconstructor"></a>
 
-#### new [Entity]()(item: Object, state: Map\<any,any\>)
+#### new [Entity](https://github.com/JCThomas4214/CassMask/blob/master/libs/entity.ts)(item: Object, model: Schema)
 
 + item should be an object with the key value pairs for a row in a table
 + state should be the Schema state this Entity belongs to
@@ -466,9 +476,22 @@ let entity = new Entity(object, Model);
 entity.save();
 ```
 
+<a name="entityisempty"></a>
+
+#### [isEmpty](https://github.com/JCThomas4214/CassMask/blob/master/libs/entity.ts)(): boolean
+
++ will return true if no column attributes are set in the Entity object
++ else false
+
+<a name="entitymerge"></a>
+
+#### [merge](https://github.com/JCThomas4214/CassMask/blob/master/libs/entity.ts)(item: Object): Entity
+
++ will merge object will the Entity, overriding any matching attributes in the Entity with the object's
+
 <a name="entitysave"></a>
 
-#### [save]()(): Rx.Observable<any>
+#### [save](https://github.com/JCThomas4214/CassMask/blob/master/libs/entity.ts)(): Rx.Observable<any>
 
 + creates a query string based off this Entity's attributes
 + will distinguish if the query is an update or insert and execute the appropriate post callback
@@ -477,7 +500,7 @@ entity.save();
 
 <a name="entityremove"></a>
 
-#### [remove]()(): Rx.Observable<any>
+#### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/entity.ts)(): Rx.Observable<any>
 
 + creates a query string based off this Entity's attributes
 + will NOT execute a pre callback as the object
