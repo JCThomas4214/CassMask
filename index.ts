@@ -253,10 +253,10 @@ export class Schema {
 
         cassandra.client.execute(query, params, {prepare:true}).then(response => { // entity will be useless from DB
           if(item.postSaveCb) { // if save Event hook set
-            item.postSaveCb(item, x => { // execute the save hook callback
+            item.postSaveCb(x => { // execute the save hook callback
               observer.next(x);
               observer.complete();
-            }, cassandra.client);
+            }, err => observer.error(err), item);
           } else { // if no save hook set
             observer.next(item); // set next() argument to new Entity
             observer.complete();
@@ -290,10 +290,10 @@ export class Schema {
 
           cassandra.client.execute(query, params, {prepare:true}).then(response => { // entity will be useless information about the DB
             if(item.postRemoveCb) { // if remvoe event hook was set
-              item.postRemoveCb(item, x => { // execute remove hook callback
+              item.postRemoveCb(x => { // execute remove hook callback
                 observer.next(x);
                 observer.complete();
-              }, cassandra.client);
+              }, err => observer.error(err), item);
             } else { // if remvoe hook was not set
               observer.next(item); // set next() argument to new Entity aligned with items iteration
               observer.complete();
@@ -345,10 +345,10 @@ export class Schema {
           cassandra.client.execute(query, params, {prepare:true}).then(entity => { // if the event hook was set
             if(item.postSaveCb) { // in state.events.saveHook will indicator boolean
               // execute the hook callback and create newEntity object with current entity JSON
-              item.postSaveCb(item, x => {
+              item.postSaveCb(x => {
                 observer.next(x);
                 observer.complete();
-              }, cassandra.client);
+              }, err => observer.error(err), item);
             } else { // if no hook was set
               observer.next(new Entity(item, this)); // next() arg is new Entity object
               observer.complete(); // now complete
@@ -403,10 +403,10 @@ export class Schema {
 
           // If the find event hook was initialized
           if(this.helper.postFindCb) { // if find Event hook set
-            this.helper.postFindCb(items, x => { // execute the find hook callback
+            this.helper.postFindCb(x => { // execute the find hook callback
               observer.next(x);
               observer.complete();
-            }, cassandra.client);
+            }, err => observer.error(err), items);
           } else { // if no find hook set
             observer.next(items); // set next() argument to Entity array
             observer.complete();
@@ -644,10 +644,10 @@ export class Schema {
 
           // If the find event hook was initialized
           if(item.postFindCb) { // if find Event hook set
-            item.postFindCb(items, x => { // execute the find hook callback
+            item.postFindCb(x => { // execute the find hook callback
               observer.next(x);
               observer.complete();
-            }, cassandra.client);
+            }, err => observer.error(err), items);
           } else { // if no find hook set
             observer.next(items); // set next() argument to Entity array
             observer.complete();
@@ -850,14 +850,16 @@ export class Schema {
          }
        }
 
-       cassandra.client.execute(q1.substring(0, q1.length-2) + q2.substring(0, q2.length-4), 
-         arr1.concat(arr2), {prepare:true}).then(entity => {
+       const query = q1.substring(0, q1.length-2) + q2.substring(0, q2.length-4);
+       const params = arr1.concat(arr2);
+
+       cassandra.client.execute(query, params, {prepare:true}).then(entity => {
 
          if(this.postSaveCb) { // if save Event hook set
-           this.postSaveCb(this, x => { // execute save hook callback
+           this.postSaveCb(x => { // execute save hook callback
              observer.next(x);
              observer.complete();
-           }, cassandra.client);
+           }, err => observer.error(err), this);
          } else { // if save hook not set
            observer.next(this); // pass this Entity into next() argument
            observer.complete();
@@ -888,10 +890,10 @@ export class Schema {
 
        cassandra.client.execute(query.substring(0, query.length-4), arr, {prepare:true}).then(entity => {
          if(this.postRemoveCb) { // if remove Event hook set
-           this.postRemoveCb(this, x => { // executes remvoe hook callback
+           this.postRemoveCb(x => { // executes remvoe hook callback
              observer.next(x);
              observer.complete();
-           }, cassandra.client);
+           }, err => observer.error(err), this);
          } else { // if remove hook not set
            observer.next(this); // pass this Entity into next() argument
            observer.complete();
