@@ -20,19 +20,24 @@ This ORM is in alpha and is not suggested for production as core features have n
 2. [The Entity](#entityObject)
   1. [Important Limitations](#eIssues)
   2. [Entity Example](#entityExample)
-3. [Batching!](#batching)
-  1. [Things to consider before batching.](#tcbBatching)
-4. [Event Hooks](#eventHooks)
+3. [Event Hooks](#eventHooks)
   1. [Socket.io example](#sioEx)
-5. [Features](#features)
-6. [Query API](#api)
+4. [Features](#features)
+5. [CassMask API](#cassmaskapi)
+  1. [connect](#connect)
+6. [Model API](#modelapi)
   1. [seam](#seam)
   2. [find](#find)
   3. [findOne](#findOne)
   4. [create](#create)
   5. [update](#update)
   6. [remove](#remove)
+  7. [post](#post)
+  8. [pre](#pre)
 7. [Entity API](#entityAPI)
+  1. [constructor](#entityconstructor)
+  2. [save](#entitysave)
+  3. [remove](#entityremove)
 8. [TODO](#TODO)
 
 ## Quick Start
@@ -216,7 +221,7 @@ Model.findOne().find().seam().subscribe( // two queries are executed and two nex
 */
 
 ```
-
+<!---
 <a name="batching"></a>
 
 ## Batching!
@@ -253,12 +258,12 @@ Model.remove().create([{
 ### Things to consider before batching.
 
 When batching, multiple queries are condenced into a single query with multiple statements. If you would like event driven features you will need to keep in mind that the CassMask Event API will only be triggered (depending on the hook) once per query response. Depending on your use case an emit per INSERT, UPDATE, and/or DELETE may be preferable.
-
+-->
 <a name="eventHooks"></a>
 
 ## Event Hooks
 
-In CassMask there are event hooks for 'save', 'remove', and 'find' that can be used to trigger a callback after a corresponding query. This callback is executed before the observer.next() and observer.complete() functions are called.
+In CassMask there are PRE and POST event hooks for 'create', 'update', 'remove', and 'find', embedded inside each Entity (Instance) scope that can be used to trigger a callback after a corresponding query. This callback is executed before the observer.next() and observer.complete() functions are called.
 
 <a name="sioEx"></a>
 
@@ -284,7 +289,7 @@ ModelEvents.setMaxListeners(0);
   The client; this is the cassandra client, which can be used to execute additional queries
 
  */
-Model.postHook('save', function(lastEntity, next, client) {
+Model.post('save', function(lastEntity, next, client) {
   // callback code goes here
 
   Model.Events.emit('save', lastEntity);
@@ -350,19 +355,30 @@ execute modelRegister(socket) in your socketio.config onConnect function
 + It allows you to seam together queries, using observables, garunteeing all queries are executed in the proper sequence.
 + It has an Events API that allow you to hook into query responses for event driven features
 
-<a name="api"></a>
+<a name="cassmaskapi"></a>
 
-## Query API
+## CassMask API
+
+<a name="connect"></a>
+
+#### [connect]()(config: [ClientOptions](http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/), cb: Function): void 
+
++ connects to the cassandra nodes
++ cb function to be fired once connection sring returns
+
+<a name="modelapi"></a>
+
+## Model API
 
 <a name="seam"></a>
 
-#### [seam](https://github.com/JCThomas4214/CassMask/blob/master/libs/seam.ts)(): Rx.Observable\<any\>
+#### [seam]()(): Rx.Observable\<any\>
 
 + returns joined observables
 
 <a name="find"></a>
 
-#### [find](https://github.com/JCThomas4214/CassMask/blob/master/libs/find.ts)(items?: Object, opts?: Object): Schema
+#### [find]()(items?: Object, opts?: Object): Schema
 
 + first argument can be empty or an object
   + If no arguments or empty object, will SELECT all rows in the table
@@ -372,7 +388,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="findOne"></a>
 
-#### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: Object): Schema
+#### [findOne]()(items?: Object, opts?: Object): Schema
 
 + first argument can be empty or an object
   + If no arguments or empty object, will SELECT the first row in the table
@@ -382,7 +398,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="create"></a>
 
-#### [create](https://github.com/JCThomas4214/CassMask/blob/master/libs/create.ts)(items: [Object || Array\<Object\>], opts?: Object): Schema
+#### [create]()(items: [Object || Array\<Object\>], opts?: Object): Schema
 
 + first argument can be an object or array of objects
 + objects must contain all columns to be inserted into the row
@@ -390,26 +406,45 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="update"></a>
 
-#### [update](https://github.com/JCThomas4214/CassMask/blob/master/libs/update.ts)(object: [Object || Array\<Object\>], opts?: Object): Schema
+#### [update]()(object: [Object || Array\<Object\>], opts?: Object): Schema
 
 + first argument can be an object or array of objects
-+ objects must contain two subobjects, 'set' and 'in', in that order
++ objects must contain two subobjects, 'set' and 'where'
   + 'set' should contain all the columns you wish to SET (primary keys not allowed)
-  + 'in' should contain the primary key columns to find the row to UPDATE
+  + 'where' should contain the primary key columns to find the row to UPDATE
 
 <a name="remove"></a>
 
-#### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object?: [Object || Array\<Object\>], opts?: Object): Schema
+#### [remove]()(object?: [Object || Array\<Object\>], opts?: Object): Schema
 
 + first argument can be empty, an object, or array of objects
 + objects must contain the primary keys for the WHERE clause to DELETE the row
-  + Key Columns should be in their respective order
+
+<a name="post"></a>
+
+#### [post]()(hook: string | Array<string>, cb: Function): void;
+
++ specify one or multiple hooks ('create', 'update', 'remove', or 'find') as the first argument
++ specify the callback as the function to execute
+  + callback passes two arguments, next(object?), err(message?), and entity: Entity | Array<Entity>
+  + callback must call one of them
+
+<a name="pre"></a>
+
+#### [pre]()(hook: string | Array<string>, cb: Function): void;
+
++ specify one or multiple hooks ('create', 'update', 'remove', or 'find') as the first argument
++ specify the callback as the function to execute
+  + callback passes two arguments, next(object?), err(message?), and entity which are both functions
+  + callback must call one of them
 
 <a name="entityAPI"></a>
 
 ## Entity API
 
-#### [Entity](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(item: Object, state: Map\<any,any\>)
+<a name="entityconstructor"></a>
+
+#### new [Entity]()(item: Object, state: Map\<any,any\>)
 
 + item should be an object with the key value pairs for a row in a table
 + state should be the Schema state this Entity belongs to
@@ -427,13 +462,31 @@ const object = {
   col5: 67
 };
 
-let entity = new Entity(object, Model.state);
+let entity = new Entity(object, Model);
 entity.save();
 ```
+
+<a name="entitysave"></a>
+
+#### [save]()(): Rx.Observable<any>
+
++ creates a query string based off this Entity's attributes
++ will distinguish if the query is an update or insert and execute the appropriate post callback
++ will NOT execute a pre callback as the object 
++ executes UPDATE query on subscribe
+
+<a name="entityremove"></a>
+
+#### [remove]()(): Rx.Observable<any>
+
++ creates a query string based off this Entity's attributes
++ will NOT execute a pre callback as the object
++ executes DELETE query on subscribe
 
 <a name="TODO"></a>
 
 ## TODO
 
-+ Virtual fields and trigger functions
++ Data Type support (Map, custom)
++ Virtual fields
 + Validation

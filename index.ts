@@ -252,8 +252,8 @@ export class Schema {
         const query = tmp1.substring(0, tmp1.length-2) + tmp2.substring(0, tmp2.length-2) + ')'; // q's query string set to concat of columns and values string
 
         cassandra.client.execute(query, params, {prepare:true}).then(response => { // entity will be useless from DB
-          if(item.postSaveCb) { // if save Event hook set
-            item.postSaveCb(x => { // execute the save hook callback
+          if(item.postCreateCb) { // if save Event hook set
+            item.postCreateCb(x => { // execute the save hook callback
               observer.next(x);
               observer.complete();
             }, err => observer.error(err), item);
@@ -343,9 +343,9 @@ export class Schema {
           const query = tmp.substring(0, tmp.length-4) + ' IF EXISTS'; // set the query key in q array to new query string
 
           cassandra.client.execute(query, params, {prepare:true}).then(entity => { // if the event hook was set
-            if(item.postSaveCb) { // in state.events.saveHook will indicator boolean
+            if(item.postUpdateCb) { // in state.events.saveHook will indicator boolean
               // execute the hook callback and create newEntity object with current entity JSON
-              item.postSaveCb(x => {
+              item.postUpdateCb(x => {
                 observer.next(x);
                 observer.complete();
               }, err => observer.error(err), item);
@@ -493,9 +493,9 @@ export class Schema {
         let item = new Entity(object.set, this);
         item.merge(object.where);
 
-        if (item.preSaveCb) {
+        if (item.preUpdateCb) {
           preArr.push(Rx.Observable.create(observer => {
-            item.preSaveCb(item, () => {
+            item.preUpdateCb(item, () => {
               observer.next();
               observer.complete();
             }, err => observer.error(err));
@@ -505,7 +505,7 @@ export class Schema {
         parseArr.push(this.parseQueryUpdate(item, options));
       }
 
-      if (this.helper.preSaveCb) {  
+      if (this.helper.preUpdateCb) {  
         obs = this.checkTable(obs).push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
       }
 
@@ -537,9 +537,9 @@ export class Schema {
         }
         item = new Entity(item, this);
 
-        if (item.preSaveCb) {
+        if (item.preCreateCb) {
           preArr.push(Rx.Observable.create(observer => {
-            item.preSaveCb(() => {
+            item.preCreateCb(() => {
               observer.next();
               observer.complete();
             }, err => observer.error(err));
@@ -549,7 +549,7 @@ export class Schema {
         parseArr.push(this.parseQueryInsert(item, options));
       }
 
-      if (this.helper.preSaveCb) {
+      if (this.helper.preCreateCb) {
         obs = this.checkTable(obs).push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
       } 
 
@@ -683,45 +683,91 @@ export class Schema {
     // post() is the event hook setting function
     // pass in the hook event; 'save', 'remove', 'find'
     // pass in a callback function that will be executed upon event
-    post(hook: string, fn: Function): void {
-      switch (hook) {
-        case "save":
-          this.helper.postSaveCb = fn;
-          break;
-        case "find":
-            this.helper.postFindCb = fn;
-          break;
-        case "remove":
-            this.helper.postRemoveCb = fn;
-          break;
+    post(hook: string | Array<string>, fn: Function): void {
+      if (!Array.isArray(hook)) {
+        switch (hook) {
+          case "create":
+            this.helper.postCreateCb = fn;
+            break;
+          case "update":
+            this.helper.postUpdateCb = fn;
+            break;
+          case "find":
+              this.helper.postFindCb = fn;
+            break;
+          case "remove":
+              this.helper.postRemoveCb = fn;
+            break;
+        }
+      } else {
+        for (let x = 0; x < hook.length; x++) {
+          switch (hook[x]) {
+            case "create":
+              this.helper.postCreateCb = fn;
+              break;
+            case "update":
+              this.helper.postUpdateCb = fn;
+              break;
+            case "find":
+                this.helper.postFindCb = fn;
+              break;
+            case "remove":
+                this.helper.postRemoveCb = fn;
+              break;
+          }
+        }
       }
       return;
     }
     // pre() is the event hook setting function
     // pass in the hook event; 'save', 'remove', 'find'
     // pass in a callback function with a next callback as an argument
-    pre(hook: string, fn: Function): void {
-      switch (hook) {
-        case "save":
-            this.helper.preSaveCb = fn;
-          break;
-        case "find":
-            this.helper.preFindCb = fn;
-          break;
-        case "remove":
-            this.helper.preRemoveCb = fn;
-          break;
-      }
+    pre(hook: string | Array<string>, fn: Function): void {
+      if (!Array.isArray(hook)) {
+        switch (hook) {
+          case "create":
+            this.helper.preCreateCb = fn;
+            break;
+          case "update":
+            this.helper.preUpdateCb = fn;
+            break;
+          case "find":
+              this.helper.preFindCb = fn;
+            break;
+          case "remove":
+              this.helper.preRemoveCb = fn;
+            break;
+        }
+      } else {
+        for (let x = 0; x < hook.length; x++) {
+          switch (hook[x]) {
+            case "create":
+              this.helper.preCreateCb = fn;
+              break;
+            case "update":
+              this.helper.preUpdateCb = fn;
+              break;
+            case "find":
+                this.helper.preFindCb = fn;
+              break;
+            case "remove":
+                this.helper.preRemoveCb = fn;
+              break;
+          }
+        }
+      }      
       return;
     }
-
+    
   }
 
  class Helper {
-   private preSaveCb: Function;
+   private preCreateCb: Function;
+   private preUpdateCb: Function;
    private preRemoveCb: Function;
    private preFindCb: Function;
-   private postSaveCb: Function;
+   private postCreateCb: Function;
+   private postUpdateCb: Function;
    private postRemoveCb: Function;
    private postFindCb: Function;
 
@@ -746,10 +792,12 @@ export class Schema {
    private modified: Object = {};
    public attributes: Object = {};
 
-   public preSaveCb: Function;
+   public preCreateCb: Function;
+   public preUpdateCb: Function;
    public preRemoveCb: Function;
    public preFindCb: Function;
-   public postSaveCb: Function;
+   public postCreateCb: Function;
+   public postUpdateCb: Function;
    public postRemoveCb: Function;
    public postFindCb: Function;
 
@@ -826,6 +874,7 @@ export class Schema {
      // observable that executes the UPDATE query with SET array + WHERE array as params
      return Rx.Observable.create(observer => {
        // two arrays for SET and WHERE
+       let isInsert: boolean = false;
        let arr1 = [],
            arr2 = [];
        const keyList = this.model.keyList;
@@ -839,24 +888,28 @@ export class Schema {
          if (this[val]) {
            q1 += `${val} = ?, `;  
            arr1.push(this[val]);
-         }
-         
+         }         
        }
        for(let y = 0; y < keyList.length; y++) {
          const val = keyList[y];
-         if (this[val]) {
+         const thisVal = this[val];
+         if (thisVal) {
            q2 += `${val} = ? AND `;
-           arr2.push(this[val]);
+           if (thisVal === 'now()' || thisVal === 'uuid()' || thisVal === 'toTimeStamp(now())')
+             isInsert = true;
+           arr2.push(thisVal);
          }
        }
 
        const query = q1.substring(0, q1.length-2) + q2.substring(0, q2.length-4);
        const params = arr1.concat(arr2);
 
+       const postCb = isInsert ? 'postCreateCb' : 'postUpdateCb';
+
        cassandra.client.execute(query, params, {prepare:true}).then(entity => {
 
-         if(this.postSaveCb) { // if save Event hook set
-           this.postSaveCb(x => { // execute save hook callback
+         if(this[postCb]) { // if save Event hook set
+           this[postCb](x => { // execute save hook callback
              observer.next(x);
              observer.complete();
            }, err => observer.error(err), this);

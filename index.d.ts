@@ -35,8 +35,8 @@ declare class Schema {
 	create(items: any, opts?: Object): Schema;
 	seam(): Rx.Observable<any>;
 
-	post(hook: string, fn: Function): void;
-	pre(hook: string, fn: Function): void;
+	post(hook: string | Array<string>, fn: Function): void;
+	pre(hook: string | Array<string>, fn: Function): void;
 
 	newEntity(item: Object): Entity;
 
