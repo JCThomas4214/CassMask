@@ -6,7 +6,7 @@ import { List, Map } from 'immutable';
 import {
   Helper,
   Entity, newEntity,
-  objDiff, parseModel,
+  parseModel,
   createTable, checkTable,
   create, parseQueryInsert,
   remove, parseQueryDelete,

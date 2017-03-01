@@ -2,6 +2,7 @@
 
 import { cassandra, Schema } from '../index';
 import { Entity } from './entity';
+import { objDiff } from './parseModel';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 
@@ -14,7 +15,18 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
 
   return Rx.Observable.create(observer => {
 
-    let query = `SELECT * FROM ${this.tableName} WHERE`; // start with a base query
+    let sel: string; // column select holder
+
+    if (options && options.attributes) { // if options and options.attributes exists
+      const attr = options.attributes; // attr is a ref holder
+      if (Array.isArray(attr)) // if attr is an array
+        sel = attr.join(','); // join array into string
+      else if (attr.exclude) { 
+        sel = objDiff(this.model.allCol, attr.exclude).join(','); // fidn set difference and join
+      }
+    } else sel = '*'; // else select all columns
+
+    let query = `SELECT ${sel} FROM ${this.tableName} WHERE`; // start with a base query
     let params = []; // where params will be stored
 
     if (!item.isEmpty()) {

@@ -27,11 +27,11 @@ interface Helper {
 declare class Schema {
 	constructor (modelName : string | Map<any,any>, model : any, options? : any);
 
-	find(object?:Object, opts?:any): Schema;
-	findOne(object?:Object, opts?:any): Schema;
-	findById(id:string): Schema;
-	remove(object?:any, opts?: Object): Schema;
-	update(object:any, opts?: Object): Schema;
+	find(object?: Object, opts?: Object): Schema;
+	findOne(object?: Object, opts?: Object): Schema;
+	findById(id: string, opts?: Object): Schema;
+	remove(object?: any, opts?: Object): Schema;
+	update(object: any, opts?: Object): Schema;
 	create(items: any, opts?: Object): Schema;
 	seam(): Rx.Observable<any>;
 

@@ -387,6 +387,9 @@ execute modelRegister(socket) in your socketio.config onConnect function
   + If no arguments or empty object, will SELECT all rows in the table
 + first argument should contain the columns for the WHERE clause
   + columns should be in the same order as the primary keys
++ second argument is a find options object
+  + options.attributes: Array<string> | Object, columns to be included in the SELECT response
+    + if attributes is an object, exclude: Array<string> will exclude columns from the SELECT response
 + query will return an array of object or a single object
 
 <a name="findOne"></a>
@@ -397,13 +400,19 @@ execute modelRegister(socket) in your socketio.config onConnect function
   + If no arguments or empty object, will SELECT the first row in the table
 + first argument should contain the columns for the WHERE clause
   + columns should be in the same order as the primary keys
++ second argument is a find options object
+  + options.attributes: Array<string> | Object, columns to be included in the SELECT response
+    + if attributes is an object, exclude: Array<string> will exclude columns from the SELECT response
 + query will return a single object
 
 <a name="findById"></a>
 
-#### [findById](https://github.com/JCThomas4214/CassMask/blob/master/libs/findById.ts)(id: string): Schema
+#### [findById](https://github.com/JCThomas4214/CassMask/blob/master/libs/findById.ts)(id: string, opts? Object): Schema
 
 + first argument must be an id
++ second argument is a find options object
+  + options.attributes: Array<string> | Object, columns to be included in the SELECT response
+    + if attributes is an object, exclude: Array<string> will exclude columns from the SELECT response
 + query will return a single or array of objects depending schema design
 
 <a name="create"></a>

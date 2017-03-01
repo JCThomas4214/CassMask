@@ -56,7 +56,6 @@ export class Entity {
     this.integrateMethods(parent.helper);  
     // create class properties cooresponding to column values
     this.integrateItem(item);
-    // console.log(this);
   }
   // integrate the JSON into the parent object
   private integrateItem(item: any): void {
