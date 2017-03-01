@@ -48,8 +48,8 @@ declare class Entity {
 
 	isEmpty(): boolean;
 	merge(object: Object): Entity;
-	save(): Rx.Observable<any>;
-	remove(): Rx.Observable<any>;
+	save(postCb?: string): Rx.Observable<any>;
+	remove(postCb?: string): Rx.Observable<any>;
 }
 
 export {

@@ -106,7 +106,7 @@ export class Entity {
   }
 
   // UPDATEs the DB with the current object column values
-  save(): Rx.Observable<any> {
+  save(postCb: string = 'update'): Rx.Observable<any> {
     // observable that executes the UPDATE query with SET array + WHERE array as params
     return Rx.Observable.create(observer => {
       // two arrays for SET and WHERE
@@ -131,8 +131,6 @@ export class Entity {
         const thisVal = this[val];
         if (thisVal) {
           q2 += `${val} = ? AND `;
-          if (thisVal === 'now()' || thisVal === 'uuid()' || thisVal === 'toTimeStamp(now())')
-            isInsert = true;
           arr2.push(thisVal);
         }
       }
@@ -140,8 +138,24 @@ export class Entity {
       const query = q1.substring(0, q1.length-2) + q2.substring(0, q2.length-4);
       const params = arr1.concat(arr2);
 
-      const postCb = isInsert ? 'postCreateCb' : 'postUpdateCb';
-
+      switch (postCb) {
+        case 'create':
+          postCb = 'postCreateCb';
+          break;
+        case 'update':
+          postCb = 'postUpdateCb';
+          break;
+        case 'find':
+          postCb = 'postFindCb';
+          break;
+        case 'remove':
+          postCb = 'postRemoveCb';
+          break;
+        default:
+          postCb = 'postUpdateCb';
+          break;
+      }
+      
       cassandra.client.execute(query, params, {prepare:true}).then(entity => {
 
         if(this[postCb]) { // if save Event hook set
@@ -160,7 +174,7 @@ export class Entity {
   }
 
   // REMOVEs row from the DB
-  remove(): Rx.Observable<any> {
+  remove(postCb: string = 'remove'): Rx.Observable<any> {
     // create observable that executes the DELETE query with WHERE array as params
     return Rx.Observable.create(observer => {
       // One array for WHERE
@@ -177,9 +191,27 @@ export class Entity {
         }
       }
 
+      switch (postCb) {
+        case 'create':
+          postCb = 'postCreateCb';
+          break;
+        case 'update':
+          postCb = 'postUpdateCb';
+          break;
+        case 'find':
+          postCb = 'postFindCb';
+          break;
+        case 'remove':
+          postCb = 'postRemoveCb';
+          break;
+        default:
+          postCb = 'postRemoveCb';
+          break;
+      }
+
       cassandra.client.execute(query.substring(0, query.length-4), arr, {prepare:true}).then(entity => {
-        if(this.postRemoveCb) { // if remove Event hook set
-          this.postRemoveCb(x => { // executes remvoe hook callback
+        if(this[postCb]) { // if remove Event hook set
+          this[postCb](x => { // executes remvoe hook callback
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), this);

@@ -5,7 +5,7 @@
 
 ### "Inspired by [MongooseJS](http://mongoosejs.com/) with a twist!"
 
-This ORM is in alpha and is not suggested for production as core features have not yet been implemented/finalized. If you would like to contribute you are welcome to Fork and pull request. Visit the [TODO](#TODO) section for points of interest. All files have been thoroughly commented 
+If you would like to contribute you are welcome to Fork and pull request. Visit the [TODO](#TODO) section for points of interest.
 
 #### Currently unsupported data types
 
