@@ -54,6 +54,7 @@ export function remove(items?: any, options?: Object): Schema {
   let obs: any = List<Rx.Observable<any>>(this.obs);
 
   if (items) { // if items passed into function
+    if (!Array.isArray(items)) items = [items];
 
     let preArr = []; // array to hold the preHook Observables
     let parseArr = []; // array to hold Query Observables
