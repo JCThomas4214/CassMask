@@ -1,7 +1,7 @@
 {
   "name": "cassmask",
-  "version": "1.3.6",
-  "description": "A Simple Observable Driven Apache Cassandra ORM",
+  "version": "1.3.7",
+  "description": "An Observable Driven Apache Cassandra ORM",
   "main": "index.js",
   "files": [
     "index.d.ts"
@@ -19,6 +19,7 @@
     "ORM",
     "cassandra-driver",
     "Observables",
+    "Reactive",
     "nodejs",
     "node",
     "rxjs",
