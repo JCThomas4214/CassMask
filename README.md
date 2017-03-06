@@ -5,8 +5,6 @@
 
 ### "Inspired by [MongooseJS](http://mongoosejs.com/) with a twist!"
 
-If you would like to contribute you are welcome to Fork and pull request. Visit the [TODO](#TODO) section for points of interest.
-
 #### Currently unsupported data types
 
 + Counter (has not been tested yet)
@@ -16,16 +14,15 @@ If you would like to contribute you are welcome to Fork and pull request. Visit 
 ## Table of Contents
 
 1. [Why Observables?](#whyObservables)
-  1. [Every Query is an Observable.](#eqObservable)
+  1. [Everything is an Observable.](#eqObservable)
 2. [The Entity](#entityObject)
   1. [Important Limitations](#eIssues)
   2. [Entity Example](#entityExample)
 3. [Event Hooks](#eventHooks)
   1. [Socket.io example](#sioEx)
-4. [Features](#features)
-5. [CassMask API](#cassmaskapi)
+4. [CassMask API](#cassmaskapi)
   1. [connect](#connect)
-6. [Model API](#modelapi)
+5. [Model API](#modelapi)
   1. [seam](#seam)
   2. [find](#find)
   3. [findOne](#findOne)
@@ -35,13 +32,13 @@ If you would like to contribute you are welcome to Fork and pull request. Visit 
   7. [remove](#remove)
   8. [post](#post)
   9. [pre](#pre)
-7. [Entity API](#entityAPI)
+6. [Entity API](#entityAPI)
   1. [constructor](#entityconstructor)
   2. [isEmpty](#entityisempty)
   2. [merge](#entitymerge)
   2. [save](#entitysave)
   3. [remove](#entityremove)
-8. [TODO](#TODO)
+7. [TODO](#TODO)
 
 ## Quick Start
 
@@ -145,33 +142,32 @@ Model.create([{
     { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test4', col5: 57 }
 */
 ```
-> Note: Cassmask on first model instance query will create a table based off the model if the table does not exist => Holder index might be index+1
 
 <a name="whyObservables"></a>
 
 # Why Observables?
 
-Observables are basically fancy promises that operate under event streams which give us very interesting opportunities to seam sets of queries and filter results. For more information about observables and the [ReactiveX](http://reactivex.io/) RxJS library [click here](http://reactivex.io/rxjs/).
+Observables are fancy promises that operate under event streams which give us opportunities to seam these streams together and filter results. For more information about observables and the [ReactiveX](http://reactivex.io/) RxJS library [click here](http://reactivex.io/rxjs/).
 
 <a name="eqObservable"></a>
 
-## Every Query is an Observable.
+## Everything is an Observable.
 
-In CassMask every query executes in an observable and passes an Entity object through the observer.next() argument. The more query functions you seam together the more Observables will be [concatenated](http://reactivex.io/documentation/operators/concat.html) together, creating the final seamed observable that will be subscribed to passing Entities you can interact with.
+In CassMask every query, event hook, and validation is executed inside an observable and it uses RxJS [concatenate](http://reactivex.io/documentation/operators/concat.html) to seam them together to ensure proper sequence on subscribe.
 
 <a name="entityObject"></a>
 
 ## The Entity.
 
-Similar to Javascript [Promise](https://www.promisejs.org/)'s resolve argument, once observer.next() is called per observable basis, an Entity object is passed as the argument giving you an opportunity to interact with it. The Entity object give access to a couple useful functions, save() and remove(). Save() will take the current properties and create a query string to UPDATE (INSERT) a row in the table. Similar to save(), remove() will take the current properties and DELETE from the table. The Entity properties will instantiate from either the response row from the corresponding query or if the query does not respond with data (UPDATE, INSERT, DELETE), holds the key value pairs that were inputted for the query in the first place.
+Once a query is executed in the stream an Entity object (or array of Entities) will be passed as the observer.next() argument giving the developer an opportunity to interact with it. The Entity object gives us access to a couple useful functions, save() and remove(). Save() will take the current attributes of the Entity and create a query string to UPDATE (INSERT) a row in the table. Similar to save(), remove() will take the current attributes and DELETE from the table. An Entity (or array of Entities) will be created from either the response row array from the corresponding query, or if the query does not respond with data (UPDATE, INSERT, DELETE), will be created from the key value pairs that were used in the original Schema query function.
 
 <a name="eIssues"></a>
 
 ### Important Limitations.
 
-This of course poses some issues. If the query does not respond with data then a particular Entity instance may not have the properties to INSERT, UPDATE, and/or DELETE rows in a table. Specifically the necessary [Partition Key](https://docs.datastax.com/en/cql/3.3/cql/cql_using/useSimplePrimaryKeyConcept.html#useSimplePrimaryKeyConcept) and [Clustering Columns](https://docs.datastax.com/en/cql/3.3/cql/cql_using/useCompoundPrimaryKey.html) to obtain the specificity required to UPDATE/DELETE a certain row. The remove() and update() querying functions in your Schema object will require your Primary Keys in order to function correctly so the problem is not as apparent as create() where certain keys may be generated on the database itself (uuid, timeuuid, timestamp, etc..).
+In order to use CassMask well, it's important to understand CQL. If the query does not respond with data (SELECT) then a particular Entity instance may not have the attributes to INSERT, UPDATE, and/or DELETE rows in a table. Specifically the necessary [Partition Key](https://docs.datastax.com/en/cql/3.3/cql/cql_using/useSimplePrimaryKeyConcept.html#useSimplePrimaryKeyConcept) and [Clustering Columns](https://docs.datastax.com/en/cql/3.3/cql/cql_using/useCompoundPrimaryKey.html) to obtain the specificity required to UPDATE/DELETE a certain row. The remove() and update() querying functions in your Schema object will require your Primary Keys in order to function correctly so the problem is not as apparent as create() where certain keys may be generated on the database itself (uuid, timeuuid, timestamp, etc..).
 
-An [event hook](#eventHooks) could be used to protentially solve this delema. For the create() Schema function we could hook into the 'save' event query promise and execute a SELECT query to find the most recently appended row and pass this object through the observer.next() argument, which could be used in your endpoint. This is not done automatically because of the level of involvement required to create tables for sorting.
+An [event hook](#eventHooks) could be used to protentially solve this delema. We could hook into the 'create' event and execute a SELECT query to find the most recently appended row and pass this object through the observer.next() argument, which could be used in your endpoint. This is not done automatically because of the level of involvement required to create tables with a certain clustering order.
 
 <a name="entityExample"></a>
 
@@ -181,10 +177,10 @@ An [event hook](#eventHooks) could be used to protentially solve this delema. Fo
 let holder = [];
 
 // findOne with no argument will find the first row in the 
-// table and pass an Entity with the found row's properties to next() 
+// table and pass an Entity with the found row to next() 
 
 // find with no argument will find the all rows in the 
-// table and pass an Entity with the found row's properties to next() 
+// table and pass an Entity with the found rows to next() 
 Model.findOne().find().seam().subscribe( // two queries are executed and two next() functions are called
   model => holder.push(model), 
   err => console.log(err),
@@ -266,7 +262,7 @@ When batching, multiple queries are condenced into a single query with multiple 
 
 ## Event Hooks
 
-In CassMask there are PRE and POST event hooks for 'create', 'update', 'remove', and 'find', embedded inside each Entity (Instance) scope that can be used to trigger a callback after a corresponding query. This callback is executed before the observer.next() and observer.complete() functions are called.
+In CassMask there are PRE and POST event hooks for 'create', 'update', 'remove', and 'find'. These hooks are embedded inside each Entity (Instance) scope and they can be used to interact with the Entity object in the stream before/after a corresponding query execution/response.
 
 <a name="sioEx"></a>
 
@@ -292,12 +288,12 @@ ModelEvents.setMaxListeners(0);
   The client; this is the cassandra client, which can be used to execute additional queries
 
  */
-Model.post('save', function(lastEntity, next, client) {
+Model.post('create', function(next, err) {
   // callback code goes here
 
-  Model.Events.emit('save', lastEntity);
+  Model.Events.emit('create', this);
   
-  next(lastEntity);
+  next(this);
 });
 
 export default ModelEvents;
@@ -314,7 +310,7 @@ socket.ts
 import ModelEvents from './path/to/events.ts';
 
 // Model events to emit
-let events = ['save'];
+let events = ['create'];
 
 function modelRegister(socket) {
   // Bind model events to socket events
@@ -348,16 +344,6 @@ export default modelRegister;
 
 execute modelRegister(socket) in your socketio.config onConnect function
 
-<a name="features"></a>
-
-# Features
-
-+ It uses the most up to date [Cassandra-Driver](https://github.com/datastax/nodejs-driver) from DataStax so all the features it has CassMask will have too. 
-+ It creates a table based off the model if it does not already exist. 
-+ It gives you all the tools availiable in CQL mapped in an easy to use api.
-+ It allows you to seam together queries, using observables, garunteeing all queries are executed in the proper sequence.
-+ It has an Events API that allow you to hook into query responses for event driven features
-
 <a name="cassmaskapi"></a>
 
 ## CassMask API
@@ -377,11 +363,11 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 #### [seam](https://github.com/JCThomas4214/CassMask/blob/master/libs/seam.ts)(): Rx.Observable\<any\>
 
-+ returns joined observables
++ returns single concatenated observables
 
 <a name="find"></a>
 
-#### [find](https://github.com/JCThomas4214/CassMask/blob/master/libs/find.ts)(items?: Object, opts?: Object): Schema
+#### [find](https://github.com/JCThomas4214/CassMask/blob/master/libs/find.ts)(items?: Object, opts?: [FindObject](#findobject)): Schema
 
 + first argument can be empty or an object
   + If no arguments or empty object, will SELECT all rows in the table
@@ -394,7 +380,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="findOne"></a>
 
-#### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: Object): Schema
+#### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: [FindObject](#findobject)): Schema
 
 + first argument can be empty or an object
   + If no arguments or empty object, will SELECT the first row in the table
@@ -407,7 +393,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="findById"></a>
 
-#### [findById](https://github.com/JCThomas4214/CassMask/blob/master/libs/findById.ts)(id: string, opts? Object): Schema
+#### [findById](https://github.com/JCThomas4214/CassMask/blob/master/libs/findById.ts)(id: string, opts? [FindObject](#findobject)): Schema
 
 + first argument must be an id
 + second argument is a find options object
@@ -456,6 +442,21 @@ execute modelRegister(socket) in your socketio.config onConnect function
 + specify the callback as the function to execute
   + callback passes two arguments, next(object?), err(message?), and entity which are both functions
   + callback must call one of them
+
+<a name="findobject"></a>
+
+#### FindObject
+
++ orderBy: string; CQL order by string to append to SELECT query
+  + ex: {orderBy: 'created desc'}
++ attributes: Array<string | Object>; columns to select or exclude from SELECT query
+  + ex: {attributes: ['name', 'created', 'id']}
+  + ex: {attributes: {exclude: ['catagory']}}
++ limit: number; limit the SELECT response to certain number of rows
+  + ex: {limit: 1}
++ allowFiltering: boolean; append ALLOW FILTERING to query string
+  + ex: {allowFiltering: true}
+  + **It is recommended that this not be used as it causes cluster wide search** 
 
 <a name="entityAPI"></a>
 

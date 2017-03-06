@@ -16,7 +16,7 @@ export function findOne(object?: Object, options?: any): Schema {
   let item: Entity = new Entity(object || {}, this);
 
   if (!options) options = {};
-  options.limitOne = true; // Make sure we limit the response to one row
+  options.limit = 1; // Make sure we limit the response to one row
 
   if (this.helper.preFindCb) {
     obs = obs.push(Rx.Observable.create(observer => {

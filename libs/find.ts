@@ -43,7 +43,7 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       // if orderBy 
       if (options.orderBy) query += ` order by ${options.orderBy}`;
       // if options for limit 1
-      if (options.limitOne) query += ' LIMIT 1';
+      if (options.limit) query += ` LIMIT ${options.limit}`;
       // options for allow filtering
       if (options.allowFiltering && params.length > 0) query += ' ALLOW FILTERING';
     }
