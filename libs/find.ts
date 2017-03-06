@@ -39,9 +39,14 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
     } else {
       query = `SELECT * FROM ${this.tableName}`;
     }
-    if (options && options.limitOne) query += ' LIMIT 1';
-    // options for allow filtering
-    if (options && options.allowFiltering && params.length > 0) query += ' ALLOW FILTERING';
+    if (options) {
+      // if orderBy 
+      if (options.orderBy) query += ` order by ${options.orderBy}`;
+      // if options for limit 1
+      if (options.limitOne) query += ' LIMIT 1';
+      // options for allow filtering
+      if (options.allowFiltering && params.length > 0) query += ' ALLOW FILTERING';
+    }
 
     cassandra.client.execute(query, params, {prepare:true}).then(entity => {
       // all rows in the response will be stored in a Entity class inside items array
