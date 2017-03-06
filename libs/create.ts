@@ -88,10 +88,10 @@ export function create(items: any, options?: Object): Schema {
   }
 
   if (this.helper.preCreateCb) {
-    obs = this.checkTable(obs).push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
-  } 
+    obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
+  }
 
-  obs = this.checkTable(obs).concat(parseArr);
+  obs = obs.concat(parseArr);
 
   return new Schema(this, obs);
 }

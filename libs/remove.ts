@@ -75,14 +75,14 @@ export function remove(items?: any, options?: Object): Schema {
 
     if (this.helper.preRemoveCb) {
       let pre = preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0];
-      obs = this.checkTable(obs).push(pre);
+      obs = obs.push(pre);
     }
 
-    obs = this.checkTable(obs).concat(parseArr);
+    obs = obs.concat(parseArr);
 
   } else { // if no items sent to the remove function
 
-    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+    obs = obs.push(Rx.Observable.create(observer => {
       cassandra.client.execute(`TRUNCATE ${this.tableName}`).then(entity => { // entity will be useless information about DB
         observer.next(); // no argument set for next()
         observer.complete();

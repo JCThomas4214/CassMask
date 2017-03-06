@@ -86,7 +86,7 @@ export function find(object?: Object, options?: any): Schema {
   let item: Entity = new Entity(object || {}, this);
 
   if (this.helper.preFindCb) {
-    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+    obs = obs.push(Rx.Observable.create(observer => {
       item.preFindCb(() => {
         observer.next();
         observer.complete();
@@ -94,7 +94,7 @@ export function find(object?: Object, options?: any): Schema {
     }));
   }
   
-  obs = this.checkTable(obs).push(this.parseQuerySelect(item, options));
+  obs = obs.push(this.parseQuerySelect(item, options));
 
   return new Schema(this, obs);
 }

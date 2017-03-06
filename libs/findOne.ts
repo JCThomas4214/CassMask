@@ -19,7 +19,7 @@ export function findOne(object?: Object, options?: any): Schema {
   options.limitOne = true; // Make sure we limit the response to one row
 
   if (this.helper.preFindCb) {
-    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+    obs = obs.push(Rx.Observable.create(observer => {
       item.preFindCb(() => {
         observer.next();
         observer.complete();
@@ -27,7 +27,7 @@ export function findOne(object?: Object, options?: any): Schema {
     }));
   }
   
-  obs = this.checkTable(obs).push(this.parseQuerySelect(item, options));
+  obs = obs.push(this.parseQuerySelect(item, options));
 
   return new Schema(this, obs);
 }

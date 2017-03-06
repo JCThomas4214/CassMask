@@ -15,7 +15,7 @@ export function findById(id: string, options?: any): Schema {
   let item: Entity = new Entity({ id : id }, this);
 
   if (item.preFindCb) {
-    obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+    obs = obs.push(Rx.Observable.create(observer => {
       item.preFindCb(() => {
         observer.next();
         observer.complete();
@@ -23,7 +23,7 @@ export function findById(id: string, options?: any): Schema {
     }));
   }
 
-  obs = this.checkTable(obs).push(Rx.Observable.create(observer => {
+  obs = obs.push(Rx.Observable.create(observer => {
     let sel: string; // column select holder
 
     if (options && options.attributes) { // if options and options.attributes exists

@@ -96,10 +96,10 @@ export function update(items: any, options: Object = {}): Schema {
   }
 
   if (this.helper.preUpdateCb) {  
-    obs = this.checkTable(obs).push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
+    obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 
-  obs = this.checkTable(obs).concat(parseArr);
+  obs = obs.concat(parseArr);
 
   return new Schema(this, obs);
 }
