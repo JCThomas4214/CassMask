@@ -58,7 +58,7 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       } else if (rows.length > 1) {
         items = [];
         for (let z = 0; z < rows.length; z++) {
-          items.push(new Entity(rows[z], this))
+          items.push(new Entity(rows[z], this));
         }
       } else {
         items = new Entity(rows[0] || {}, this);

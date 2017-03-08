@@ -226,19 +226,9 @@ describe('CassMask ENTITY', function() {
 
 	describe('ENTITY with POST Events', function() {
 		var rows;
-		var post = [];
-
-		beforeAll(done => {
-			ItemPost.post('update', function(next, err) {
-				post.push(this.name + ' update post hooked!');
-				next(this);
-			});
-			ItemPost.post('remove', function(next, err) {
-				post.push(this.name + ' update remove hooked!');
-				next(this);
-			});
-			done();
-		});
+		var postu = [];
+		var postc = [];
+		var postr = [];
 
 		beforeAll(done => {
 			ItemPost.remove().create([{
@@ -263,6 +253,22 @@ describe('CassMask ENTITY', function() {
 				test => {},
 				err => console.log(err),
 				() => done());
+		});
+
+		beforeAll(done => {
+			ItemPost.post('update', function(next, err) {
+				postu.push(this.name + ' update post hooked!');
+				next(this);
+			});
+			ItemPost.post('create', function(next, err) {
+				postc.push(this.name + ' create post hooked!');
+				next(this);
+			});
+			ItemPost.post('remove', function(next, err) {
+				postr.push(this.name + ' remove post hooked!');
+				next(this);
+			});
+			done();
 		});
 
 		beforeAll(done => {
@@ -304,7 +310,7 @@ describe('CassMask ENTITY', function() {
 			beforeAll(done => {
 				rows[4].info = 'Entity saved test2';
 
-				rows[4].save().subscribe(
+				rows[4].save('create').subscribe(
 					test => {},
 					err => console.log(err),
 					() => done());
@@ -313,7 +319,16 @@ describe('CassMask ENTITY', function() {
 			beforeAll(done => {
 				rows[2].info = 'Entity saved test3';
 
-				rows[2].save().subscribe(
+				rows[2].save('find').subscribe(
+					test => {},
+					err => console.log(err),
+					() => done());
+			});
+
+			beforeAll(done => {
+				rows[5].info = 'Entity saved test4';
+
+				rows[5].save('remove').subscribe(
 					test => {},
 					err => console.log(err),
 					() => done());
@@ -350,6 +365,14 @@ describe('CassMask ENTITY', function() {
 				expect(newRows[2].created).toEqual(rows[2].created);
 			});
 
+			it('should have updated the 6th row', () => {
+				expect(newRows[5].info).toEqual('Entity saved test4');
+				expect(newRows[5].name).toEqual(rows[5].name);
+				expect(newRows[5].part).toEqual(rows[5].part);
+				expect(newRows[5].id).toEqual(rows[5].id);
+				expect(newRows[5].created).toEqual(rows[5].created);
+			});
+
 			it('the 4th row should not be changed', () => {
 				expect(newRows[3].info).toEqual(rows[3].info);
 				expect(newRows[3].name).toEqual(rows[3].name);
@@ -366,20 +389,15 @@ describe('CassMask ENTITY', function() {
 				expect(newRows[0].created).toEqual(rows[0].created);
 			});
 
-			it('the 6th row should not be changed', () => {
-				expect(newRows[5].info).toEqual(rows[5].info);
-				expect(newRows[5].name).toEqual(rows[5].name);
-				expect(newRows[5].part).toEqual(rows[5].part);
-				expect(newRows[5].id).toEqual(rows[5].id);
-				expect(newRows[5].created).toEqual(rows[5].created);
-			});
-
 			it('post event should have been triggered', () => {
-				expect(post.length).toEqual(3);
+				expect(postu.length).toEqual(2);
+				expect(postc.length).toEqual(1);
+				expect(postr.length).toEqual(1);
 
-				expect(post[0]).toEqual(rows[1].name + ' update post hooked!');
-				expect(post[1]).toEqual(rows[4].name + ' update post hooked!');
-				expect(post[2]).toEqual(rows[2].name + ' update post hooked!');
+				expect(postu[0]).toEqual(rows[1].name + ' update post hooked!');
+				expect(postc[0]).toEqual(rows[4].name + ' create post hooked!');
+				expect(postu[1]).toEqual(rows[2].name + ' update post hooked!');
+				expect(postr[0]).toEqual(rows[5].name + ' remove post hooked!');
 			});
 		});
 
@@ -387,22 +405,31 @@ describe('CassMask ENTITY', function() {
 			var newRows;
 
 			beforeAll(done => {
-				post = [];
-				rows[1].remove().subscribe(
+				postu = [];
+				postc = [];
+				postr = [];
+				rows[1].remove('update').subscribe(
 					test => {},
 					err => console.log(err),
 					() => done());
 			});
 
 			beforeAll(done => {
-				rows[5].remove().subscribe(
+				rows[5].remove('create').subscribe(
 					test => {},
 					err => console.log(err),
 					() => done());
 			});
 
 			beforeAll(done => {
-				rows[4].remove().subscribe(
+				rows[4].remove('find').subscribe(
+					test => {},
+					err => console.log(err),
+					() => done());
+			});
+
+			beforeAll(done => {
+				rows[2].remove().subscribe(
 					test => {},
 					err => console.log(err),
 					() => done());
@@ -415,8 +442,8 @@ describe('CassMask ENTITY', function() {
 					() => done());
 			});
 
-			it('database table should only have 3 rows', () => {
-				expect(newRows.length).toEqual(3);
+			it('database table should only have 2 rows', () => {
+				expect(newRows.length).toEqual(2);
 			});	
 
 			it('database table should no longer have deleted rows', () => {
@@ -426,25 +453,22 @@ describe('CassMask ENTITY', function() {
 				expect(newRows[0].id).toEqual(rows[0].id);
 				expect(newRows[0].created).toEqual(rows[0].created);
 
-				expect(newRows[1].info).toEqual(rows[2].info);
-				expect(newRows[1].name).toEqual(rows[2].name);
-				expect(newRows[1].part).toEqual(rows[2].part);
-				expect(newRows[1].id).toEqual(rows[2].id);
-				expect(newRows[1].created).toEqual(rows[2].created);
-
-				expect(newRows[2].info).toEqual(rows[3].info);
-				expect(newRows[2].name).toEqual(rows[3].name);
-				expect(newRows[2].part).toEqual(rows[3].part);
-				expect(newRows[2].id).toEqual(rows[3].id);
-				expect(newRows[2].created).toEqual(rows[3].created);
+				expect(newRows[1].info).toEqual(rows[3].info);
+				expect(newRows[1].name).toEqual(rows[3].name);
+				expect(newRows[1].part).toEqual(rows[3].part);
+				expect(newRows[1].id).toEqual(rows[3].id);
+				expect(newRows[1].created).toEqual(rows[3].created);
 			});
 
 			it('post event should have been triggered', () => {
-				expect(post.length).toEqual(3);
+				expect(postu.length).toEqual(1);
+				expect(postc.length).toEqual(1);
+				expect(postr.length).toEqual(2);
 
-				expect(post[0]).toEqual(rows[1].name + ' update remove hooked!');
-				expect(post[1]).toEqual(rows[5].name + ' update remove hooked!');
-				expect(post[2]).toEqual(rows[4].name + ' update remove hooked!');
+				expect(postu[0]).toEqual(rows[1].name + ' update post hooked!');
+				expect(postc[0]).toEqual(rows[5].name + ' create post hooked!');
+				expect(postr[0]).toEqual(rows[4].name + ' remove post hooked!');
+				expect(postr[1]).toEqual(rows[2].name + ' remove post hooked!');
 			});
 		});		
 	});

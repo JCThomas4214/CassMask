@@ -105,7 +105,7 @@ export class Entity {
   }
 
   // UPDATEs the DB with the current object column values
-  save(postCb: string = 'update'): Rx.Observable<any> {
+  save(postCb?: string): Rx.Observable<any> {
     // observable that executes the UPDATE query with SET array + WHERE array as params
     return Rx.Observable.create(observer => {
       // two arrays for SET and WHERE
@@ -141,12 +141,6 @@ export class Entity {
         case 'create':
           postCb = 'postCreateCb';
           break;
-        case 'update':
-          postCb = 'postUpdateCb';
-          break;
-        case 'find':
-          postCb = 'postFindCb';
-          break;
         case 'remove':
           postCb = 'postRemoveCb';
           break;
@@ -173,7 +167,7 @@ export class Entity {
   }
 
   // REMOVEs row from the DB
-  remove(postCb: string = 'remove'): Rx.Observable<any> {
+  remove(postCb?: string): Rx.Observable<any> {
     // create observable that executes the DELETE query with WHERE array as params
     return Rx.Observable.create(observer => {
       // One array for WHERE
@@ -196,12 +190,6 @@ export class Entity {
           break;
         case 'update':
           postCb = 'postUpdateCb';
-          break;
-        case 'find':
-          postCb = 'postFindCb';
-          break;
-        case 'remove':
-          postCb = 'postRemoveCb';
           break;
         default:
           postCb = 'postRemoveCb';
