@@ -8,8 +8,7 @@
 #### Currently unsupported data types
 
 + Counter (has not been tested yet)
-+ Maps
-+ User Defined Data types
++ Maps, Sets, Lists, and User Defined Data types
 
 ## Table of Contents
 
@@ -520,6 +519,6 @@ entity.save();
 
 ## TODO
 
-+ Data Type support (Map, custom)
++ Data Type support (Map, Sets, Lists, custom)
 + Virtual fields
 + Validation
