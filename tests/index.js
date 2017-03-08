@@ -19,7 +19,7 @@ cassandra.connect({
 	jasmine.loadConfig({
 		spec_dir: 'tests',
 		spec_files: [
-			'create.spec.js'
+			'*.spec.js'
 		]
 	});
 
