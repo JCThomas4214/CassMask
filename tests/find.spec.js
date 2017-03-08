@@ -469,7 +469,7 @@ describe('CassMask FIND', function() {
 		});
 
 		beforeAll(() => {
-			ItemPost.post('find', (next, err, items) => {
+			ItemPost.post('find', function(next, err, items) {
 				if (Array.isArray(items)) items.forEach(val => post.push(val.name + ' find post hooked!'));	 
 				else post.push(items.name + ' find post hooked!');
 				next(items);
@@ -922,7 +922,7 @@ describe('CassMask FIND', function() {
 		});
 
 		beforeAll(() => {
-			ItemPre.pre('find', (next, err) => { 
+			ItemPre.pre('find', function(next, err) { 
 				pre.push('find pre hooked!');
 				next();
 			});
@@ -1358,11 +1358,11 @@ describe('CassMask FIND', function() {
 		});
 
 		beforeAll(() => {
-			ItemPrePost.pre('find', (next, err) => { 
+			ItemPrePost.pre('find', function(next, err) { 
 				pre.push('find pre hooked!');
 				next();
 			});
-			ItemPrePost.post('find', (next, err, items) => {
+			ItemPrePost.post('find', function(next, err, items) {
 				if (Array.isArray(items)) items.forEach(val => post.push(val.name + ' find post hooked!'));	 
 				else post.push(items.name + ' find post hooked!');
 				next(items);

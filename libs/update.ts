@@ -85,10 +85,10 @@ export function update(items: any, options?: Object): Schema {
 
     if (item.preUpdateCb) {
       preArr.push(Rx.Observable.create(observer => {
-        item.preUpdateCb(item, () => {
+        item.preUpdateCb(() => {
           observer.next();
           observer.complete();
-        }, err => observer.error(err));
+        }, err => observer.error(err), item);
       }));
     }
 

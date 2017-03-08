@@ -64,10 +64,10 @@ export function remove(items?: any, options?: Object): Schema {
 
       if (item.preRemoveCb) {
         preArr.push(Rx.Observable.create(observer => {
-          item.preRemoveCb(item, () => {
+          item.preRemoveCb(() => {
             observer.next();
             observer.complete();
-          }, err => observer.error(err));
+          }, err => observer.error(err), item);
         }));
       }
 
