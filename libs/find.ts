@@ -37,7 +37,7 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       }
       query = query.substring(0, query.length-4); // truncate last AND in the query string
     } else {
-      query = `SELECT * FROM ${this.tableName}`;
+      query = `SELECT ${sel} FROM ${this.tableName}`;
     }
     if (options) {
       // if orderBy 

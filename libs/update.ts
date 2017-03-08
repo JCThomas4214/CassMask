@@ -23,7 +23,7 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
       // for all keys in the set object
       for(let y = 0; y < columnList.length; y++) {
         const columnVal = columnList[y];
-        const itemVal = item[columnVal];
+        const itemVal = item.attributes[columnVal];
         if (itemVal) {
           tmp += ` ${columnVal} = ?, `; // append set attributes to query string
           params.push(itemVal); // push values to params array
@@ -34,7 +34,7 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
       // for all keys in the 'in' object
       for(let z = 0; z < keyList.length; z++) {
         const keyVal = keyList[z];
-        const itemVal = item[keyVal];
+        const itemVal = item.attributes[keyVal];
         if (itemVal) {
           tmp += ` ${keyVal} = ? AND`; // append all 'in' keys to query string
           params.push(itemVal); // push key values to params array
@@ -71,7 +71,7 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
     IN THE TABLE
  */
 
-export function update(items: any, options: Object = {}): Schema {
+export function update(items: any, options?: Object): Schema {
   let obs: any = List<Rx.Observable<any>>(this.obs); // create new state object 
   items = Array.isArray(items) ? items : [items]; // if items is not an array, make it one
 
@@ -92,7 +92,7 @@ export function update(items: any, options: Object = {}): Schema {
       }));
     }
 
-    parseArr.push(this.parseQueryUpdate(item, options));
+    parseArr.push(this.parseQueryUpdate(item, options || {}));
   }
 
   if (this.helper.preUpdateCb) {  
