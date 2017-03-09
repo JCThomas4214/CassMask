@@ -88,6 +88,10 @@ export {
 	INET,
 	COUNTER,
 
+	now,
+	uuid,
+	toTimeStamp,
+
 	Model,
 	Entity,
 };
