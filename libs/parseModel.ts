@@ -19,22 +19,22 @@ export function objDiff(object: Array<string>, source: Array<string>) {
       LATER FUNCTIONS
  */
 
-export function parseModel(model: any): any {
-  const keys = model['keys'];
+export function parseModel(schema: any): any {
+  const keys = schema['keys'];
 
   let columns = [], // array for column names and data type
       colName = [], // array for column names only
       defaults = {};
 
-  if (!model['id']) {
-    model['id'] = {
+  if (!schema['id']) {
+    schema['id'] = {
       Type: 'uuid',
       Default: 'uuid()'
     };
   }
-  // for every key in the model JSON
-  for (let x in model) { 
-    const val = model[x];
+  // for every key in the schema JSON
+  for (let x in schema) { 
+    const val = schema[x];
 
     if (x !== 'keys') { // if key is not the PRIMARY KEYS, 'keys'
       if (typeof val === 'string') {
@@ -54,7 +54,7 @@ export function parseModel(model: any): any {
   }
   // console.log(_.difference(colName, keys), keys);
   // console.log(objDiff(colName, keys), keys);
-  // return model object that will be used for query functions
+  // return schema object that will be used for query functions
   return {
     columns: columns.join(', '),
     keys: keys.join(', '),

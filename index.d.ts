@@ -5,40 +5,52 @@
 import * as Rx from 'rxjs';
 import { Map } from 'immutable'; 
 
+declare let client: any;
+
+declare const BLOB: string;
+declare const ASCII: string;
+declare const TEXT: string; 
+declare const VARCHAR: string;
+declare const BOOLEAN: string;
+declare const DOUBLE: string;
+declare const FLOAT: string;
+declare const BIGINT: string;
+declare const INT: string;
+declare const SMALLINT: string;
+declare const TINYINT: string;
+declare const VARINT: string;
+declare const UUID: string;
+declare const TIMEUUID: string;
+declare const DATE: string;
+declare const TIME: string;
+declare const TIMESTAMP: string;
+declare const INET: string;
+declare const COUNTER: string;
+
 declare function now(): string;
 declare function uuid(): string;
 declare function toTimeStamp(timeuuid: string): string;
-
-declare namespace cassandra {
-	export var client : any;
-	export var TEXT : string;		
-	export var INT : string;	 
-	export var UUID : string;		
-	export var TIMEUUID : string;
-	export var TIMESTAMP : string;
-
-	export function connect(config : any, cb : any): void;
-}
+declare function connect(config: any, cb?: Function): void;
 
 interface Helper {
 	methods(scope: Object): void;
 }
 
-declare class Schema {
+declare class Model {
 	constructor (modelName : string | Map<any,any>, model : any, options? : any);
 
-	find(object?: Object, opts?: Object): Schema;
-	findOne(object?: Object, opts?: Object): Schema;
-	findById(id: string, opts?: Object): Schema;
-	remove(object?: any, opts?: Object): Schema;
-	update(object: any, opts?: Object): Schema;
-	create(items: any, opts?: Object): Schema;
+	find(object?: Object, opts?: Object): Model;
+	findOne(object?: Object, opts?: Object): Model;
+	findById(id: string, opts?: Object): Model;
+	remove(object?: any, opts?: Object): Model;
+	update(object: any, opts?: Object): Model;
+	create(items: any, opts?: Object): Model;
 	seam(): Rx.Observable<any>;
 
 	post(hook: string | Array<string>, fn: Function): void;
 	pre(hook: string | Array<string>, fn: Function): void;
 
-	newEntity(item: Object): Entity;
+	methods(scope: Object): void;
 
 	helper: Helper;
 }
@@ -53,10 +65,29 @@ declare class Entity {
 }
 
 export {
-	cassandra,
-	Schema,
+	client,
+	connect,
+
+	BLOB,
+	ASCII,
+	TEXT,
+	VARCHAR,
+	BOOLEAN,
+	DOUBLE,
+	FLOAT,
+	BIGINT,
+	INT,
+	SMALLINT,
+	TINYINT,
+	VARINT,
+	UUID,
+	TIMEUUID,
+	DATE,
+	TIME,
+	TIMESTAMP,
+	INET,
+	COUNTER,
+
+	Model,
 	Entity,
-	now,
-	uuid,
-	toTimeStamp
 };

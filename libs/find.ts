@@ -1,6 +1,6 @@
 'use strict';
 
-import { cassandra, Schema } from '../index';
+import { client, Model } from '../index';
 import { Entity } from './entity';
 import { objDiff } from './parseModel';
 import * as Rx from 'rxjs';
@@ -22,7 +22,7 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       if (Array.isArray(attr)) // if attr is an array
         sel = attr.join(','); // join array into string
       else if (attr.exclude) { 
-        sel = objDiff(this.model.allCol, attr.exclude).join(','); // fidn set difference and join
+        sel = objDiff(this.schema.allCol, attr.exclude).join(','); // fidn set difference and join
       }
     } else sel = '*'; // else select all columns
 
@@ -48,7 +48,7 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       if (options.allowFiltering && params.length > 0) query += ' ALLOW FILTERING';
     }
 
-    cassandra.client.execute(query, params, {prepare:true}).then(entity => {
+    client.execute(query, params, {prepare:true}).then(entity => {
       // all rows in the response will be stored in a Entity class inside items array
       const rows = entity.rows;
       let items;
@@ -65,8 +65,8 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       }
 
       // If the find event hook was initialized
-      if(this.helper.postFindCb) { // if find Event hook set
-        this.helper.postFindCb(x => { // execute the find hook callback
+      if(this.helper.post.find) { // if find Event hook set
+        this.helper.post.find(x => { // execute the find hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), items);
@@ -86,20 +86,20 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       PARSES ATTR INTO FINDS OBJECT TO THEN QUERY THE DB
  */
 
-export function find(object?: Object, options?: any): Schema {
+export function find(object?: Object, options?: any): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity(object || {}, this);
 
-  if (this.helper.preFindCb) {
+  if (item.prefind) {
     obs = obs.push(Rx.Observable.create(observer => {
-      item.preFindCb(() => {
+      item.prefind(() => {
         observer.next();
         observer.complete();
-      }, err => observer.error(err));
+      }, err => observer.error(err), item);
     }));
   }
   
   obs = obs.push(this.parseQuerySelect(item, options));
 
-  return new Schema(this, obs);
+  return new Model(this, obs);
 }

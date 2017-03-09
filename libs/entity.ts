@@ -1,20 +1,10 @@
 'use strict';
 
-import { cassandra, Schema } from '../index';
+import { client, Model } from '../index';
+import {eventFunctions} from './helper';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 
-
-
-export function newEntity(item: Object): Entity {
-  const defaults = this.model.defaults;
-
-  for (let x in defaults) {
-    if (!item[x]) item[x] = defaults[x];
-  }
-
-  return new Entity(item, this);
-}
 
 /*
      Entity class is the object that will be instantiated with the DB response row data
@@ -23,43 +13,43 @@ export function newEntity(item: Object): Entity {
  */
 export class Entity {
   public toJSON: Function;
-  private model: any;
+  private schema: any;
   private tableName: string;
   private modified: Object = {};
   public attributes: Object = {};
 
-  public preCreateCb: Function;
-  public preUpdateCb: Function;
-  public preRemoveCb: Function;
-  public preFindCb: Function;
-  public postCreateCb: Function;
-  public postUpdateCb: Function;
-  public postRemoveCb: Function;
-  public postFindCb: Function;
+  public precreate: Function;
+  public preupdate: Function;
+  public preremove: Function;
+  public prefind: Function;
+  public postcreate: Function;
+  public postupdate: Function;
+  public postremove: Function;
+  public postfind: Function;
 
-  constructor(item: any, parent: Schema) {
+  constructor(item: any, parent: Model) {
     // remove all exploitable properties from the item
     // when passed back through express response
     this.toJSON = function() {
       let obj = this;
-      delete obj.model;
+      delete obj.schema;
       delete obj.tableName;
       delete obj.modified;
       delete obj.attributes;
       return obj;
     };
 
-    this.model = parent.model;
+    this.schema = parent.schema;
     this.tableName = parent.tableName;
 
     // create functions for parent based off of the Schema state
-    this.integrateMethods(parent.helper);  
+    this.integrateMethods(parent.helper.pre, parent.helper.post, parent.helper.methods);  
     // create class properties cooresponding to column values
     this.integrateItem(item);
   }
   // integrate the JSON into the parent object
   private integrateItem(item: any): void {
-    const cols = this.model.allCol;
+    const cols = this.schema.allCol;
 
     for (let y = 0; y < cols.length; y++) {
       let prop = cols[y];
@@ -82,10 +72,20 @@ export class Entity {
     }
   }
   // integrate methods into parent object
-  private integrateMethods(methods: any) {
-    for (let x in methods) {
-      if (x !== 'methods')
-        this[x] = methods[x];
+  private integrateMethods(pre: any, post: any, methods: any) {
+
+    this.precreate = pre.create;
+    this.preremove = pre.remove;
+    this.prefind = pre.find;
+    this.preupdate = pre.update;
+
+    this.postcreate = post.create;
+    this.postremove = post.remove;
+    this.postfind = post.find;
+    this.postupdate = post.update;
+
+    for(let z in methods) {
+      this[z] = methods[z];
     }
   }
 
@@ -112,8 +112,8 @@ export class Entity {
       let isInsert: boolean = false;
       let arr1 = [],
           arr2 = [];
-      const keyList = this.model.keyList;
-      const columnList = this.model.columnList;
+      const keyList = this.schema.keyList;
+      const columnList = this.schema.columnList;
 
       let q1: string = `UPDATE ${this.tableName} SET `,
           q2: string = ` WHERE `;
@@ -137,22 +137,14 @@ export class Entity {
       const query = q1.substring(0, q1.length-2) + q2.substring(0, q2.length-4);
       const params = arr1.concat(arr2);
 
-      switch (postCb) {
-        case 'create':
-          postCb = 'postCreateCb';
-          break;
-        case 'remove':
-          postCb = 'postRemoveCb';
-          break;
-        default:
-          postCb = 'postUpdateCb';
-          break;
+      if (postCb !== 'create' && postCb !== 'remove') {
+         postCb = 'update';
       }
       
-      cassandra.client.execute(query, params, {prepare:true}).then(entity => {
+      client.execute(query, params, {prepare:true}).then(entity => {
 
-        if(this[postCb]) { // if save Event hook set
-          this[postCb](x => { // execute save hook callback
+        if(this['post' + postCb]) { // if save Event hook set
+          this['post' + postCb](x => { // execute save hook callback
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), this);
@@ -174,7 +166,7 @@ export class Entity {
       let arr = [];
 
       let query: string = `DELETE FROM ${this.tableName} WHERE `;
-      const keyList = this.model.keyList;
+      const keyList = this.schema.keyList;
 
       for(let x = 0; x < keyList.length; x++) {
         const val = keyList[x];
@@ -184,21 +176,13 @@ export class Entity {
         }
       }
 
-      switch (postCb) {
-        case 'create':
-          postCb = 'postCreateCb';
-          break;
-        case 'update':
-          postCb = 'postUpdateCb';
-          break;
-        default:
-          postCb = 'postRemoveCb';
-          break;
+      if (postCb !== 'create' && postCb !== 'update') {
+         postCb = 'remove';
       }
 
-      cassandra.client.execute(query.substring(0, query.length-4), arr, {prepare:true}).then(entity => {
-        if(this[postCb]) { // if remove Event hook set
-          this[postCb](x => { // executes remvoe hook callback
+      client.execute(query.substring(0, query.length-4), arr, {prepare:true}).then(entity => {
+        if(this['post' + postCb]) { // if remove Event hook set
+          this['post' + postCb](x => { // executes remvoe hook callback
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), this);

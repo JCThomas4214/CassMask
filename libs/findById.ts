@@ -1,6 +1,6 @@
 'use strict';
 
-import { cassandra, Schema } from '../index';
+import { client, Model } from '../index';
 import { Entity } from './entity';
 import { objDiff } from './parseModel';
 import * as Rx from 'rxjs';
@@ -10,16 +10,16 @@ import { List, Map } from 'immutable';
       SELECTS FROM THE DATABASE WITH ONLY AN ID
         IF NO ID SET IN THE MODEL THIS SHOULD BE A UUID THAT HAS A SECONDARY INDEX
  */
-export function findById(id: string, options?: any): Schema {
+export function findById(id: string, options?: any): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity({ id : id }, this);
 
-  if (item.preFindCb) {
+  if (item.prefind) {
     obs = obs.push(Rx.Observable.create(observer => {
-      item.preFindCb(() => {
+      item.prefind(() => {
         observer.next();
         observer.complete();
-      }, err => observer.error(err));
+      }, err => observer.error(err), item);
     }));
   }
 
@@ -31,13 +31,13 @@ export function findById(id: string, options?: any): Schema {
       if (Array.isArray(attr)) // if attr is an array
         sel = attr.join(','); // join array into string
       else if (attr.exclude) { 
-        sel = objDiff(this.model.allCol, attr.exclude).join(','); // fidn set difference and join
+        sel = objDiff(this.schema.allCol, attr.exclude).join(','); // fidn set difference and join
       }
     } else sel = '*'; // else select all columns
 
     const query = `SELECT ${sel} FROM ${this.tableName} WHERE id = ${id}`
 
-    cassandra.client.execute(query).then(entity => {
+    client.execute(query).then(entity => {
       // all rows in the response will be stored in a Entity class inside items array
       const rows = entity.rows;
       let items;
@@ -54,8 +54,8 @@ export function findById(id: string, options?: any): Schema {
       }
 
       // If the find event hook was initialized
-      if(item.postFindCb) { // if find Event hook set
-        item.postFindCb(x => { // execute the find hook callback
+      if(item.postfind) { // if find Event hook set
+        item.postfind(x => { // execute the find hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), items);
@@ -68,5 +68,5 @@ export function findById(id: string, options?: any): Schema {
     return function () {};
   }));
 
-  return new Schema(this, obs);
+  return new Model(this, obs);
 }

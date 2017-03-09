@@ -1,6 +1,6 @@
 'use strict';
 
-import { cassandra, Schema } from '../index';
+import { client, Model } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
@@ -34,9 +34,9 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
 
     const query = tmp1.substring(0, tmp1.length-2) + tmp2.substring(0, tmp2.length-2) + ')'; // q's query string set to concat of columns and values string
 
-    cassandra.client.execute(query, params, {prepare:true}).then(response => { // entity will be useless from DB
-      if(item.postCreateCb) { // if save Event hook set
-        item.postCreateCb(x => { // execute the save hook callback
+    client.execute(query, params, {prepare:true}).then(response => { // entity will be useless from DB
+      if(item.postcreate) { // if save Event hook set
+        item.postcreate(x => { // execute the save hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), item);
@@ -57,7 +57,7 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
         USES CASS DRIVER BATCH FUNCTION TO INSERT PARSED OBJECT ARRAY
  */
 
-export function create(items: any, options?: Object): Schema { 
+export function create(items: any, options?: Object): Model { 
   let obs: any = List<Rx.Observable<any>>(this.obs);
   items = Array.isArray(items) ? items : [items];
 
@@ -65,7 +65,7 @@ export function create(items: any, options?: Object): Schema {
   let parseArr = [];
 
   // create a read only pointer to a new object from the defaults Map
-  const defaults = this.model.defaults;
+  const defaults = this.schema.defaults;
   // merge default values with each item in the items array
   for(let x = 0; x < items.length; x++) {
     let item = items[x];
@@ -75,23 +75,23 @@ export function create(items: any, options?: Object): Schema {
     }
     item = new Entity(item, this);
 
-    if (item.preCreateCb) {
+    if (item.precreate) {
       preArr.push(Rx.Observable.create(observer => {
-        item.preCreateCb(() => {
+        item.precreate(() => {
           observer.next();
           observer.complete();
-        }, err => observer.error(err));
+        }, err => observer.error(err), item);
       }));
     }
 
     parseArr.push(this.parseQueryInsert(item, options));
   }
 
-  if (this.helper.preCreateCb) {
+  if (this.helper.pre.create) {
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 
   obs = obs.concat(parseArr);
 
-  return new Schema(this, obs);
+  return new Model(this, obs);
 }

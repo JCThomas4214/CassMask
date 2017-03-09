@@ -1,20 +1,27 @@
 'use strict';
 
+export interface eventFunctions {
+  create: Function;
+  update: Function;
+  remove: Function;
+  find: Function;
+}
+
+class Eve implements eventFunctions {
+  create;
+  update;
+  remove;
+  find;
+}
+
 export class Helper {
-  private preCreateCb: Function;
-  private preUpdateCb: Function;
-  private preRemoveCb: Function;
-  private preFindCb: Function;
-  private postCreateCb: Function;
-  private postUpdateCb: Function;
-  private postRemoveCb: Function;
-  private postFindCb: Function;
+  public pre: eventFunctions = new Eve();
+  public post: eventFunctions = new Eve();
+
+  public methods: any = {};
 
   constructor() {
 
   }
 
-  methods(scope: Object): void {
-    for (let x in scope) this[x] = scope[x];
-  }
 }

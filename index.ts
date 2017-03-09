@@ -5,7 +5,7 @@ import { List, Map } from 'immutable';
 
 import {
   Helper,
-  Entity, newEntity,
+  Entity,
   parseModel,
   createTable, checkTable,
   create, parseQueryInsert,
@@ -16,7 +16,30 @@ import {
   post, pre
 } from './libs';
 
+export let client;
 
+// const values holding schema data types
+export const BLOB: string = 'blob';
+export const ASCII: string = 'ascii';
+export const TEXT: string = 'text'; 
+export const VARCHAR: string = 'varchar';
+export const BOOLEAN: string = 'boolean';
+export const DOUBLE: string = 'double';
+export const FLOAT: string = 'float';
+export const BIGINT: string = 'bigint';
+export const INT: string = 'int';
+export const SMALLINT: string = 'smallint';
+export const TINYINT: string = 'tinyint';
+export const VARINT: string = 'varint';
+export const UUID: string = 'uuid';
+export const TIMEUUID: string = 'timeuuid';
+export const DATE: string = 'date';
+export const TIME: string = 'time';
+export const TIMESTAMP: string = 'timestamp';
+export const INET: string = 'inet';
+export const COUNTER: string = 'counter';
+
+// replica functions for database query functions
 export function now() {
   return 'now()';
 }
@@ -27,72 +50,36 @@ export function toTimeStamp(timeuuid: string) {
   return `toTimeStamp(${timeuuid})`;
 }
 
-export class cassandra {
-  // client object
-  static client: any;
+export function connect(config: any, cb?: Function): void {
+  client = new cass.Client(config);
 
-  // Cassandra data types
-  static BLOB: string = 'blob';
-
-  static ASCII: string = 'ascii';
-  static TEXT: string = 'text'; 
-  static VARCHAR: string = 'varchar';
-
-  static BOOLEAN: string = 'boolean';
-
-  static DOUBLE: string = 'double';
-  static FLOAT: string = 'float';
-  static BIGINT: string = 'bigint';
-  static INT: string = 'int';
-  static SMALLINT: string = 'smallint';
-  static TINYINT: string = 'tinyint';
-  static VARINT: string = 'varint';
-
-  static UUID: string = 'uuid';
-  static TIMEUUID: string = 'timeuuid';
-
-  static DATE: string = 'date';
-  static TIME: string = 'time';
-  static TIMESTAMP: string = 'timestamp';
-
-  static INET: string = 'inet';
-
-  static COUNTER: string = 'counter';
-
-  
-  // Connect function is used to connect to Cassandra
-  // and store the client object 
-  static connect(config: any, cb?) {
-    cassandra.client = new cass.Client(config);
-
-    cassandra.client.connect(function(err, result) {
-      if (err) {
-        console.error('Could not connect to CassandraDB!');
-        console.log(err);
-      }
-      return cb ? cb(err, result) : null;
-    });
-  }
+  client.connect(function(err, result) {
+    if (err) {
+      console.error('Could not connect to CassandraDB!');
+      console.log(err);
+    }
+    return cb ? cb(err, result) : null;
+  });
 }
 
-export class Schema {
+export class Model {
     public state: Map<any, any>;
 
     public obs: List<Rx.Observable<any>>;
     public tableName: string;
     public tblChked: boolean = false;
-    public model: any;
+    public schema: any;
     public helper: any;
 
     public options: any;
 
-    constructor(modelName: string | Schema, model?: any, options?: any) {
-      if (modelName instanceof Schema) {
+    constructor(modelName: string | Model, schema?: any, options?: any) {
+      if (modelName instanceof Model) {
 
-        this.obs = model;
+        this.obs = schema;
         this.tableName = modelName.tableName;
         this.tblChked = modelName.tblChked;
-        this.model = modelName.model;
+        this.schema = modelName.schema;
         this.helper = modelName.helper;
         this.options = modelName.options;
 
@@ -100,15 +87,13 @@ export class Schema {
 
         this.obs = List<Rx.Observable<any>>([]);
         this.tableName = modelName;
-        this.model = parseModel(model);
+        this.schema = parseModel(schema);
         this.helper = new Helper();
 
         if (options) this.options = options; 
 
       }
     }
-
-    public newEntity = newEntity;
 
     private createTable = createTable;
     private checkTable = checkTable;
@@ -127,6 +112,10 @@ export class Schema {
 
     public post = post;
     public pre = pre;
+
+    methods(scope: Object): void {
+      for (let x in scope) this.helper.methods[x] = scope[x];
+    }
 
   }
 

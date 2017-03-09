@@ -1,5 +1,5 @@
 import { Helper } from './helper';
-import { Entity, newEntity } from './entity';
+import { Entity } from './entity';
 import { parseModel } from './parseModel';
 import { createTable, checkTable } from './createTable';
 import { create, parseQueryInsert } from './create';
@@ -13,7 +13,7 @@ import { post, pre } from './events';
 
 export {
 	Helper,
-	Entity, newEntity,
+	Entity,
 	parseModel,
 	createTable, checkTable,
 	create, parseQueryInsert,

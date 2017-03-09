@@ -1,22 +1,19 @@
 var cassmask = require('cassmask');
-
-var cassandra = cassmask.cassandra;
-var Schema = cassmask.Schema;
-var now = cassmask.now;
-var toTimeStamp = cassmask.toTimeStamp;
+var now = require('cassmask').now;
+var toTimeStamp = require('cassmask').toTimeStamp;
 
 
-var Item = new Schema('Items', {
+var Item = new cassmask.Model('Items', {
 	part: {
-		Type: cassandra.TEXT,
+		Type: cassmask.TEXT,
 		Default: 'Item'
 	},
 	created: {
-		Type: cassandra.TIMESTAMP,
+		Type: cassmask.TIMESTAMP,
 		Default: toTimeStamp(now())
 	},
-	name: cassandra.TEXT,
-	info: cassandra.TEXT,
+	name: cassmask.TEXT,
+	info: cassmask.TEXT,
 	keys: ['part', 'name']
 });
 

@@ -140,7 +140,7 @@ describe('CassMask CREATE', function() {
 	describe('CREATE with POST events', function() {
 		var post = [];
 
-		beforeAll(done => {
+		beforeAll(function(done) {
 			ItemPost.post('create', function(next, err) {
 				post.push(this.name + ' create post hooked!');
 				next(this);

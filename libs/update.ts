@@ -1,6 +1,6 @@
 'use strict';
 
-import { cassandra, Schema } from '../index';
+import { client, Model } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
@@ -13,8 +13,8 @@ import { List, Map } from 'immutable';
 export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any> {
 
   return Rx.Observable.create(observer => {
-      const keyList = this.model.keyList;
-      const columnList = this.model.columnList;
+      const keyList = this.schema.keyList;
+      const columnList = this.schema.columnList;
 
       let params = [];
       // start query string at this base
@@ -43,10 +43,10 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
 
       const query = tmp.substring(0, tmp.length-4) + ' IF EXISTS'; // set the query key in q array to new query string
 
-      cassandra.client.execute(query, params, {prepare:true}).then(entity => { // if the event hook was set
-        if(item.postUpdateCb) { // in state.events.saveHook will indicator boolean
+      client.execute(query, params, {prepare:true}).then(entity => { // if the event hook was set
+        if(item.postupdate) { // in state.events.saveHook will indicator boolean
           // execute the hook callback and create newEntity object with current entity JSON
-          item.postUpdateCb(x => {
+          item.postupdate(x => {
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), item);
@@ -71,7 +71,7 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
     IN THE TABLE
  */
 
-export function update(items: any, options?: Object): Schema {
+export function update(items: any, options?: Object): Model {
   let obs: any = List<Rx.Observable<any>>(this.obs); // create new state object 
   items = Array.isArray(items) ? items : [items]; // if items is not an array, make it one
 
@@ -83,9 +83,9 @@ export function update(items: any, options?: Object): Schema {
     let item = new Entity(object.set, this);
     item.merge(object.where);
 
-    if (item.preUpdateCb) {
+    if (item.preupdate) {
       preArr.push(Rx.Observable.create(observer => {
-        item.preUpdateCb(() => {
+        item.preupdate(() => {
           observer.next();
           observer.complete();
         }, err => observer.error(err), item);
@@ -95,11 +95,11 @@ export function update(items: any, options?: Object): Schema {
     parseArr.push(this.parseQueryUpdate(item, options || {}));
   }
 
-  if (this.helper.preUpdateCb) {  
+  if (this.helper.pre.update) {  
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 
   obs = obs.concat(parseArr);
 
-  return new Schema(this, obs);
+  return new Model(this, obs);
 }

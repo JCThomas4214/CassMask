@@ -1,6 +1,6 @@
 'use strict';
 
-import { cassandra, Schema } from '../index';
+import { Model } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
@@ -11,23 +11,23 @@ import { List, Map } from 'immutable';
         THIS WILL CAUSE EXEC TO LIMIT THE QUERY TO 1
  */
 
-export function findOne(object?: Object, options?: any): Schema {
+export function findOne(object?: Object, options?: any): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity(object || {}, this);
 
   if (!options) options = {};
   options.limit = 1; // Make sure we limit the response to one row
 
-  if (this.helper.preFindCb) {
+  if (item.prefind) {
     obs = obs.push(Rx.Observable.create(observer => {
-      item.preFindCb(() => {
+      item.prefind(() => {
         observer.next();
         observer.complete();
-      }, err => observer.error(err));
+      }, err => observer.error(err), item);
     }));
   }
   
   obs = obs.push(this.parseQuerySelect(item, options));
 
-  return new Schema(this, obs);
+  return new Model(this, obs);
 }

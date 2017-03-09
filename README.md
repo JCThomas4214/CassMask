@@ -31,6 +31,7 @@
   7. [remove](#remove)
   8. [post](#post)
   9. [pre](#pre)
+  10. [methods](#methods)
 6. [Entity API](#entityAPI)
   1. [constructor](#entityconstructor)
   2. [isEmpty](#entityisempty)
@@ -48,7 +49,7 @@ $ npm install cassmask
 Connect to Cassandra with a [ClientOptions](http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/) object.
 
 ```ts
-import { cassandra } from 'cassmask';
+import { connect } from 'cassmask';
 
 // ClientOptions Object
 const config = {
@@ -58,31 +59,32 @@ const config = {
   keyspace: 'demo-space'
 };
 
-cassandra.connect(config, (err, result) => {
-  // callback after connection  
+connect(config, (err, result) => {
+  // callback after connection
 });
 ```
 
 Create a model.
 
 ```ts
-import { cassandra, Schema } from 'cassmask';
+import * as cassmask from 'cassmask';
+import { toTimeStamp, now, uuid } from 'cassmask';
 
-let Model = new Schema('TableName', {
+let Model = new cassmask.Model('TableName', {
   col1: {
-    Type: cassandra.UUID,
+    Type: cassmask.UUID,
     Default: uuid()
   },
   col2: {
-    Type: cassandra.TIMEUUID,
+    Type: cassmask.TIMEUUID,
     Default: now()
   },
   col3: {
-    Type: cassandra.TIMESTAMP,
+    Type: cassmask.TIMESTAMP,
     Default: toTimeStamp(now())
   },
-  col4: cassandra.TEXT,
-  cal5: cassandra.INT,
+  col4: cassmask.TEXT,
+  cal5: cassmask.INT,
   // Primary Keys (Partition & Clustering Column)
   keys: ['col1', 'col2']
 });
@@ -93,7 +95,6 @@ export default Model;
 Find, create, remove, update...
 
 ```ts
-import { now, uuid, toTimeStamp } from 'cassmask';
 import Model from 'path/to/model.ts';
 
 let holder = [];
@@ -441,6 +442,12 @@ execute modelRegister(socket) in your socketio.config onConnect function
 + specify the callback as the function to execute
   + callback passes two arguments, next(object?), err(message?), and entity which are both functions
   + callback must call one of them
+
+<a name="methods"></a>
+
+#### [methods](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(scope: Object): void;
+
++ scope object containing properties that will be integrated into all instantiated Entity objects 
 
 <a name="findobject"></a>
 

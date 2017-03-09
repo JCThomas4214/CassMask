@@ -1,6 +1,6 @@
 'use strict';
 
-import { cassandra, Schema } from '../index';
+import { client, Model } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
@@ -25,9 +25,9 @@ export function parseQueryDelete(item: Entity, options: any): Rx.Observable<any>
       }
       const query = tmp.substring(0, tmp.length-4); // truncate last ' AND' on the string
 
-      cassandra.client.execute(query, params, {prepare:true}).then(response => { // entity will be useless information about the DB
-        if(item.postRemoveCb) { // if remvoe event hook was set
-          item.postRemoveCb(x => { // execute remove hook callback
+      client.execute(query, params, {prepare:true}).then(response => { // entity will be useless information about the DB
+        if(item.postremove) { // if remvoe event hook was set
+          item.postremove(x => { // execute remove hook callback
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), item);
@@ -50,7 +50,7 @@ export function parseQueryDelete(item: Entity, options: any): Rx.Observable<any>
     REMOVE() IS FOR DELETING FOUND ROWS OR TRUNCATING TABLE
  */
 
-export function remove(items?: any, options?: Object): Schema { 
+export function remove(items?: any, options?: Object): Model { 
   let obs: any = List<Rx.Observable<any>>(this.obs);
 
   if (items) { // if items passed into function
@@ -62,9 +62,9 @@ export function remove(items?: any, options?: Object): Schema {
     for (let x = 0; x < items.length; x++) {
       let item = new Entity(items[x], this);
 
-      if (item.preRemoveCb) {
+      if (item.preremove) {
         preArr.push(Rx.Observable.create(observer => {
-          item.preRemoveCb(() => {
+          item.preremove(() => {
             observer.next();
             observer.complete();
           }, err => observer.error(err), item);
@@ -74,7 +74,7 @@ export function remove(items?: any, options?: Object): Schema {
       parseArr.push(this.parseQueryDelete(item, options));
     }
 
-    if (this.helper.preRemoveCb) {
+    if (this.helper.pre.remove) {
       let pre = preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0];
       obs = obs.push(pre);
     }
@@ -84,7 +84,7 @@ export function remove(items?: any, options?: Object): Schema {
   } else { // if no items sent to the remove function
 
     obs = obs.push(Rx.Observable.create(observer => {
-      cassandra.client.execute(`TRUNCATE ${this.tableName}`).then(entity => { // entity will be useless information about DB
+      client.execute(`TRUNCATE ${this.tableName}`).then(entity => { // entity will be useless information about DB
         observer.next(); // no argument set for next()
         observer.complete();
       }).catch(err => observer.error(err));
@@ -94,5 +94,5 @@ export function remove(items?: any, options?: Object): Schema {
 
   }
 
-  return new Schema(this, obs);
+  return new Model(this, obs);
 }

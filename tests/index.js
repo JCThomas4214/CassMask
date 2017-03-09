@@ -6,9 +6,9 @@ var Jasmine = require('jasmine');
 var jasmine = new Jasmine();
 var JasmineReporter = require('jasmine-spec-reporter').SpecReporter;
 
-var cassandra = require('cassmask').cassandra;
+var cassmask = require('cassmask');
 
-cassandra.connect({
+cassmask.connect({
   contactPoints: ['127.0.0.1'],
   protocolOptions: { port: 9042 },
   queryOptions: { consistency: 1 },
