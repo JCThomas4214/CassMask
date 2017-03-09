@@ -87,7 +87,7 @@ export function create(items: any, options?: Object): Model {
     parseArr.push(this.parseQueryInsert(item, options));
   }
 
-  if (this.helper.pre.create) {
+  if (this.helper.precreate) {
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 

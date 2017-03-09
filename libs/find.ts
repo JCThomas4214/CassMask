@@ -65,8 +65,8 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       }
 
       // If the find event hook was initialized
-      if(this.helper.post.find) { // if find Event hook set
-        this.helper.post.find(x => { // execute the find hook callback
+      if(this.helper.postfind) { // if find Event hook set
+        this.helper.postfind(x => { // execute the find hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), items);

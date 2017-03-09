@@ -1,33 +1,25 @@
 'use strict';
 
 import { client, Model } from '../index';
-import {eventFunctions} from './helper';
+import { Helper } from './helper';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
-
 
 /*
      Entity class is the object that will be instantiated with the DB response row data
        Entity holds it's cooresponding schema's current state and the item properties that is passed into it
        Entity has two basic functions, save() and remove() to UPDATE or DELETE the row it's properties relates to 
  */
-export class Entity {
+export class Entity extends Helper {
   public toJSON: Function;
   private schema: any;
   private tableName: string;
   private modified: Object = {};
   public attributes: Object = {};
 
-  public precreate: Function;
-  public preupdate: Function;
-  public preremove: Function;
-  public prefind: Function;
-  public postcreate: Function;
-  public postupdate: Function;
-  public postremove: Function;
-  public postfind: Function;
-
   constructor(item: any, parent: Model) {
+    // super will be the Helper class with all defined event functions
+    super(parent.helper);
     // remove all exploitable properties from the item
     // when passed back through express response
     this.toJSON = function() {
@@ -42,8 +34,6 @@ export class Entity {
     this.schema = parent.schema;
     this.tableName = parent.tableName;
 
-    // create functions for parent based off of the Schema state
-    this.integrateMethods(parent.helper.pre, parent.helper.post, parent.helper.methods);  
     // create class properties cooresponding to column values
     this.integrateItem(item);
   }
@@ -69,23 +59,6 @@ export class Entity {
             this.modified[prop] = true;
           }
         });
-    }
-  }
-  // integrate methods into parent object
-  private integrateMethods(pre: any, post: any, methods: any) {
-
-    this.precreate = pre.create;
-    this.preremove = pre.remove;
-    this.prefind = pre.find;
-    this.preupdate = pre.update;
-
-    this.postcreate = post.create;
-    this.postremove = post.remove;
-    this.postfind = post.find;
-    this.postupdate = post.update;
-
-    for(let z in methods) {
-      this[z] = methods[z];
     }
   }
 

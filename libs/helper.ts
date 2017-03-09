@@ -1,27 +1,18 @@
-'use strict';
-
-export interface eventFunctions {
-  create: Function;
-  update: Function;
-  remove: Function;
-  find: Function;
-}
-
-class Eve implements eventFunctions {
-  create;
-  update;
-  remove;
-  find;
-}
 
 export class Helper {
-  public pre: eventFunctions = new Eve();
-  public post: eventFunctions = new Eve();
 
-  public methods: any = {};
+  public precreate: Function;
+  public preupdate: Function;
+  public preremove: Function;
+  public prefind: Function;
 
-  constructor() {
+  public postcreate: Function;
+  public postupdate: Function;
+  public postremove: Function;
+  public postfind: Function;
 
+  constructor(helper?: Helper) {
+    if(helper) for(let x in helper) this[x] = helper[x];
   }
 
 }

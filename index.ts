@@ -62,9 +62,11 @@ export function connect(config: any, cb?: Function): void {
   });
 }
 
-export class Model {
-    public state: Map<any, any>;
+interface Schema {
 
+}
+
+export class Model {
     public obs: List<Rx.Observable<any>>;
     public tableName: string;
     public tblChked: boolean = false;
@@ -76,7 +78,8 @@ export class Model {
     constructor(modelName: string | Model, schema?: any, options?: any) {
       if (modelName instanceof Model) {
 
-        this.obs = schema;
+        if (schema) this.obs = schema;
+
         this.tableName = modelName.tableName;
         this.tblChked = modelName.tblChked;
         this.schema = modelName.schema;
@@ -114,7 +117,7 @@ export class Model {
     public pre = pre;
 
     methods(scope: Object): void {
-      for (let x in scope) this.helper.methods[x] = scope[x];
+      for (let x in scope) this.helper[x] = scope[x];
     }
 
   }

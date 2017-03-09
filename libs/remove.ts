@@ -74,7 +74,7 @@ export function remove(items?: any, options?: Object): Model {
       parseArr.push(this.parseQueryDelete(item, options));
     }
 
-    if (this.helper.pre.remove) {
+    if (this.helper.preremove) {
       let pre = preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0];
       obs = obs.push(pre);
     }

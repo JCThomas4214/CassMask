@@ -7,32 +7,32 @@ export function post(hook: string | Array<string>, fn: Function): void {
   if (!Array.isArray(hook)) {
     switch (hook) {
       case "create":
-        this.helper.post.create = fn;
+        this.helper.postcreate = fn;
         break;
       case "update":
-        this.helper.post.update = fn;
+        this.helper.postupdate = fn;
         break;
       case "find":
-          this.helper.post.find = fn;
+          this.helper.postfind = fn;
         break;
       case "remove":
-          this.helper.post.remove = fn;
+          this.helper.postremove = fn;
         break;
     }
   } else {
     for (let x = 0; x < hook.length; x++) {
       switch (hook[x]) {
         case "create":
-          this.helper.post.create = fn;
+          this.helper.postcreate = fn;
           break;
         case "update":
-          this.helper.post.update = fn;
+          this.helper.postupdate = fn;
           break;
         case "find":
-            this.helper.post.find = fn;
+            this.helper.postfind = fn;
           break;
         case "remove":
-            this.helper.post.remove = fn;
+            this.helper.postremove = fn;
           break;
       }
     }
@@ -46,32 +46,32 @@ export function pre(hook: string | Array<string>, fn: Function): void {
   if (!Array.isArray(hook)) {
     switch (hook) {
       case "create":
-        this.helper.pre.create = fn;
+        this.helper.precreate = fn;
         break;
       case "update":
-        this.helper.pre.update = fn;
+        this.helper.preupdate = fn;
         break;
       case "find":
-          this.helper.pre.find = fn;
+          this.helper.prefind = fn;
         break;
       case "remove":
-          this.helper.pre.remove = fn;
+          this.helper.preremove = fn;
         break;
     }
   } else {
     for (let x = 0; x < hook.length; x++) {
       switch (hook[x]) {
         case "create":
-          this.helper.pre.create = fn;
+          this.helper.precreate = fn;
           break;
         case "update":
-          this.helper.pre.update = fn;
+          this.helper.preupdate = fn;
           break;
         case "find":
-            this.helper.pre.find = fn;
+            this.helper.prefind = fn;
           break;
         case "remove":
-            this.helper.pre.remove = fn;
+            this.helper.preremove = fn;
           break;
       }
     }
