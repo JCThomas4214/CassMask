@@ -1,14 +1,13 @@
-import { client, Model } from '../index';
+import { client, Model, SchemaOptions, UpdateObject } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
-
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
-export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any> {
+export function parseQueryUpdate(item: Entity, options: SchemaOptions): Rx.Observable<any> {
 
   return Rx.Observable.create(observer => {
       const keyList = this.schema.keyList;
@@ -16,7 +15,9 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
 
       let params = [];
       // start query string at this base
-      let tmp = `UPDATE ${this.schema.tableName} SET`;
+      let tmp = `UPDATE ${this.schema.tableName}`;
+      if(options && options.using) tmp += ` USING ${options.using}`;
+      tmp += ' SET';
 
       // for all keys in the set object
       for(let y = 0; y < columnList.length; y++) {
@@ -39,7 +40,9 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
         }
       }
 
-      const query = tmp.substring(0, tmp.length-4) + ' IF EXISTS'; // set the query key in q array to new query string
+      let query = tmp.substring(0, tmp.length-4); // set the query key in q array to new query string
+      if (options && options.if) query += ` IF ${options.if}`;
+      else query += ' IF EXISTS';
 
       client.execute(query, params, {prepare:true}).then(entity => { // if the event hook was set
         if(item['post_update']) { // in state.events.saveHook will indicator boolean
@@ -69,7 +72,7 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
     IN THE TABLE
  */
 
-export function update(items: any, options?: Object): Model {
+export function update(items: UpdateObject | Array<UpdateObject>, options?: SchemaOptions): Model {
   let obs: any = List<Rx.Observable<any>>(this.obs); // create new state object 
   items = Array.isArray(items) ? items : [items]; // if items is not an array, make it one
 

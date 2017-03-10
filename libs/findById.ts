@@ -1,4 +1,4 @@
-import { client, Model } from '../index';
+import { client, Model, FindOptions } from '../index';
 import { Entity } from './entity';
 import { objDiff } from './parseModel';
 import * as Rx from 'rxjs';
@@ -8,7 +8,7 @@ import { List, Map } from 'immutable';
       SELECTS FROM THE DATABASE WITH ONLY AN ID
         IF NO ID SET IN THE MODEL THIS SHOULD BE A UUID THAT HAS A SECONDARY INDEX
  */
-export function findById(id: string, options?: any): Model {
+export function findById(id: string, options?: FindOptions): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity({ id : id }, this);
 

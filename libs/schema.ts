@@ -1,5 +1,6 @@
 import { parseModel } from './parseModel';
 
+
 export class Schema {
   columns: string;
   keys: string;

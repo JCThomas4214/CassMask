@@ -5,8 +5,6 @@
 import * as Rx from 'rxjs';
 import { Map } from 'immutable'; 
 
-declare let client: any;
-
 declare type BLOB = string;
 declare type ASCII = string;
 declare type TEXT = string; 
@@ -47,77 +45,79 @@ declare const TIMESTAMP: string;
 declare const INET: string;
 declare const COUNTER: string;
 
-declare function now(): string;
-declare function uuid(): string;
-declare function toTimeStamp(timeuuid: string): string;
-declare function connect(config: any, cb?: Function): void;
+declare module "cassmask" {
+	let client: any;
 
-declare function model(modelName: string, schema: Schema, options?: any): Model;
+	interface UpdateObject<K> {
+		set: K,
+		where: K
+	}
 
-declare class Schema {
-	 tableName: string;
+	interface SchemaOptions {
+		using?: string,
+		if?: string
+	}
 
-	 constructor(schema?: Schema | Object);
+	interface Exclude {
+		exclude: Array<string>;
+	}
+
+	interface FindOptions {
+		attributes?: Array<string> | Exclude,
+		groupBy?: string,
+		orderBy?: string,
+		perPartitionLimit?: number,
+		limit?: number,
+		allowFiltering?: boolean
+	}
+
+	interface BatchOptions {
+		using?: string
+	}
+
+	function now(): string;
+	function uuid(): string;
+	function toTimeStamp(timeuuid: string): string;
+	function connect(config: any, cb?: Function): void;
+
+	function model<T>(modelName: string, schema: Schema, options?: any): Model<T>;
+
+	interface ISchema {
+		id?: string
+	}
+
+	class Schema {
+		 constructor(schema?: Schema | Object);
+	}
+
+	class Model<J> {
+		constructor (modelName : string | Model<J>, schema: Schema, options? : any);
+
+		find(object?: J, opts?: FindOptions): Model<J>;
+		findOne(object?: J, opts?: FindOptions): Model<J>;
+		findById(id: string, opts?: FindOptions): Model<J>;
+		remove(object?: J | Array<J>, opts?: SchemaOptions): Model<J>;
+		update(object: UpdateObject<J> | Array<UpdateObject<J>>, opts?: SchemaOptions): Model<J>;
+		create(items: J | Array<J>, opts?: SchemaOptions): Model<J>;
+		seam(): Rx.Observable<any>;
+
+		// batch(items: Array<Object>, opt?: BatchOptions): Rx.Observable<any>;
+
+		post(hook: string | Array<string>, fn: Function): void;
+		pre(hook: string | Array<string>, fn: Function): void;
+
+		methods(scope: Object): void;
+
+		schema: Schema;
+	}
+
+	class Entity {
+		constructor (items: any, parent: Model<any>);
+
+		isEmpty(): boolean;
+		merge(object: Object): Entity;
+		save(postCb?: string): Rx.Observable<any>;
+		remove(postCb?: string): Rx.Observable<any>;
+	}
+
 }
-
-declare class Model {
-	constructor (modelName : string | Map<any,any>, model : any, options? : any);
-
-	find(object?: Object, opts?: Object): Model;
-	findOne(object?: Object, opts?: Object): Model;
-	findById(id: string, opts?: Object): Model;
-	remove(object?: any, opts?: Object): Model;
-	update(object: any, opts?: Object): Model;
-	create(items: any, opts?: Object): Model;
-	seam(): Rx.Observable<any>;
-
-	post(hook: string | Array<string>, fn: Function): void;
-	pre(hook: string | Array<string>, fn: Function): void;
-
-	methods(scope: Object): void;
-
-	schema: Schema;
-}
-
-declare class Entity {
-	constructor (items: any, state: Map<any,any>);
-
-	isEmpty(): boolean;
-	merge(object: Object): Entity;
-	save(postCb?: string): Rx.Observable<any>;
-	remove(postCb?: string): Rx.Observable<any>;
-}
-
-export {
-	client,
-	connect,
-
-	BLOB,
-	ASCII,
-	TEXT,
-	VARCHAR,
-	BOOLEAN,
-	DOUBLE,
-	FLOAT,
-	BIGINT,
-	INT,
-	SMALLINT,
-	TINYINT,
-	VARINT,
-	UUID,
-	TIMEUUID,
-	DATE,
-	TIME,
-	TIMESTAMP,
-	INET,
-	COUNTER,
-
-	now,
-	uuid,
-	toTimeStamp,
-
-	model,
-	Model,
-	Schema,
-	Entity,
-};

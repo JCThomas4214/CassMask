@@ -70,6 +70,17 @@ Create a model.
 import * as cassmask from 'cassmask';
 import { toTimeStamp, now, uuid } from 'cassmask';
 
+// An interface for your Schema is not necessary but
+// it enables Typescript to type-check the key-value paires
+// placed into cassmask's query functions
+interface IModelSchema extends cassmask.ISchema {
+  col1?: cassmask.UUID;
+  col2?: cassmask.TIMEUUID;
+  col3?: cassmask.TIMESTAMP;
+  col4?: cassmask.TEXT;
+  col5?: cassmask.INT;  
+}
+
 class ModelSchema extends cassmask.Schema {
   // declare schema properties
   col1: cassmask.UUID;
@@ -89,7 +100,7 @@ class ModelSchema extends cassmask.Schema {
   // Other defined functions will be integrated into Entity scope
 }
 
-export default cassmask.model('Model', new ModelSchema({
+export default cassmask.model<IModelSchema>('Model', new ModelSchema({
   col1: {
     type: cassmask.UUID,
     default: uuid()
@@ -384,7 +395,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="find"></a>
 
-#### [find](https://github.com/JCThomas4214/CassMask/blob/master/libs/find.ts)(items?: Object, opts?: [FindObject](#findobject)): Schema
+#### [find](https://github.com/JCThomas4214/CassMask/blob/master/libs/find.ts)(items?: Object, opts?: [FindOptions](#findoptions)): Schema
 
 + first argument can be empty or an object
   + If no arguments or empty object, will SELECT all rows in the table
@@ -397,7 +408,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="findOne"></a>
 
-#### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: [FindObject](#findobject)): Schema
+#### [findOne](https://github.com/JCThomas4214/CassMask/blob/master/libs/findOne.ts)(items?: Object, opts?: [FindOptions](#findoptions)): Schema
 
 + first argument can be empty or an object
   + If no arguments or empty object, will SELECT the first row in the table
@@ -410,7 +421,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="findById"></a>
 
-#### [findById](https://github.com/JCThomas4214/CassMask/blob/master/libs/findById.ts)(id: string, opts? [FindObject](#findobject)): Schema
+#### [findById](https://github.com/JCThomas4214/CassMask/blob/master/libs/findById.ts)(id: string, opts? [FindOptions](#findoptions)): Schema
 
 + first argument must be an id
 + second argument is a find options object
@@ -420,7 +431,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="create"></a>
 
-#### [create](https://github.com/JCThomas4214/CassMask/blob/master/libs/create.ts)(items: Object | Array\<Object\>, opts?: Object): Schema
+#### [create](https://github.com/JCThomas4214/CassMask/blob/master/libs/create.ts)(items: Object | Array\<Object\>, opts?: [SchemaOptions](#schemaoptions)): Schema
 
 + first argument can be an object or array of objects
 + objects must contain all columns to be inserted into the row
@@ -428,7 +439,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="update"></a>
 
-#### [update](https://github.com/JCThomas4214/CassMask/blob/master/libs/update.ts)(object: Object | Array\<Object\>, opts?: Object): Schema
+#### [update](https://github.com/JCThomas4214/CassMask/blob/master/libs/update.ts)(object: [UpdateObject](#updateobject) | Array\<[UpdateObject](#updateobject)\>, opts?: [SchemaOptions](#schemaoptions)): Schema
 
 + first argument can be an object or array of objects
 + objects must contain two subobjects, 'set' and 'where'
@@ -437,7 +448,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="remove"></a>
 
-#### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object?: Object | Array\<Object\>, opts?: Object): Schema
+#### [remove](https://github.com/JCThomas4214/CassMask/blob/master/libs/remove.ts)(object?: Object | Array\<Object\>, opts?: [SchemaOptions](#schemaoptions)): Schema
 
 + first argument can be empty, an object, or array of objects
 + objects must contain the primary keys for the WHERE clause to DELETE the row
@@ -468,20 +479,44 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 + scope object containing properties that will be integrated into all instantiated Entity objects 
 
-<a name="findobject"></a>
+<a name="updateobject"></a>
 
-#### FindObject
+#### UpdateObject
 
-+ orderBy: string; CQL order by string to append to SELECT query
-  + ex: {orderBy: 'created desc'}
-+ attributes: Array<string | Object>; columns to select or exclude from SELECT query
++ set: Object; object with table attribute key value pairs to update
++ where: Object; object with PRIMARY KEY key value pairs
+  + ex: { set: {name: 'test'}, where: {id: '123456'}}
+
+<a name="schemaoptions"></a>
+
+#### SchemaOptions
+
++ using?: string; is the CQL update parameter(s) appended in the INSERT, DELETE, UPDATE string
+  + ex: {using: 'TTL 86400'}
++ if?: string; is the CQL conditions to execute INSERT, DELETE, UPDATE string
+  + ex: {if: 'exists'}
+  + ex: {if: 'played > 10'}
+
+<a name="findoptions"></a>
+
+#### FindOptions
+
++ attributes?: Array<string | Object>; "columns to select or exclude from SELECT query"
   + ex: {attributes: ['name', 'created', 'id']}
   + ex: {attributes: {exclude: ['catagory']}}
-+ limit: number; limit the SELECT response to certain number of rows
++ groupBy?: string; CQL group by string to append to SELECT query
+  + ex: {groupBy: 'created, name'}
++ orderBy?: string; CQL order by string to append to SELECT query
+  + ex: {orderBy: 'created desc'}
++ perParitionLimit?: number; limit select per partition
+  + ex: {perPartitionLimit: 3}
++ limit?: number; limit the SELECT response to certain number of rows
   + ex: {limit: 1}
-+ allowFiltering: boolean; append ALLOW FILTERING to query string
++ allowFiltering?: boolean; append ALLOW FILTERING to query string
   + ex: {allowFiltering: true}
   + **It is recommended that this not be used as it causes cluster wide search** 
+
+#### 
 
 <a name="entityAPI"></a>
 

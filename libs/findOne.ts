@@ -1,4 +1,4 @@
-import { Model } from '../index';
+import { Model, FindOptions } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
@@ -9,7 +9,7 @@ import { List, Map } from 'immutable';
         THIS WILL CAUSE EXEC TO LIMIT THE QUERY TO 1
  */
 
-export function findOne(object?: Object, options?: any): Model {
+export function findOne(object?: Object, options?: FindOptions): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity(object || {}, this);
 

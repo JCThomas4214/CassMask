@@ -59,6 +59,29 @@ export const TIMESTAMP: string = 'timestamp';
 export const INET: string = 'inet';
 export const COUNTER: string = 'counter';
 
+export interface UpdateObject {
+  set: Object,
+  where: Object
+}
+
+export interface SchemaOptions {
+  using?: string,
+  if?: string
+}
+
+interface Exclude {
+  exclude: Array<string>;
+}
+
+export interface FindOptions {
+  attributes?: Array<string> | Exclude,
+  groupBy?: string,
+  orderBy?: string,
+  perPartitionLimit?: number,
+  limit?: number,
+  allowFiltering?: boolean
+}
+
 // replica functions for database query functions
 export function now() {
   return 'now()';
@@ -83,29 +106,27 @@ export function connect(config: any, cb?: Function): void {
 }
 
 export function model(modelName: string, schema: Schema, options?: any): Model {
-  return new Model(modelName+'s', schema, options);
+  schema.tableName = modelName + 's';
+  return new Model(schema.tableName, schema, options);
 }
 
 export class Model {
     public obs: List<Rx.Observable<any>>;
-    // public schema: any;
     public schema: Schema;
 
     public options: any;
 
-    constructor(modelName: string | Model, schema?: any, options?: any) {
+    constructor(modelName: string | Model, schema?: Schema | List<Rx.Observable<any>>, options?: any) {
       if (modelName instanceof Model) {
 
-        if (schema) this.obs = schema;
+        if (schema) this.obs = schema as List<Rx.Observable<any>>;
         this.schema = modelName.schema;
         this.options = modelName.options;
 
       } else {
-
         this.obs = List<Rx.Observable<any>>([]);
-
-        schema.tableName = modelName;
-        this.schema = schema;
+        if (!schema['tableName']) schema['tableName'] = modelName;
+        this.schema = schema as Schema;
 
         if (options) this.options = options; 
 

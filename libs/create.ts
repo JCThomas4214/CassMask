@@ -30,7 +30,11 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
         }
     }
 
-    const query = tmp1.substring(0, tmp1.length-2) + tmp2.substring(0, tmp2.length-2) + ')'; // q's query string set to concat of columns and values string
+    let query = tmp1.substring(0, tmp1.length-2) + tmp2.substring(0, tmp2.length-2) + ')'; // q's query string set to concat of columns and values string
+    if (options) {
+      if (options.if) query += ` IF NOT EXISTS`;
+      if (options.using) query += ` USING ${options.using}`;
+    }
 
     client.execute(query, params, {prepare:true}).then(response => { // entity will be useless from DB
       if(item['post_create']) { // if save Event hook set

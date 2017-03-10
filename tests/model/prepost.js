@@ -17,6 +17,4 @@ var ItemPrePostSchema = new cassmask.Schema({
 	keys: ['part', 'name']
 });
 
-var ItemPrePost = new cassmask.Model('ItemPrePosts', ItemPrePostSchema);
-
-module.exports = ItemPrePost;
+module.exports = cassmask.model('ItemPrePost', ItemPrePostSchema);;

@@ -1,27 +1,29 @@
-import { client, Model } from '../index';
+import { client, Model, SchemaOptions } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
-
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
 
-export function parseQueryDelete(item: Entity, options: any): Rx.Observable<any> {
+export function parseQueryDelete(item: Entity, options: SchemaOptions): Rx.Observable<any> {
 
   return Rx.Observable.create(observer => {
       let params = [];
 
-      let tmp = `DELETE FROM ${this.schema.tableName} WHERE`; // set starting query string
+      let tmp = `DELETE FROM ${this.schema.tableName}`; // set starting query string
+      if (options && options.using) tmp += ` USING ${options.using}`;
+      tmp += ' WHERE';
       // for all keys in this item
       for(let y in item.attributes) {
-        const val = item[y];            
+        const val = item[y];
         tmp += ` ${y} = ? AND`; // append key to query string
         params.push(val); // push value to params array          
       }
-      const query = tmp.substring(0, tmp.length-4); // truncate last ' AND' on the string
+      let query = tmp.substring(0, tmp.length-4); // truncate last ' AND' on the string
+      if (options && options.if) query += ` IF ${options.if}`;
 
       client.execute(query, params, {prepare:true}).then(response => { // entity will be useless information about the DB
         if(item['post_remove']) { // if remvoe event hook was set
@@ -48,7 +50,7 @@ export function parseQueryDelete(item: Entity, options: any): Rx.Observable<any>
     REMOVE() IS FOR DELETING FOUND ROWS OR TRUNCATING TABLE
  */
 
-export function remove(items?: any, options?: Object): Model { 
+export function remove(items?: any, options?: SchemaOptions): Model { 
   let obs: any = List<Rx.Observable<any>>(this.obs);
 
   if (items) { // if items passed into function

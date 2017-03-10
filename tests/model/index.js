@@ -16,6 +16,4 @@ var ItemSchema = new cassmask.Schema({
 	keys: ['part', 'name']
 });
 
-var Item = new cassmask.Model('Items', ItemSchema);
-
-module.exports = Item;
+module.exports = cassmask.model('Item', ItemSchema);

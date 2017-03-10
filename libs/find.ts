@@ -1,4 +1,4 @@
-import { client, Model } from '../index';
+import { client, Model, FindOptions } from '../index';
 import { Entity } from './entity';
 import { objDiff } from './parseModel';
 import * as Rx from 'rxjs';
@@ -8,7 +8,7 @@ import { List, Map } from 'immutable';
     PARSES THE INPUTTED OBJECT
       THEN RETURNS AN OBSERVABLE QUERY 
  */
-export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any> {
+export function parseQuerySelect(item: Entity, options?: FindOptions): Rx.Observable<any> {
 
   return Rx.Observable.create(observer => {
 
@@ -37,8 +37,12 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       query = `SELECT ${sel} FROM ${this.schema.tableName}`;
     }
     if (options) {
+      // if groupBy 
+      if (options.groupBy) query += ` GROUP BY ${options.groupBy}`;
       // if orderBy 
-      if (options.orderBy) query += ` order by ${options.orderBy}`;
+      if (options.orderBy) query += ` ORDER BY ${options.orderBy}`;
+      // if options for limit 1
+      if (options.perPartitionLimit) query += ` PRE PARTITION LIMIT ${options.perPartitionLimit}`;
       // if options for limit 1
       if (options.limit) query += ` LIMIT ${options.limit}`;
       // options for allow filtering
@@ -83,7 +87,7 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       PARSES ATTR INTO FINDS OBJECT TO THEN QUERY THE DB
  */
 
-export function find(object?: Object, options?: any): Model {
+export function find(object?: Object, options?: FindOptions): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity(object || {}, this);
 
