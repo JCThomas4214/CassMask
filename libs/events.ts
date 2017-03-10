@@ -5,32 +5,32 @@ export function post(hook: string | Array<string>, fn: Function): void {
   if (!Array.isArray(hook)) {
     switch (hook) {
       case "create":
-        this.schema['postcreate'] = fn;
+        this.schema['post_create'] = fn;
         break;
       case "update":
-        this.schema['postupdate'] = fn;
+        this.schema['post_update'] = fn;
         break;
       case "find":
-          this.schema['postfind'] = fn;
+          this.schema['post_find'] = fn;
         break;
       case "remove":
-          this.schema['postremove'] = fn;
+          this.schema['post_remove'] = fn;
         break;
     }
   } else {
     for (let x = 0; x < hook.length; x++) {
       switch (hook[x]) {
         case "create":
-          this.schema['postcreate'] = fn;
+          this.schema['post_create'] = fn;
           break;
         case "update":
-          this.schema['postupdate'] = fn;
+          this.schema['post_update'] = fn;
           break;
         case "find":
-            this.schema['postfind'] = fn;
+            this.schema['post_find'] = fn;
           break;
         case "remove":
-            this.schema['postremove'] = fn;
+            this.schema['post_remove'] = fn;
           break;
       }
     }
@@ -44,32 +44,32 @@ export function pre(hook: string | Array<string>, fn: Function): void {
   if (!Array.isArray(hook)) {
     switch (hook) {
       case "create":
-        this.schema.precreate = fn;
+        this.schema['pre_create'] = fn;
         break;
       case "update":
-        this.schema.preupdate = fn;
+        this.schema['pre_update'] = fn;
         break;
       case "find":
-          this.schema.prefind = fn;
+          this.schema['pre_find'] = fn;
         break;
       case "remove":
-          this.schema.preremove = fn;
+          this.schema['pre_remove'] = fn;
         break;
     }
   } else {
     for (let x = 0; x < hook.length; x++) {
       switch (hook[x]) {
         case "create":
-          this.schema.precreate = fn;
+          this.schema['pre_create'] = fn;
           break;
         case "update":
-          this.schema.preupdate = fn;
+          this.schema['pre_update'] = fn;
           break;
         case "find":
-            this.schema.prefind = fn;
+            this.schema['pre_find'] = fn;
           break;
         case "remove":
-            this.schema.preremove = fn;
+            this.schema['pre_remove'] = fn;
           break;
       }
     }

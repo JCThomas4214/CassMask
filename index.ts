@@ -82,7 +82,7 @@ export function connect(config: any, cb?: Function): void {
   });
 }
 
-export function model(modelName: string, schema: any, options?: any) {
+export function model(modelName: string, schema: Schema, options?: any): Model {
   return new Model(modelName+'s', schema, options);
 }
 

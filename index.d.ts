@@ -32,8 +32,12 @@ declare function uuid(): string;
 declare function toTimeStamp(timeuuid: string): string;
 declare function connect(config: any, cb?: Function): void;
 
-interface Helper {
-	methods(scope: Object): void;
+declare function model(modelName: string, schema: Schema, options?: any): Model;
+
+declare class Schema {
+	 tableName: string;
+
+	 constructor(schema?: Schema | Object);
 }
 
 declare class Model {
@@ -52,7 +56,7 @@ declare class Model {
 
 	methods(scope: Object): void;
 
-	helper: Helper;
+	schema: Schema;
 }
 
 declare class Entity {
@@ -92,6 +96,8 @@ export {
 	uuid,
 	toTimeStamp,
 
+	model,
 	Model,
+	Schema,
 	Entity,
 };

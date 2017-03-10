@@ -33,8 +33,8 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
     const query = tmp1.substring(0, tmp1.length-2) + tmp2.substring(0, tmp2.length-2) + ')'; // q's query string set to concat of columns and values string
 
     client.execute(query, params, {prepare:true}).then(response => { // entity will be useless from DB
-      if(item['postcreate']) { // if save Event hook set
-        item['postcreate'](x => { // execute the save hook callback
+      if(item['post_create']) { // if save Event hook set
+        item['post_create'](x => { // execute the save hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), item);
@@ -73,9 +73,9 @@ export function create(items: any, options?: Object): Model {
     }
     item = new Entity(item, this);
 
-    if (item['precreate']) {
+    if (item['pre_create']) {
       preArr.push(Rx.Observable.create(observer => {
-        item['precreate'](() => {
+        item['pre_create'](() => {
           observer.next();
           observer.complete();
         }, err => observer.error(err), item);
@@ -85,7 +85,7 @@ export function create(items: any, options?: Object): Model {
     parseArr.push(this.parseQueryInsert(item, options));
   }
 
-  if (this.schema['precreate']) {
+  if (this.schema['pre_create']) {
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 

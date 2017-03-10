@@ -24,8 +24,8 @@ export function parseQueryDelete(item: Entity, options: any): Rx.Observable<any>
       const query = tmp.substring(0, tmp.length-4); // truncate last ' AND' on the string
 
       client.execute(query, params, {prepare:true}).then(response => { // entity will be useless information about the DB
-        if(item['postremove']) { // if remvoe event hook was set
-          item['postremove'](x => { // execute remove hook callback
+        if(item['post_remove']) { // if remvoe event hook was set
+          item['post_remove'](x => { // execute remove hook callback
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), item);
@@ -60,9 +60,9 @@ export function remove(items?: any, options?: Object): Model {
     for (let x = 0; x < items.length; x++) {
       let item = new Entity(items[x], this);
 
-      if (item['preremove']) {
+      if (item['pre_remove']) {
         preArr.push(Rx.Observable.create(observer => {
-          item['preremove'](() => {
+          item['pre_remove'](() => {
             observer.next();
             observer.complete();
           }, err => observer.error(err), item);
@@ -72,7 +72,7 @@ export function remove(items?: any, options?: Object): Model {
       parseArr.push(this.parseQueryDelete(item, options));
     }
 
-    if (this.schema['preremove']) {
+    if (this.schema['pre_remove']) {
       let pre = preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0];
       obs = obs.push(pre);
     }

@@ -115,8 +115,8 @@ export class Entity extends Schema {
       
       client.execute(query, params, {prepare:true}).then(entity => {
 
-        if(this['post' + postCb]) { // if save Event hook set
-          this['post' + postCb](x => { // execute save hook callback
+        if(this['post_' + postCb]) { // if save Event hook set
+          this['post_' + postCb](x => { // execute save hook callback
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), this);
@@ -153,8 +153,8 @@ export class Entity extends Schema {
       }
 
       client.execute(query.substring(0, query.length-4), arr, {prepare:true}).then(entity => {
-        if(this['post' + postCb]) { // if remove Event hook set
-          this['post' + postCb](x => { // executes remvoe hook callback
+        if(this['post_' + postCb]) { // if remove Event hook set
+          this['post_' + postCb](x => { // executes remvoe hook callback
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), this);

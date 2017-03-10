@@ -42,9 +42,9 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
       const query = tmp.substring(0, tmp.length-4) + ' IF EXISTS'; // set the query key in q array to new query string
 
       client.execute(query, params, {prepare:true}).then(entity => { // if the event hook was set
-        if(item['postupdate']) { // in state.events.saveHook will indicator boolean
+        if(item['post_update']) { // in state.events.saveHook will indicator boolean
           // execute the hook callback and create newEntity object with current entity JSON
-          item['postupdate'](x => {
+          item['post_update'](x => {
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), item);
@@ -81,9 +81,9 @@ export function update(items: any, options?: Object): Model {
     let item = new Entity(object.set, this);
     item.merge(object.where);
 
-    if (item['preupdate']) {
+    if (item['pre_update']) {
       preArr.push(Rx.Observable.create(observer => {
-        item['preupdate'](() => {
+        item['pre_update'](() => {
           observer.next();
           observer.complete();
         }, err => observer.error(err), item);
@@ -93,7 +93,7 @@ export function update(items: any, options?: Object): Model {
     parseArr.push(this.parseQueryUpdate(item, options || {}));
   }
 
-  if (this.schema['preupdate']) {  
+  if (this.schema['pre_update']) {  
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 

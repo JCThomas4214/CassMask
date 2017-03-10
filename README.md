@@ -82,8 +82,8 @@ class ModelSchema extends cassmask.Schema {
     super(schema);
   }
 
-  // Define precreate, preupdate, preremove, prefind
-  //    postcreate, postupdate, postremove, postfind
+  // Define pre_create, pre_update, pre_remove, pre_find
+  //    post_create, post_update, post_remove, post_find
   //    functions to set hook events
 
   // Other defined functions will be integrated into Entity scope

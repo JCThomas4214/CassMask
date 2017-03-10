@@ -62,8 +62,8 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       }
 
       // If the find event hook was initialized
-      if(this.schema['postfind']) { // if find Event hook set
-        this.schema['postfind'](x => { // execute the find hook callback
+      if(this.schema['post_find']) { // if find Event hook set
+        this.schema['post_find'](x => { // execute the find hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), items);
@@ -87,9 +87,9 @@ export function find(object?: Object, options?: any): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity(object || {}, this);
 
-  if (item['prefind']) {
+  if (item['pre_find']) {
     obs = obs.push(Rx.Observable.create(observer => {
-      item['prefind'](() => {
+      item['pre_find'](() => {
         observer.next();
         observer.complete();
       }, err => observer.error(err), item);
