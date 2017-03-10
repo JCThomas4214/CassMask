@@ -7,6 +7,26 @@ import { Map } from 'immutable';
 
 declare let client: any;
 
+declare type BLOB = string;
+declare type ASCII = string;
+declare type TEXT = string; 
+declare type VARCHAR = string;
+declare type BOOLEAN = boolean;
+declare type DOUBLE = number;
+declare type FLOAT = number;
+declare type BIGINT = number;
+declare type INT = number;
+declare type SMALLINT = number;
+declare type TINYINT = number;
+declare type VARINT = number;
+declare type UUID = string;
+declare type TIMEUUID = string;
+declare type DATE = string;
+declare type TIME = string;
+declare type TIMESTAMP = string;
+declare type INET = string;
+declare type COUNTER = number;
+
 declare const BLOB: string;
 declare const ASCII: string;
 declare const TEXT: string; 
