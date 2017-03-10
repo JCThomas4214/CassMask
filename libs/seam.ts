@@ -1,5 +1,3 @@
-'use strict';
-
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 

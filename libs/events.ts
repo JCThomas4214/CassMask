@@ -1,5 +1,3 @@
-'use strict';
-
 // post() is the event hook setting function
 // pass in the hook event; 'save', 'remove', 'find'
 // pass in a callback function that will be executed upon event
@@ -7,32 +5,32 @@ export function post(hook: string | Array<string>, fn: Function): void {
   if (!Array.isArray(hook)) {
     switch (hook) {
       case "create":
-        this.helper.postcreate = fn;
+        this.schema['postcreate'] = fn;
         break;
       case "update":
-        this.helper.postupdate = fn;
+        this.schema['postupdate'] = fn;
         break;
       case "find":
-          this.helper.postfind = fn;
+          this.schema['postfind'] = fn;
         break;
       case "remove":
-          this.helper.postremove = fn;
+          this.schema['postremove'] = fn;
         break;
     }
   } else {
     for (let x = 0; x < hook.length; x++) {
       switch (hook[x]) {
         case "create":
-          this.helper.postcreate = fn;
+          this.schema['postcreate'] = fn;
           break;
         case "update":
-          this.helper.postupdate = fn;
+          this.schema['postupdate'] = fn;
           break;
         case "find":
-            this.helper.postfind = fn;
+            this.schema['postfind'] = fn;
           break;
         case "remove":
-            this.helper.postremove = fn;
+            this.schema['postremove'] = fn;
           break;
       }
     }
@@ -46,32 +44,32 @@ export function pre(hook: string | Array<string>, fn: Function): void {
   if (!Array.isArray(hook)) {
     switch (hook) {
       case "create":
-        this.helper.precreate = fn;
+        this.schema.precreate = fn;
         break;
       case "update":
-        this.helper.preupdate = fn;
+        this.schema.preupdate = fn;
         break;
       case "find":
-          this.helper.prefind = fn;
+          this.schema.prefind = fn;
         break;
       case "remove":
-          this.helper.preremove = fn;
+          this.schema.preremove = fn;
         break;
     }
   } else {
     for (let x = 0; x < hook.length; x++) {
       switch (hook[x]) {
         case "create":
-          this.helper.precreate = fn;
+          this.schema.precreate = fn;
           break;
         case "update":
-          this.helper.preupdate = fn;
+          this.schema.preupdate = fn;
           break;
         case "find":
-            this.helper.prefind = fn;
+            this.schema.prefind = fn;
           break;
         case "remove":
-            this.helper.preremove = fn;
+            this.schema.preremove = fn;
           break;
       }
     }

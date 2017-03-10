@@ -1,5 +1,3 @@
-'use strict';
-
 import { Model } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
@@ -18,9 +16,9 @@ export function findOne(object?: Object, options?: any): Model {
   if (!options) options = {};
   options.limit = 1; // Make sure we limit the response to one row
 
-  if (item.prefind) {
+  if (item['prefind']) {
     obs = obs.push(Rx.Observable.create(observer => {
-      item.prefind(() => {
+      item['prefind'](() => {
         observer.next();
         observer.complete();
       }, err => observer.error(err), item);

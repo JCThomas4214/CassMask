@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { List, Map } from 'immutable';
 
 import {
-  Helper,
+  Schema,
   Entity,
   parseModel,
   createTable, checkTable,
@@ -17,6 +17,26 @@ import {
 } from './libs';
 
 export let client;
+
+export declare type BLOB = string;
+export declare type ASCII = string;
+export declare type TEXT = string; 
+export declare type VARCHAR = string;
+export declare type BOOLEAN = boolean;
+export declare type DOUBLE = number;
+export declare type FLOAT = number;
+export declare type BIGINT = number;
+export declare type INT = number;
+export declare type SMALLINT = number;
+export declare type TINYINT = number;
+export declare type VARINT = number;
+export declare type UUID = string;
+export declare type TIMEUUID = string;
+export declare type DATE = string;
+export declare type TIME = string;
+export declare type TIMESTAMP = string;
+export declare type INET = string;
+export declare type COUNTER = number;
 
 // const values holding schema data types
 export const BLOB: string = 'blob';
@@ -62,16 +82,14 @@ export function connect(config: any, cb?: Function): void {
   });
 }
 
-interface Schema {
-
+export function model(modelName: string, schema: any, options?: any) {
+  return new Model(modelName+'s', schema, options);
 }
 
 export class Model {
     public obs: List<Rx.Observable<any>>;
-    public tableName: string;
-    public tblChked: boolean = false;
-    public schema: any;
-    public helper: any;
+    // public schema: any;
+    public schema: Schema;
 
     public options: any;
 
@@ -79,19 +97,15 @@ export class Model {
       if (modelName instanceof Model) {
 
         if (schema) this.obs = schema;
-
-        this.tableName = modelName.tableName;
-        this.tblChked = modelName.tblChked;
         this.schema = modelName.schema;
-        this.helper = modelName.helper;
         this.options = modelName.options;
 
       } else {
 
         this.obs = List<Rx.Observable<any>>([]);
-        this.tableName = modelName;
-        this.schema = parseModel(schema);
-        this.helper = new Helper();
+
+        schema.tableName = modelName;
+        this.schema = schema;
 
         if (options) this.options = options; 
 
@@ -117,9 +131,9 @@ export class Model {
     public pre = pre;
 
     methods(scope: Object): void {
-      for (let x in scope) this.helper[x] = scope[x];
+      for (let x in scope) this.schema[x] = scope[x];
     }
 
   }
 
-  export {Entity};
+  export {Entity, Schema};

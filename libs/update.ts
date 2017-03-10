@@ -1,5 +1,3 @@
-'use strict';
-
 import { client, Model } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
@@ -18,7 +16,7 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
 
       let params = [];
       // start query string at this base
-      let tmp = `UPDATE ${this.tableName} SET`;
+      let tmp = `UPDATE ${this.schema.tableName} SET`;
 
       // for all keys in the set object
       for(let y = 0; y < columnList.length; y++) {
@@ -44,9 +42,9 @@ export function parseQueryUpdate(item: Entity, options: any): Rx.Observable<any>
       const query = tmp.substring(0, tmp.length-4) + ' IF EXISTS'; // set the query key in q array to new query string
 
       client.execute(query, params, {prepare:true}).then(entity => { // if the event hook was set
-        if(item.postupdate) { // in state.events.saveHook will indicator boolean
+        if(item['postupdate']) { // in state.events.saveHook will indicator boolean
           // execute the hook callback and create newEntity object with current entity JSON
-          item.postupdate(x => {
+          item['postupdate'](x => {
             observer.next(x);
             observer.complete();
           }, err => observer.error(err), item);
@@ -83,9 +81,9 @@ export function update(items: any, options?: Object): Model {
     let item = new Entity(object.set, this);
     item.merge(object.where);
 
-    if (item.preupdate) {
+    if (item['preupdate']) {
       preArr.push(Rx.Observable.create(observer => {
-        item.preupdate(() => {
+        item['preupdate'](() => {
           observer.next();
           observer.complete();
         }, err => observer.error(err), item);
@@ -95,7 +93,7 @@ export function update(items: any, options?: Object): Model {
     parseArr.push(this.parseQueryUpdate(item, options || {}));
   }
 
-  if (this.helper.preupdate) {  
+  if (this.schema['preupdate']) {  
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 

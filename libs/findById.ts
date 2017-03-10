@@ -1,5 +1,3 @@
-'use strict';
-
 import { client, Model } from '../index';
 import { Entity } from './entity';
 import { objDiff } from './parseModel';
@@ -14,9 +12,9 @@ export function findById(id: string, options?: any): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity({ id : id }, this);
 
-  if (item.prefind) {
+  if (item['prefind']) {
     obs = obs.push(Rx.Observable.create(observer => {
-      item.prefind(() => {
+      item['prefind'](() => {
         observer.next();
         observer.complete();
       }, err => observer.error(err), item);
@@ -35,7 +33,7 @@ export function findById(id: string, options?: any): Model {
       }
     } else sel = '*'; // else select all columns
 
-    const query = `SELECT ${sel} FROM ${this.tableName} WHERE id = ${id}`
+    const query = `SELECT ${sel} FROM ${this.schema.tableName} WHERE id = ${id}`
 
     client.execute(query).then(entity => {
       // all rows in the response will be stored in a Entity class inside items array
@@ -54,8 +52,8 @@ export function findById(id: string, options?: any): Model {
       }
 
       // If the find event hook was initialized
-      if(item.postfind) { // if find Event hook set
-        item.postfind(x => { // execute the find hook callback
+      if(item['postfind']) { // if find Event hook set
+        item['postfind'](x => { // execute the find hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), items);

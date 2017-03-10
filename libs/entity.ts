@@ -1,7 +1,5 @@
-'use strict';
-
 import { client, Model } from '../index';
-import { Helper } from './helper';
+import { Schema } from './schema';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 
@@ -10,36 +8,37 @@ import { List, Map } from 'immutable';
        Entity holds it's cooresponding schema's current state and the item properties that is passed into it
        Entity has two basic functions, save() and remove() to UPDATE or DELETE the row it's properties relates to 
  */
-export class Entity extends Helper {
+export class Entity extends Schema {
   public toJSON: Function;
-  private schema: any;
-  private tableName: string;
   private modified: Object = {};
   public attributes: Object = {};
 
   constructor(item: any, parent: Model) {
-    // super will be the Helper class with all defined event functions
-    super(parent.helper);
+    // super will be the Schema class with all defined event functions
+    super(parent.schema);
     // remove all exploitable properties from the item
     // when passed back through express response
     this.toJSON = function() {
-      let obj = this;
-      delete obj.schema;
-      delete obj.tableName;
-      delete obj.modified;
-      delete obj.attributes;
-      return obj;
-    };
+      delete this.tableName;
+      delete this.tblChked;
+      delete this.columns;
+      delete this.keys;
+      delete this.allCol;
+      delete this.columnList;
+      delete this.keyList;
+      delete this.defaults;
 
-    this.schema = parent.schema;
-    this.tableName = parent.tableName;
+      delete this.modified;
+      delete this.attributes;
+      return this;
+    };
 
     // create class properties cooresponding to column values
     this.integrateItem(item);
   }
   // integrate the JSON into the parent object
   private integrateItem(item: any): void {
-    const cols = this.schema.allCol;
+    const cols = this.allCol;
 
     for (let y = 0; y < cols.length; y++) {
       let prop = cols[y];
@@ -85,8 +84,8 @@ export class Entity extends Helper {
       let isInsert: boolean = false;
       let arr1 = [],
           arr2 = [];
-      const keyList = this.schema.keyList;
-      const columnList = this.schema.columnList;
+      const keyList = this.keyList;
+      const columnList = this.columnList;
 
       let q1: string = `UPDATE ${this.tableName} SET `,
           q2: string = ` WHERE `;
@@ -139,7 +138,7 @@ export class Entity extends Helper {
       let arr = [];
 
       let query: string = `DELETE FROM ${this.tableName} WHERE `;
-      const keyList = this.schema.keyList;
+      const keyList = this.keyList;
 
       for(let x = 0; x < keyList.length; x++) {
         const val = keyList[x];

@@ -1,5 +1,3 @@
-'use strict';
-
 import { client, Model } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
@@ -15,7 +13,7 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
     let params = [];
     // INSERT is a more complicated query that requires more feness
     // // separate query into two parts, columns & values
-    let tmp1 = `INSERT INTO ${this.tableName} (`; // columns will be appended to this
+    let tmp1 = `INSERT INTO ${this.schema.tableName} (`; // columns will be appended to this
     let tmp2 = `) VALUES (`; // values appended to this
     // for all keys in the current object
     for(let y in item.attributes) {
@@ -35,8 +33,8 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
     const query = tmp1.substring(0, tmp1.length-2) + tmp2.substring(0, tmp2.length-2) + ')'; // q's query string set to concat of columns and values string
 
     client.execute(query, params, {prepare:true}).then(response => { // entity will be useless from DB
-      if(item.postcreate) { // if save Event hook set
-        item.postcreate(x => { // execute the save hook callback
+      if(item['postcreate']) { // if save Event hook set
+        item['postcreate'](x => { // execute the save hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), item);
@@ -75,9 +73,9 @@ export function create(items: any, options?: Object): Model {
     }
     item = new Entity(item, this);
 
-    if (item.precreate) {
+    if (item['precreate']) {
       preArr.push(Rx.Observable.create(observer => {
-        item.precreate(() => {
+        item['precreate'](() => {
           observer.next();
           observer.complete();
         }, err => observer.error(err), item);
@@ -87,7 +85,7 @@ export function create(items: any, options?: Object): Model {
     parseArr.push(this.parseQueryInsert(item, options));
   }
 
-  if (this.helper.precreate) {
+  if (this.schema['precreate']) {
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 

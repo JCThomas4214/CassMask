@@ -1,11 +1,8 @@
-'use strict';
-
 import { client, Model } from '../index';
 import { Entity } from './entity';
 import { objDiff } from './parseModel';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
-
 
 /*
     PARSES THE INPUTTED OBJECT
@@ -26,7 +23,7 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       }
     } else sel = '*'; // else select all columns
 
-    let query = `SELECT ${sel} FROM ${this.tableName} WHERE`; // start with a base query
+    let query = `SELECT ${sel} FROM ${this.schema.tableName} WHERE`; // start with a base query
     let params = []; // where params will be stored
 
     if (!item.isEmpty()) {
@@ -37,7 +34,7 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       }
       query = query.substring(0, query.length-4); // truncate last AND in the query string
     } else {
-      query = `SELECT ${sel} FROM ${this.tableName}`;
+      query = `SELECT ${sel} FROM ${this.schema.tableName}`;
     }
     if (options) {
       // if orderBy 
@@ -65,8 +62,8 @@ export function parseQuerySelect(item: Entity, options?: any): Rx.Observable<any
       }
 
       // If the find event hook was initialized
-      if(this.helper.postfind) { // if find Event hook set
-        this.helper.postfind(x => { // execute the find hook callback
+      if(this.schema['postfind']) { // if find Event hook set
+        this.schema['postfind'](x => { // execute the find hook callback
           observer.next(x);
           observer.complete();
         }, err => observer.error(err), items);
@@ -90,9 +87,9 @@ export function find(object?: Object, options?: any): Model {
   let obs = List<Rx.Observable<any>>(this.obs);
   let item: Entity = new Entity(object || {}, this);
 
-  if (item.prefind) {
+  if (item['prefind']) {
     obs = obs.push(Rx.Observable.create(observer => {
-      item.prefind(() => {
+      item['prefind'](() => {
         observer.next();
         observer.complete();
       }, err => observer.error(err), item);

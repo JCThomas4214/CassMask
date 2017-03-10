@@ -70,26 +70,43 @@ Create a model.
 import * as cassmask from 'cassmask';
 import { toTimeStamp, now, uuid } from 'cassmask';
 
-let Model = new cassmask.Model('TableName', {
+class ModelSchema extends cassmask.Schema {
+  // declare schema properties
+  col1: cassmask.UUID;
+  col2: cassmask.TIMEUUID;
+  col3: cassmask.TIMESTAMP;
+  col4: cassmask.TEXT;
+  col5: cassmask.INT;
+  
+  constructor(schema: Object) {
+    super(schema);
+  }
+
+  // Define precreate, preupdate, preremove, prefind
+  //    postcreate, postupdate, postremove, postfind
+  //    functions to set hook events
+
+  // Other defined functions will be integrated into Entity scope
+}
+
+export default cassmask.model('Model', new ModelSchema({
   col1: {
-    Type: cassmask.UUID,
-    Default: uuid()
+    type: cassmask.UUID,
+    default: uuid()
   },
   col2: {
-    Type: cassmask.TIMEUUID,
-    Default: now()
+    type: cassmask.TIMEUUID,
+    default: now()
   },
   col3: {
-    Type: cassmask.TIMESTAMP,
-    Default: toTimeStamp(now())
+    type: cassmask.TIMESTAMP,
+    default: toTimeStamp(now())
   },
   col4: cassmask.TEXT,
   cal5: cassmask.INT,
   // Primary Keys (Partition & Clustering Column)
   keys: ['col1', 'col2']
-});
-
-export default Model;
+}));
 ```
 
 Find, create, remove, update...
@@ -433,6 +450,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 + specify the callback as the function to execute
   + callback passes two arguments, next(object?), err(message?), and entity: Entity | Array<Entity>
   + callback must call one of them
++ sets the cooresponding hook function the Schema/Entity scopes
 
 <a name="pre"></a>
 
@@ -442,6 +460,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 + specify the callback as the function to execute
   + callback passes two arguments, next(object?), err(message?), and entity which are both functions
   + callback must call one of them
++ sets the cooresponding hook function the Schema/Entity scopes
 
 <a name="methods"></a>
 

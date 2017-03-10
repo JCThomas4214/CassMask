@@ -3,18 +3,20 @@ var cassmask = require('cassmask');
 var now = cassmask.now;
 var toTimeStamp = cassmask.toTimeStamp; 
 
-var ItemPre = new cassmask.Model('ItemPres', {
+var ItemPreSchema = new cassmask.Schema({
 	part: {
-		Type: cassmask.TEXT,
-		Default: 'Item'
+		type: cassmask.TEXT,
+		default: 'Item'
 	},
 	created: {
-		Type: cassmask.TIMESTAMP,
-		Default: toTimeStamp(now())
+		type: cassmask.TIMESTAMP,
+		default: toTimeStamp(now())
 	},
 	name: cassmask.TEXT,
 	info: cassmask.TEXT,
 	keys: ['part', 'name']
 });
+
+var ItemPre = new cassmask.Model('ItemPres', ItemPreSchema);
 
 module.exports = ItemPre;

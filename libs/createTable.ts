@@ -1,5 +1,3 @@
-'use strict';
-
 import { client } from '../index';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
@@ -12,7 +10,7 @@ import { List, Map } from 'immutable';
 export function createTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<any>> {
   // immutablejs object update to push to obs List
   return obs.insert(0, Rx.Observable.create(observer => {
-    const table = this.tableName;
+    const table = this.schema.tableName;
     const q1 = `CREATE TABLE IF NOT EXISTS ${ table } (${ this.schema.columns }, PRIMARY KEY (${ this.schema.keys }))`;   
     
     // when subscribe() execute create table query
@@ -39,8 +37,8 @@ export function createTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<a
       else, return passed state
  */
 export function checkTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<any>> {
-  if (!this.tblChked) { // if state.tblChked === false
-    this.tblChked = true; // state.tblChked = true
+  if (!this.schema.tblChked) { // if state.tblChked === false
+    this.schema.tblChked = true; // state.tblChked = true
     return this.createTable(obs); // createTable() will return new state with appended obs List
   }
   return obs;

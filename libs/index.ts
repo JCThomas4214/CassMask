@@ -1,4 +1,4 @@
-import { Helper } from './helper';
+import { Schema } from './schema';
 import { Entity } from './entity';
 import { parseModel } from './parseModel';
 import { createTable, checkTable } from './createTable';
@@ -12,7 +12,7 @@ import { seam } from './seam';
 import { post, pre } from './events';
 
 export {
-	Helper,
+	Schema,
 	Entity,
 	parseModel,
 	createTable, checkTable,
