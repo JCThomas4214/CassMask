@@ -13,7 +13,7 @@ export function parseQueryDelete(item: Entity, options: SchemaOptions): Rx.Obser
   return Rx.Observable.create(observer => {
       let params = [];
 
-      let tmp = `DELETE FROM ${this.schema.tableName}`; // set starting query string
+      let tmp = `DELETE FROM ${this.schemaHelper.tableName}`; // set starting query string
       if (options && options.using) tmp += ` USING ${options.using}`;
       tmp += ' WHERE';
       // for all keys in this item
@@ -84,7 +84,7 @@ export function remove(items?: any, options?: SchemaOptions): Model {
   } else { // if no items sent to the remove function
 
     obs = obs.push(Rx.Observable.create(observer => {
-      client.execute(`TRUNCATE ${this.schema.tableName}`).then(entity => { // entity will be useless information about DB
+      client.execute(`TRUNCATE ${this.schemaHelper.tableName}`).then(entity => { // entity will be useless information about DB
         observer.next(); // no argument set for next()
         observer.complete();
       }).catch(err => observer.error(err));

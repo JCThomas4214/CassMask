@@ -4,9 +4,8 @@ import * as _ from 'lodash';
 import { List, Map } from 'immutable';
 
 import {
-  Schema,
+  Schema, SchemaHelper,
   Entity,
-  parseModel,
   createTable, checkTable,
   create, parseQueryInsert,
   remove, parseQueryDelete,
@@ -59,6 +58,10 @@ export const TIMESTAMP: string = 'timestamp';
 export const INET: string = 'inet';
 export const COUNTER: string = 'counter';
 
+export interface ISchema {
+  id: string;
+}
+
 export interface UpdateObject {
   set: Object,
   where: Object
@@ -105,14 +108,14 @@ export function connect(config: any, cb?: Function): void {
   });
 }
 
-export function model(modelName: string, schema: Schema, options?: any): Model {
-  schema.tableName = modelName + 's';
-  return new Model(schema.tableName, schema, options);
+export function model<T>(modelName: string, schema: Schema, options?: any): Model {
+  return new Model(modelName + 's', schema, options);
 }
 
 export class Model {
     public obs: List<Rx.Observable<any>>;
     public schema: Schema;
+    public schemaHelper: SchemaHelper;
 
     public options: any;
 
@@ -121,12 +124,13 @@ export class Model {
 
         if (schema) this.obs = schema as List<Rx.Observable<any>>;
         this.schema = modelName.schema;
+        this.schemaHelper = modelName.schemaHelper;
         this.options = modelName.options;
 
       } else {
         this.obs = List<Rx.Observable<any>>([]);
-        if (!schema['tableName']) schema['tableName'] = modelName;
         this.schema = schema as Schema;
+        this.schemaHelper = new SchemaHelper(modelName, schema);
 
         if (options) this.options = options; 
 

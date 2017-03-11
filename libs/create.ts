@@ -13,7 +13,7 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
     let params = [];
     // INSERT is a more complicated query that requires more feness
     // // separate query into two parts, columns & values
-    let tmp1 = `INSERT INTO ${this.schema.tableName} (`; // columns will be appended to this
+    let tmp1 = `INSERT INTO ${this.schemaHelper.tableName} (`; // columns will be appended to this
     let tmp2 = `) VALUES (`; // values appended to this
     // for all keys in the current object
     for(let y in item.attributes) {
@@ -67,7 +67,7 @@ export function create(items: any, options?: Object): Model {
   let parseArr = [];
 
   // create a read only pointer to a new object from the defaults Map
-  const defaults = this.schema.defaults;
+  const defaults = this.schemaHelper.defaults;
   // merge default values with each item in the items array
   for(let x = 0; x < items.length; x++) {
     let item = items[x];

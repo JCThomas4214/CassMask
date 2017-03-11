@@ -82,15 +82,26 @@ interface IModelSchema extends cassmask.ISchema {
 }
 
 class ModelSchema extends cassmask.Schema {
-  // declare schema properties
-  col1: cassmask.UUID;
-  col2: cassmask.TIMEUUID;
-  col3: cassmask.TIMESTAMP;
-  col4: cassmask.TEXT;
-  col5: cassmask.INT;
+  // declare schema type values
+  col1 = {
+    type: cassmask.UUID,
+    default: uuid()
+  };
+  col2 = {
+    type: cassmask.TIMEUUID,
+    default: now()
+  };
+  col3 = {
+    type: cassmask.TIMESTAMP,
+    default: toTimeStamp(now())
+  };
+  col4 = cassmask.TEXT;
+  cal5 = cassmask.INT;
+  // Primary Keys (Partition & Clustering Column)
+  keys = ['col1', 'col2'];
   
-  constructor(schema: Object) {
-    super(schema);
+  constructor() {
+    super();
   }
 
   // Define pre_create, pre_update, pre_remove, pre_find
@@ -100,24 +111,7 @@ class ModelSchema extends cassmask.Schema {
   // Other defined functions will be integrated into Entity scope
 }
 
-export default cassmask.model<IModelSchema>('Model', new ModelSchema({
-  col1: {
-    type: cassmask.UUID,
-    default: uuid()
-  },
-  col2: {
-    type: cassmask.TIMEUUID,
-    default: now()
-  },
-  col3: {
-    type: cassmask.TIMESTAMP,
-    default: toTimeStamp(now())
-  },
-  col4: cassmask.TEXT,
-  cal5: cassmask.INT,
-  // Primary Keys (Partition & Clustering Column)
-  keys: ['col1', 'col2']
-}));
+export default cassmask.model<IModelSchema>('Model', new ModelSchema());
 ```
 
 Find, create, remove, update...

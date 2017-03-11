@@ -10,8 +10,8 @@ import { List, Map } from 'immutable';
 export function createTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<any>> {
   // immutablejs object update to push to obs List
   return obs.insert(0, Rx.Observable.create(observer => {
-    const table = this.schema.tableName;
-    const q1 = `CREATE TABLE IF NOT EXISTS ${ table } (${ this.schema.columns }, PRIMARY KEY (${ this.schema.keys }))`;   
+    const table = this.schemaHelper.tableName;
+    const q1 = `CREATE TABLE IF NOT EXISTS ${ table } (${ this.schemaHelper.columns }, PRIMARY KEY (${ this.schemaHelper.keys }))`;   
     
     // when subscribe() execute create table query
     client.execute(q1).then(entity => { // observer will not pass any arguments from the query
@@ -37,8 +37,8 @@ export function createTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<a
       else, return passed state
  */
 export function checkTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<any>> {
-  if (!this.schema.tblChked) { // if state.tblChked === false
-    this.schema.tblChked = true; // state.tblChked = true
+  if (!this.schemaHelper.tblChked) { // if state.tblChked === false
+    this.schemaHelper.tblChked = true; // state.tblChked = true
     return this.createTable(obs); // createTable() will return new state with appended obs List
   }
   return obs;

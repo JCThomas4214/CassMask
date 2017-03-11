@@ -1,6 +1,6 @@
 import { client, Model, FindOptions } from '../index';
 import { Entity } from './entity';
-import { objDiff } from './parseModel';
+import { objDiff } from './schema';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 
@@ -19,11 +19,11 @@ export function parseQuerySelect(item: Entity, options?: FindOptions): Rx.Observ
       if (Array.isArray(attr)) // if attr is an array
         sel = attr.join(','); // join array into string
       else if (attr.exclude) { 
-        sel = objDiff(this.schema.allCol, attr.exclude).join(','); // fidn set difference and join
+        sel = objDiff(this.schemaHelper.allCol, attr.exclude).join(','); // fidn set difference and join
       }
     } else sel = '*'; // else select all columns
 
-    let query = `SELECT ${sel} FROM ${this.schema.tableName} WHERE`; // start with a base query
+    let query = `SELECT ${sel} FROM ${this.schemaHelper.tableName} WHERE`; // start with a base query
     let params = []; // where params will be stored
 
     if (!item.isEmpty()) {
@@ -34,7 +34,7 @@ export function parseQuerySelect(item: Entity, options?: FindOptions): Rx.Observ
       }
       query = query.substring(0, query.length-4); // truncate last AND in the query string
     } else {
-      query = `SELECT ${sel} FROM ${this.schema.tableName}`;
+      query = `SELECT ${sel} FROM ${this.schemaHelper.tableName}`;
     }
     if (options) {
       // if groupBy 

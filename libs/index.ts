@@ -1,6 +1,5 @@
-import { Schema } from './schema';
+import { Schema, SchemaHelper } from './schema';
 import { Entity } from './entity';
-import { parseModel } from './parseModel';
 import { createTable, checkTable } from './createTable';
 import { create, parseQueryInsert } from './create';
 import { remove, parseQueryDelete } from './remove';
@@ -12,9 +11,8 @@ import { seam } from './seam';
 import { post, pre } from './events';
 
 export {
-	Schema,
+	Schema, SchemaHelper,
 	Entity,
-	parseModel,
 	createTable, checkTable,
 	create, parseQueryInsert,
 	remove, parseQueryDelete,

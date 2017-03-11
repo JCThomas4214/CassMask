@@ -10,12 +10,12 @@ import { List, Map } from 'immutable';
 export function parseQueryUpdate(item: Entity, options: SchemaOptions): Rx.Observable<any> {
 
   return Rx.Observable.create(observer => {
-      const keyList = this.schema.keyList;
-      const columnList = this.schema.columnList;
+      const keyList = this.schemaHelper.keyList;
+      const columnList = this.schemaHelper.columnList;
 
       let params = [];
       // start query string at this base
-      let tmp = `UPDATE ${this.schema.tableName}`;
+      let tmp = `UPDATE ${this.schemaHelper.tableName}`;
       if(options && options.using) tmp += ` USING ${options.using}`;
       tmp += ' SET';
 

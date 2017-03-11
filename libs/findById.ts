@@ -1,6 +1,6 @@
 import { client, Model, FindOptions } from '../index';
 import { Entity } from './entity';
-import { objDiff } from './parseModel';
+import { objDiff } from './schema';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 
@@ -29,11 +29,11 @@ export function findById(id: string, options?: FindOptions): Model {
       if (Array.isArray(attr)) // if attr is an array
         sel = attr.join(','); // join array into string
       else if (attr.exclude) { 
-        sel = objDiff(this.schema.allCol, attr.exclude).join(','); // fidn set difference and join
+        sel = objDiff(this.schemaHelper.allCol, attr.exclude).join(','); // fidn set difference and join
       }
     } else sel = '*'; // else select all columns
 
-    const query = `SELECT ${sel} FROM ${this.schema.tableName} WHERE id = ${id}`
+    const query = `SELECT ${sel} FROM ${this.schemaHelper.tableName} WHERE id = ${id}`
 
     client.execute(query).then(entity => {
       // all rows in the response will be stored in a Entity class inside items array

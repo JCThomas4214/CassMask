@@ -1,5 +1,5 @@
 import { client, Model } from '../index';
-import { Schema } from './schema';
+import { Schema, SchemaHelper } from './schema';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 
@@ -12,6 +12,7 @@ export class Entity extends Schema {
   public toJSON: Function;
   private modified: Object = {};
   public attributes: Object = {};
+  private schemaHelper: SchemaHelper;
 
   constructor(item: any, parent: Model) {
     // super will be the Schema class with all defined event functions
@@ -19,26 +20,19 @@ export class Entity extends Schema {
     // remove all exploitable properties from the item
     // when passed back through express response
     this.toJSON = function() {
-      delete this.tableName;
-      delete this.tblChked;
-      delete this.columns;
-      delete this.keys;
-      delete this.allCol;
-      delete this.columnList;
-      delete this.keyList;
-      delete this.defaults;
-
+      delete this.schemaHelper;
       delete this.modified;
       delete this.attributes;
       return this;
     };
 
+    this.schemaHelper = parent.schemaHelper;
     // create class properties cooresponding to column values
     this.integrateItem(item);
   }
   // integrate the JSON into the parent object
   private integrateItem(item: any): void {
-    const cols = this.allCol;
+    const cols = this.schemaHelper.allCol;
 
     for (let y = 0; y < cols.length; y++) {
       let prop = cols[y];
@@ -84,10 +78,10 @@ export class Entity extends Schema {
       let isInsert: boolean = false;
       let arr1 = [],
           arr2 = [];
-      const keyList = this.keyList;
-      const columnList = this.columnList;
+      const keyList = this.schemaHelper.keyList;
+      const columnList = this.schemaHelper.columnList;
 
-      let q1: string = `UPDATE ${this.tableName} SET `,
+      let q1: string = `UPDATE ${this.schemaHelper.tableName} SET `,
           q2: string = ` WHERE `;
 
       for(let x = 0; x < columnList.length; x++) {
@@ -137,8 +131,8 @@ export class Entity extends Schema {
       // One array for WHERE
       let arr = [];
 
-      let query: string = `DELETE FROM ${this.tableName} WHERE `;
-      const keyList = this.keyList;
+      let query: string = `DELETE FROM ${this.schemaHelper.tableName} WHERE `;
+      const keyList = this.schemaHelper.keyList;
 
       for(let x = 0; x < keyList.length; x++) {
         const val = keyList[x];
