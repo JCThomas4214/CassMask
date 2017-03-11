@@ -55,12 +55,16 @@ describe('CassMask CREATE', function() {
 			it('subscribe result should be the same as inserted', () => {
 				expect(newSubTest.name).toBe('testing');
 				expect(newSubTest.info).toBe('this is a testing insert');
+				expect(newSubTest.id).toBe('uuid()');
+				expect(newSubTest.created).toBe('toTimeStamp(now())');
 			});
 
 			it('database should have same result as inserted', () => {
 				expect(newTest).not.toEqual(jasmine.any(Array));
 				expect(newTest.name).toBe('testing');
 				expect(newTest.info).toBe('this is a testing insert');
+				expect(newSubTest.id).toBeDefined();
+				expect(newSubTest.created).toBeDefined();
 			});
 		});
 
@@ -107,32 +111,56 @@ describe('CassMask CREATE', function() {
 			it('subscribe results should be the same as inserted', () => {
 				expect(arrayTest[0].name).toBe('arrayInsert1');
 				expect(arrayTest[0].info).toBe('this is a arrayInsert1 test');
+				expect(arrayTest[0].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[0].id).toBe('uuid()');
 				expect(arrayTest[1].name).toBe('arrayInsert2');
 				expect(arrayTest[1].info).toBe('this is a arrayInsert2 test');
+				expect(arrayTest[1].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[1].id).toBe('uuid()');
 				expect(arrayTest[2].name).toBe('arrayInsert3');
 				expect(arrayTest[2].info).toBe('this is a arrayInsert3 test');
+				expect(arrayTest[2].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[2].id).toBe('uuid()');
 				expect(arrayTest[3].name).toBe('arrayInsert4');
 				expect(arrayTest[3].info).toBe('this is a arrayInsert4 test');
+				expect(arrayTest[3].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[3].id).toBe('uuid()');
 				expect(arrayTest[4].name).toBe('arrayInsert5');
 				expect(arrayTest[4].info).toBe('this is a arrayInsert5 test');
+				expect(arrayTest[4].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[4].id).toBe('uuid()');
 				expect(arrayTest[5].name).toBe('arrayInsert6');
 				expect(arrayTest[5].info).toBe('this is a arrayInsert6 test');
+				expect(arrayTest[5].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[5].id).toBe('uuid()');
 			});
 
 			it('database should have same results as inserted', () => {
 				expect(dbrows).toEqual(jasmine.any(Array));
 				expect(dbrows[0].name).toBe('arrayInsert1');
 				expect(dbrows[0].info).toBe('this is a arrayInsert1 test');
+				expect(dbrows[0].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[0].id).not.toBe('uuid()');
 				expect(dbrows[1].name).toBe('arrayInsert2');
 				expect(dbrows[1].info).toBe('this is a arrayInsert2 test');
+				expect(dbrows[1].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[1].id).not.toBe('uuid()');
 				expect(dbrows[2].name).toBe('arrayInsert3');
 				expect(dbrows[2].info).toBe('this is a arrayInsert3 test');
+				expect(dbrows[2].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[2].id).not.toBe('uuid()');
 				expect(dbrows[3].name).toBe('arrayInsert4');
 				expect(dbrows[3].info).toBe('this is a arrayInsert4 test');
+				expect(dbrows[3].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[3].id).not.toBe('uuid()');
 				expect(dbrows[4].name).toBe('arrayInsert5');
 				expect(dbrows[4].info).toBe('this is a arrayInsert5 test');
+				expect(dbrows[4].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[4].id).not.toBe('uuid()');
 				expect(dbrows[5].name).toBe('arrayInsert6');
 				expect(dbrows[5].info).toBe('this is a arrayInsert6 test');
+				expect(dbrows[5].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[5].id).not.toBe('uuid()');
 			});
 		});
 	});
@@ -229,32 +257,56 @@ describe('CassMask CREATE', function() {
 			it('subscribe results should be the same as inserted', () => {
 				expect(arrayTest[0].name).toBe('arrayInsert1');
 				expect(arrayTest[0].info).toBe('this is a arrayInsert1 test');
+				expect(arrayTest[0].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[0].id).toBe('uuid()');
 				expect(arrayTest[1].name).toBe('arrayInsert2');
 				expect(arrayTest[1].info).toBe('this is a arrayInsert2 test');
+				expect(arrayTest[1].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[1].id).toBe('uuid()');
 				expect(arrayTest[2].name).toBe('arrayInsert3');
 				expect(arrayTest[2].info).toBe('this is a arrayInsert3 test');
+				expect(arrayTest[2].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[2].id).toBe('uuid()');
 				expect(arrayTest[3].name).toBe('arrayInsert4');
 				expect(arrayTest[3].info).toBe('this is a arrayInsert4 test');
+				expect(arrayTest[3].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[3].id).toBe('uuid()');
 				expect(arrayTest[4].name).toBe('arrayInsert5');
 				expect(arrayTest[4].info).toBe('this is a arrayInsert5 test');
+				expect(arrayTest[4].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[4].id).toBe('uuid()');
 				expect(arrayTest[5].name).toBe('arrayInsert6');
 				expect(arrayTest[5].info).toBe('this is a arrayInsert6 test');
+				expect(arrayTest[5].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[5].id).toBe('uuid()');
 			});
 
 			it('database should have same results as inserted', () => {
 				expect(dbrows).toEqual(jasmine.any(Array));
 				expect(dbrows[0].name).toBe('arrayInsert1');
 				expect(dbrows[0].info).toBe('this is a arrayInsert1 test');
+				expect(dbrows[0].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[0].id).not.toBe('uuid()');
 				expect(dbrows[1].name).toBe('arrayInsert2');
 				expect(dbrows[1].info).toBe('this is a arrayInsert2 test');
+				expect(dbrows[1].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[1].id).not.toBe('uuid()');
 				expect(dbrows[2].name).toBe('arrayInsert3');
 				expect(dbrows[2].info).toBe('this is a arrayInsert3 test');
+				expect(dbrows[2].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[2].id).not.toBe('uuid()');
 				expect(dbrows[3].name).toBe('arrayInsert4');
 				expect(dbrows[3].info).toBe('this is a arrayInsert4 test');
+				expect(dbrows[3].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[3].id).not.toBe('uuid()');
 				expect(dbrows[4].name).toBe('arrayInsert5');
 				expect(dbrows[4].info).toBe('this is a arrayInsert5 test');
+				expect(dbrows[4].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[4].id).not.toBe('uuid()');
 				expect(dbrows[5].name).toBe('arrayInsert6');
 				expect(dbrows[5].info).toBe('this is a arrayInsert6 test');
+				expect(dbrows[5].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[5].id).not.toBe('uuid()');
 			});
 
 			it('post event should have triggered 6 times', () => {
@@ -359,34 +411,58 @@ describe('CassMask CREATE', function() {
 			});
 
 			it('subscribe results should be the same as inserted', () => {
-				expect(arrayTest[0].name).toBe('arrayInsert1 create pre hooked!');
+				expect(arrayTest[0].name).toBe('arrayInsert1 create pre hooked!');				
 				expect(arrayTest[0].info).toBe('this is a arrayInsert1 test');
+				expect(arrayTest[0].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[0].id).toBe('uuid()');
 				expect(arrayTest[1].name).toBe('arrayInsert2 create pre hooked!');
 				expect(arrayTest[1].info).toBe('this is a arrayInsert2 test');
+				expect(arrayTest[1].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[1].id).toBe('uuid()');
 				expect(arrayTest[2].name).toBe('arrayInsert3 create pre hooked!');
 				expect(arrayTest[2].info).toBe('this is a arrayInsert3 test');
+				expect(arrayTest[2].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[2].id).toBe('uuid()');
 				expect(arrayTest[3].name).toBe('arrayInsert4 create pre hooked!');
 				expect(arrayTest[3].info).toBe('this is a arrayInsert4 test');
+				expect(arrayTest[3].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[3].id).toBe('uuid()');
 				expect(arrayTest[4].name).toBe('arrayInsert5 create pre hooked!');
 				expect(arrayTest[4].info).toBe('this is a arrayInsert5 test');
+				expect(arrayTest[4].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[4].id).toBe('uuid()');
 				expect(arrayTest[5].name).toBe('arrayInsert6 create pre hooked!');
 				expect(arrayTest[5].info).toBe('this is a arrayInsert6 test');
+				expect(arrayTest[5].created).toBe('toTimeStamp(now())');
+				expect(arrayTest[5].id).toBe('uuid()');
 			});
 
 			it('database should have same results as inserted', () => {
 				expect(dbrows).toEqual(jasmine.any(Array));
-				expect(dbrows[0].name).toBe('arrayInsert1 create pre hooked!');
+				expect(dbrows[0].name).toBe('arrayInsert1 create pre hooked!');				
 				expect(dbrows[0].info).toBe('this is a arrayInsert1 test');
+				expect(dbrows[0].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[0].id).not.toBe('uuid()');
 				expect(dbrows[1].name).toBe('arrayInsert2 create pre hooked!');
 				expect(dbrows[1].info).toBe('this is a arrayInsert2 test');
+				expect(dbrows[1].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[1].id).not.toBe('uuid()');
 				expect(dbrows[2].name).toBe('arrayInsert3 create pre hooked!');
 				expect(dbrows[2].info).toBe('this is a arrayInsert3 test');
+				expect(dbrows[2].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[2].id).not.toBe('uuid()');
 				expect(dbrows[3].name).toBe('arrayInsert4 create pre hooked!');
 				expect(dbrows[3].info).toBe('this is a arrayInsert4 test');
+				expect(dbrows[3].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[3].id).not.toBe('uuid()');
 				expect(dbrows[4].name).toBe('arrayInsert5 create pre hooked!');
 				expect(dbrows[4].info).toBe('this is a arrayInsert5 test');
+				expect(dbrows[4].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[4].id).not.toBe('uuid()');
 				expect(dbrows[5].name).toBe('arrayInsert6 create pre hooked!');
 				expect(dbrows[5].info).toBe('this is a arrayInsert6 test');
+				expect(dbrows[5].created).not.toBe('toTimeStamp(now())');
+				expect(dbrows[5].id).not.toBe('uuid()');
 			});
 
 			it('pre event should have triggered 6 times', () => {

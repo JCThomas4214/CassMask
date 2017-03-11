@@ -96,7 +96,7 @@ export function update(items: UpdateObject | Array<UpdateObject>, options?: Sche
     parseArr.push(this.parseQueryUpdate(item, options || {}));
   }
 
-  if (this.schema['pre_update']) {  
+  if (this.schema['pre_update']) {
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
   }
 

@@ -82,7 +82,12 @@ export class SchemaHelper {
 export class Schema {
 
   constructor(schema?: Schema | Object) {
-    if(schema) for(let x in schema) this[x] = schema[x];
+    if(schema && schema instanceof Schema)
+      for(let x in schema) {
+        if (typeof schema[x] === 'function')
+          this[x] = schema[x]
+      }
+    else for(let x in schema) this[x] = schema[x];      
   }
 
 }

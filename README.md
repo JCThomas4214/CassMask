@@ -3,8 +3,6 @@
 
 # CassMask
 
-### "Inspired by [MongooseJS](http://mongoosejs.com/) with a twist!"
-
 #### Currently unsupported data types
 
 + Counter (has not been tested yet)
