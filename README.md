@@ -15,11 +15,12 @@
 2. [The Entity](#entityObject)
   1. [Important Limitations](#eIssues)
   2. [Entity Example](#entityExample)
-3. [Event Hooks](#eventHooks)
+3. [Validation](#validation)
+4. [Event Hooks](#eventHooks)
   1. [Socket.io example](#sioEx)
-4. [CassMask API](#cassmaskapi)
+5. [CassMask API](#cassmaskapi)
   1. [connect](#connect)
-5. [Model API](#modelapi)
+6. [Model API](#modelapi)
   1. [seam](#seam)
   2. [find](#find)
   3. [findOne](#findOne)
@@ -30,13 +31,13 @@
   8. [post](#post)
   9. [pre](#pre)
   10. [methods](#methods)
-6. [Entity API](#entityAPI)
+7. [Entity API](#entityAPI)
   1. [constructor](#entityconstructor)
   2. [isEmpty](#entityisempty)
   2. [merge](#entitymerge)
   2. [save](#entitysave)
   3. [remove](#entityremove)
-7. [TODO](#TODO)
+8. [TODO](#TODO)
 
 ## Quick Start
 
@@ -93,24 +94,49 @@ class ModelSchema extends cassmask.Schema {
     type: cassmask.TIMESTAMP,
     default: toTimeStamp(now())
   };
-  col4 = cassmask.TEXT;
-  cal5 = cassmask.INT;
+  col4 = {
+    type: cassmask.TEXT,
+    required: true
+  };
+  col5 = {
+    type: cassmask.INT,
+    required: 'Col5 must be present!!'
+  };
   // Primary Keys (Partition & Clustering Column)
   keys = ['col1', 'col2'];
-  
+
   constructor() {
     super();
+  }
+
+  // Define validate_[column name] function to create
+  //    a validate function for that key
+
+  validate_col4(col4, next) {
+    if(col4.length >= 5) next();
+    else next('col4 is not long enough!');
+  }
+
+  validate_col5(col5, next) {
+    if(col5 >= 5) next();
+    else next('col5 value is not large enough!');
   }
 
   // Define pre_create, pre_update, pre_remove, pre_find
   //    post_create, post_update, post_remove, post_find
   //    functions to set hook events
 
+  pre_create(next, err) {
+    this.col4 += ' test pre hook!';
+    next();
+  }
+
   // Other defined functions will be integrated into Entity scope
 }
 
 export default cassmask.model<IModelSchema>('Model', new ModelSchema());
 ```
+_[click here](https://github.com/JCThomas4214/CassMask/wiki/ES5-Examples) for a ES5 example_
 
 Find, create, remove, update...
 
@@ -121,11 +147,11 @@ let holder = [];
 
 /*
   Existing rows in Model Table
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before1', col5: 0 }
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before2', col5: 1 }
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before3', col5: 2 }
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before4', col5: 3 }
-    
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before1 test pre hook!', col5: 6 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before2 test pre hook!', col5: 7 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before3 test pre hook!', col5: 8 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before4 test pre hook!', col5: 9 }
+
 */
 
 Model.create([{
@@ -147,19 +173,19 @@ Model.create([{
   col1: 'generated uuid', // before4
   col2: 'generated timeuuid'
 }]).find().seam().subscribe( // Every next argument will be an Entity object for every query executed
-  x => holder.push(x), 
-  err => console.log(err), 
-  () => console.log(holder[holder.length - 1])
+  x => holder.push(x),
+  err => console.log(err),
+  () => {}
 );
 
 /*  
   Model Table
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before1', col5: 0 }
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before3', col5: 2 }
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test1', col5: 49 }
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test2', col5: 23 }
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test3', col5: 97 }
-    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test4', col5: 57 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before1 test pre hook!', col5: 6 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'before3 test pre hook!', col5: 8 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test1 test pre hook!', col5: 49 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test2 test pre hook!', col5: 23 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test3 test pre hook!', col5: 97 }
+    { col1: '[uuid]', col2: '[timeuuid]', col3: '[created time]', col4: 'test4 test pre hook!', col5: 57 }
 */
 ```
 
@@ -196,13 +222,13 @@ An [event hook](#eventHooks) could be used to protentially solve this delema. We
 ```ts
 let holder = [];
 
-// findOne with no argument will find the first row in the 
-// table and pass an Entity with the found row to next() 
+// findOne with no argument will find the first row in the
+// table and pass an Entity with the found row to next()
 
-// find with no argument will find the all rows in the 
-// table and pass an Entity with the found rows to next() 
+// find with no argument will find the all rows in the
+// table and pass an Entity with the found rows to next()
 Model.findOne().find().seam().subscribe( // two queries are executed and two next() functions are called
-  model => holder.push(model), 
+  model => holder.push(model),
   err => console.log(err),
   () => {
     holder[0].col4 = 'awesome_example'; // index 0 is the findOne query argument
@@ -245,14 +271,14 @@ Model.findOne().find().seam().subscribe( // two queries are executed and two nex
 
 ## Batching!
 
-Batching is not always practical in Cassandra because of how it partitions the data to Nodes/SSTables. Batching is best practice if and only if the INSERTS, UPDATES, and DELETES are for a single partition. 
+Batching is not always practical in Cassandra because of how it partitions the data to Nodes/SSTables. Batching is best practice if and only if the INSERTS, UPDATES, and DELETES are for a single partition.
 
 In CassMask batching is currently only availiable per function basis and is off by default. If you would like to enable it, simply pass in a Object with batch = true as the second argument.
 
 ```ts
 // Parititon key = catagory
 Model.remove().create([{
-    catagory: 'cloud', 
+    catagory: 'cloud',
     id: now(),
     name: 'SocketIO',
     xcoor: 52,
@@ -270,7 +296,7 @@ Model.remove().create([{
     xcoor: 10,
     ycoor: 65
   }], { batch: true }).seam().subscribe(x => {}, err => console.log(err));
-``` 
+```
 
 <a name="tcbBatching"></a>
 
@@ -278,6 +304,10 @@ Model.remove().create([{
 
 When batching, multiple queries are condenced into a single query with multiple statements. If you would like event driven features you will need to keep in mind that the CassMask Event API will only be triggered (depending on the hook) once per query response. Depending on your use case an emit per INSERT, UPDATE, and/or DELETE may be preferable.
 -->
+<a name="validation"></a>
+
+Validation in
+
 <a name="eventHooks"></a>
 
 ## Event Hooks
@@ -299,10 +329,10 @@ let ModelEvents = new EventEmitter();
 // Set max event listeners (0 == unlimited)
 ModelEvents.setMaxListeners(0);
 
-/* 
+/*
   The lastEntity; for create(), update(), and remove(): Entity object that was originally passed into the query
     for find() and findOne(): the rows found in the table
-  the next; this is a callback that expects zero or one argument. 
+  the next; this is a callback that expects zero or one argument.
     callback will call observer next() and complete() functions
     argument will be passed into next()
   The client; this is the cassandra client, which can be used to execute additional queries
@@ -312,13 +342,13 @@ Model.post('create', function(next, err) {
   // callback code goes here
 
   Model.Events.emit('create', this);
-  
+
   next(this);
 });
 
 export default ModelEvents;
 
-``` 
+```
 
 socket.ts
 
@@ -370,7 +400,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="connect"></a>
 
-#### [connect](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(config: [ClientOptions](http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/), cb: Function): void 
+#### [connect](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(config: [ClientOptions](http://docs.datastax.com/en/developer/nodejs-driver/3.2/api/type.ClientOptions/), cb: Function): void
 
 + connects to the cassandra nodes
 + cb function to be fired once connection sring returns
@@ -469,7 +499,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 #### [methods](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(scope: Object): void;
 
-+ scope object containing properties that will be integrated into all instantiated Entity objects 
++ scope object containing properties that will be integrated into all instantiated Entity objects
 
 <a name="updateobject"></a>
 
@@ -506,9 +536,9 @@ execute modelRegister(socket) in your socketio.config onConnect function
   + ex: {limit: 1}
 + allowFiltering?: boolean; append ALLOW FILTERING to query string
   + ex: {allowFiltering: true}
-  + **It is recommended that this not be used as it causes cluster wide search** 
+  + **It is recommended that this not be used as it causes cluster wide search**
 
-#### 
+####
 
 <a name="entityAPI"></a>
 
@@ -557,7 +587,7 @@ entity.save();
 
 + creates a query string based off this Entity's attributes
 + will distinguish if the query is an update or insert and execute the appropriate post callback
-+ will NOT execute a pre callback as the object 
++ will NOT execute a pre callback as the object
 + executes UPDATE query on subscribe
 
 <a name="entityremove"></a>
@@ -573,5 +603,3 @@ entity.save();
 ## TODO
 
 + Data Type support (Map, Sets, Lists, custom)
-+ Virtual fields
-+ Validation

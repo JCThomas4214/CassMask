@@ -53,14 +53,20 @@ describe('CassMask UPDATE', function() {
 				info: 'this is a arrayUpdate6 test'
 			}]).seam().subscribe(
 				test => {},
-				err => console.log(err),
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
 				() => done());
 		});
 
 		beforeAll(done => {
 			Item.find().seam().subscribe(
 				tests => rows = tests,
-				err => console.log(err),
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
 				() => done());
 		});
 
@@ -83,6 +89,24 @@ describe('CassMask UPDATE', function() {
 
 		describe('UPDATE specific single', function() {
 
+			it('should throw a validation error when info is too short', done => {
+				Item.update({
+					set: {
+						info: 'info'
+					},
+					where: {
+						part: rows[1].part,
+						name: rows[1].name
+					}
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Info is not long enough!');
+						done();
+					},
+					() => done());
+			});
+
 			it('should update the 2nd row on the database table', done => {
 				var results = [];
 
@@ -96,7 +120,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate2 test');
 						expect(results[0].part).toEqual('Item');
@@ -125,7 +152,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate6 test');
 						expect(results[0].part).toEqual('Item');
@@ -154,7 +184,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate4 test');
 						expect(results[0].part).toEqual('Item');
@@ -194,7 +227,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate1 test');
 						expect(results[0].part).toEqual('Item');
@@ -238,7 +274,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate2 test');
 						expect(results[0].part).toEqual('Item');
@@ -282,7 +321,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate3 test');
 						expect(results[0].part).toEqual('Item');
@@ -332,14 +374,20 @@ describe('CassMask UPDATE', function() {
 				info: 'this is a arrayUpdate6 test'
 			}]).seam().subscribe(
 				test => {},
-				err => console.log(err),
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
 				() => done());
 		});
 
 		beforeAll(done => {
 			ItemPost.find().seam().subscribe(
 				tests => rows = tests,
-				err => console.log(err),
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
 				() => done());
 		});
 
@@ -370,6 +418,24 @@ describe('CassMask UPDATE', function() {
 
 		describe('UPDATE specific single', function() {
 
+			it('should throw a validation error when info is too short', done => {
+				ItemPost.update({
+					set: {
+						info: 'info'
+					},
+					where: {
+						part: rows[1].part,
+						name: rows[1].name
+					}
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Info is not long enough!');
+						done();
+					},
+					() => done());
+			});
+
 			it('should update the 2nd row on the database table', done => {
 				var results = [];
 
@@ -383,7 +449,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate2 test');
 						expect(results[0].part).toEqual('Item');
@@ -412,7 +481,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate6 test');
 						expect(results[0].part).toEqual('Item');
@@ -441,7 +513,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate4 test');
 						expect(results[0].part).toEqual('Item');
@@ -490,7 +565,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate1 test');
 						expect(results[0].part).toEqual('Item');
@@ -534,7 +612,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate2 test');
 						expect(results[0].part).toEqual('Item');
@@ -578,7 +659,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate3 test');
 						expect(results[0].part).toEqual('Item');
@@ -612,7 +696,7 @@ describe('CassMask UPDATE', function() {
 				expect(post[5]).toEqual(rows[3].name + ' update post hooked!');
 			});
 		});
-	});	
+	});
 
 	describe('UPDATE with PRE Events', function() {
 		var rows;
@@ -639,14 +723,20 @@ describe('CassMask UPDATE', function() {
 				info: 'this is a arrayUpdate6 test'
 			}]).seam().subscribe(
 				test => {},
-				err => console.log(err),
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
 				() => done());
 		});
 
 		beforeAll(done => {
 			ItemPre.find().seam().subscribe(
 				tests => rows = tests,
-				err => console.log(err),
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
 				() => done());
 		});
 
@@ -677,6 +767,24 @@ describe('CassMask UPDATE', function() {
 
 		describe('UPDATE specific single', function() {
 
+			it('should throw a validation error when info is too short', done => {
+				ItemPre.update({
+					set: {
+						info: 'info'
+					},
+					where: {
+						part: rows[1].part,
+						name: rows[1].name
+					}
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Info is not long enough!');
+						done();
+					},
+					() => done());
+			});
+
 			it('should update the 2nd row on the database table', done => {
 				var results = [];
 
@@ -690,7 +798,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate2 test');
 						expect(results[0].part).toEqual('Item');
@@ -719,7 +830,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate6 test');
 						expect(results[0].part).toEqual('Item');
@@ -748,7 +862,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate4 test');
 						expect(results[0].part).toEqual('Item');
@@ -797,7 +914,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate1 test');
 						expect(results[0].part).toEqual('Item');
@@ -841,7 +961,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate2 test');
 						expect(results[0].part).toEqual('Item');
@@ -885,7 +1008,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate3 test');
 						expect(results[0].part).toEqual('Item');
@@ -919,7 +1045,7 @@ describe('CassMask UPDATE', function() {
 				expect(pre[5]).toEqual(rows[3].name + ' update pre hooked!');
 			});
 		});
-	});	
+	});
 
 	describe('UPDATE with PRE and POST Events', function() {
 		var rows;
@@ -947,14 +1073,20 @@ describe('CassMask UPDATE', function() {
 				info: 'this is a arrayUpdate6 test'
 			}]).seam().subscribe(
 				test => {},
-				err => console.log(err),
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
 				() => done());
 		});
 
 		beforeAll(done => {
 			ItemPrePost.find().seam().subscribe(
 				tests => rows = tests,
-				err => console.log(err),
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
 				() => done());
 		});
 
@@ -989,6 +1121,24 @@ describe('CassMask UPDATE', function() {
 
 		describe('UPDATE specific single', function() {
 
+			it('should throw a validation error when info is too short', done => {
+				ItemPrePost.update({
+					set: {
+						info: 'info'
+					},
+					where: {
+						part: rows[1].part,
+						name: rows[1].name
+					}
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Info is not long enough!');
+						done();
+					},
+					() => done());
+			});
+
 			it('should update the 2nd row on the database table', done => {
 				var results = [];
 
@@ -1002,7 +1152,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate2 test');
 						expect(results[0].part).toEqual('Item');
@@ -1031,7 +1184,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate6 test');
 						expect(results[0].part).toEqual('Item');
@@ -1060,7 +1216,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('updated this is a arrayUpdate4 test');
 						expect(results[0].part).toEqual('Item');
@@ -1116,7 +1275,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate1 test');
 						expect(results[0].part).toEqual('Item');
@@ -1160,7 +1322,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate2 test');
 						expect(results[0].part).toEqual('Item');
@@ -1204,7 +1369,10 @@ describe('CassMask UPDATE', function() {
 					}
 				}]).find().seam().subscribe(
 					tests => results.push(tests),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => {
 						expect(results[0].info).toEqual('more updated this is a arrayUpdate3 test');
 						expect(results[0].part).toEqual('Item');
@@ -1247,5 +1415,5 @@ describe('CassMask UPDATE', function() {
 				expect(post[5]).toEqual(rows[3].name + ' update post hooked!');
 			});
 		});
-	});	
+	});
 });

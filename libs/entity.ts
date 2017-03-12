@@ -1,12 +1,12 @@
 import { client, Model } from '../index';
-import { Schema, SchemaHelper } from './schema';
+import { Schema, SchemaHelper, Error } from './schema';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 
 /*
      Entity class is the object that will be instantiated with the DB response row data
        Entity holds it's cooresponding schema's current state and the item properties that is passed into it
-       Entity has two basic functions, save() and remove() to UPDATE or DELETE the row it's properties relates to 
+       Entity has two basic functions, save() and remove() to UPDATE or DELETE the row it's properties relates to
  */
 export class Entity extends Schema {
   public toJSON: Function;
@@ -14,12 +14,14 @@ export class Entity extends Schema {
   public attributes: Object = {};
   private schemaHelper: SchemaHelper;
 
-  constructor(item: any, parent: Model) {
+  constructor(item: any, parent: Model, options?: Object) {
     // super will be the Schema class with all defined event functions
     super(parent.schema);
     // remove all exploitable properties from the item
     // when passed back through express response
     this.toJSON = function() {
+      delete this.validationObs;
+      delete this.requireObs;
       delete this.schemaHelper;
       delete this.modified;
       delete this.attributes;
@@ -28,15 +30,48 @@ export class Entity extends Schema {
 
     this.schemaHelper = parent.schemaHelper;
     // create class properties cooresponding to column values
-    this.integrateItem(item);
+    this.integrateItem(item, options);
   }
   // integrate the JSON into the parent object
-  private integrateItem(item: any): void {
+  private integrateItem(item: any, options: any = {}): void {
+    let vali = [];
+    let req = [];
     const cols = this.schemaHelper.allCol;
 
     for (let y = 0; y < cols.length; y++) {
       let prop = cols[y];
       let val = item[prop];
+
+      const reqVal = this.schemaHelper.require[prop]; // require value
+
+      // if property is required
+      if (options.requireChk && reqVal) {
+        req.push(Rx.Observable.create(observer => {
+          if(val) {
+            observer.next();
+            observer.complete();
+          }
+          else {
+            observer.error(typeof reqVal === 'boolean' ?
+              new Error(`'${prop}' is a required field`) : new Error(reqVal));
+          }
+        }));
+      }
+
+      // if a validate function exists
+      if (options.validateChk && this['validate_' + prop] && typeof this['validate_' + prop] === 'function') {
+
+        vali.push(Rx.Observable.create(observer => {
+          return this['validate_' + prop](this[prop], err => {
+            if (err) {
+              return observer.error(err ? new Error(err) : new Error(`${prop} could not be validated`) )
+            }
+            observer.next();
+            observer.complete();
+          });
+        }));
+
+      }
 
       this[prop] = val;
       if (val) this.attributes[prop] = val;
@@ -53,6 +88,10 @@ export class Entity extends Schema {
           }
         });
     }
+    // check if any require properties
+    if (req.length > 0) this['requireObs'] = req.length > 1 ? Rx.Observable.merge.apply(this, req) : req[0];
+    // check if any validation functions
+    if (vali.length > 0) this['validationObs'] = vali.length > 1 ? Rx.Observable.merge.apply(this, vali) : vali[0];
   }
 
   isEmpty(): boolean {
@@ -87,9 +126,9 @@ export class Entity extends Schema {
       for(let x = 0; x < columnList.length; x++) {
         const val = columnList[x];
         if (this[val]) {
-          q1 += `${val} = ?, `;  
+          q1 += `${val} = ?, `;
           arr1.push(this[val]);
-        }         
+        }
       }
       for(let y = 0; y < keyList.length; y++) {
         const val = keyList[y];
@@ -106,7 +145,7 @@ export class Entity extends Schema {
       if (postCb !== 'create' && postCb !== 'remove') {
          postCb = 'update';
       }
-      
+
       client.execute(query, params, {prepare:true}).then(entity => {
 
         if(this['post_' + postCb]) { // if save Event hook set
@@ -159,6 +198,6 @@ export class Entity extends Schema {
       }).catch(err => observer.error(err));
 
       return function(){};
-    });    
+    });
   }
 }

@@ -1,3 +1,4 @@
+import * as Rx from 'rxjs';
 
 // Returns the set difference of the first source array to the second
 export function objDiff(object: Array<string>, source: Array<string>) {
@@ -12,6 +13,17 @@ export function objDiff(object: Array<string>, source: Array<string>) {
   return dest;
 }
 
+export class Error {
+  message: string;
+  statusCode: number;
+
+  constructor(error: string) {
+    this.message = error;
+    this.statusCode = 422;
+  }
+
+}
+
 export class SchemaHelper {
   columns: string;
   keys: string;
@@ -19,6 +31,7 @@ export class SchemaHelper {
   columnList: Array<string>;
   keyList: Array<string>;
   defaults;
+  require;
 
   tableName: string;
   tblChked: boolean = false;
@@ -30,7 +43,7 @@ export class SchemaHelper {
 
   /*
       PARSES THE MODEL SENT INTO THE CONTRUCTOR
-        WILL CREATE A KEY VALUE ARRAY TO USE IN 
+        WILL CREATE A KEY VALUE ARRAY TO USE IN
         LATER FUNCTIONS
    */
 
@@ -39,14 +52,9 @@ export class SchemaHelper {
 
     let columns = [], // array for column names and data type
         colName = [], // array for column names only
+        require = {},
         defaults = {};
 
-    if (!schema['id']) {
-      schema['id'] = {
-        type: 'uuid',
-        default: 'uuid()'
-      };
-    }
     // for every key in the schema JSON
     for (let x in schema) {
       const val = schema[x];
@@ -58,12 +66,16 @@ export class SchemaHelper {
           columns.push(`${ x } ${ val }`); // push name and datatype to columns array
           colName.push(x); // push only column name to colName array
 
-        } else if (typeof val === 'object') {
+        } else {
 
           columns.push(`${ x } ${ val.type }`); // push name and datatype to columns array
           colName.push(x); // push only column name to colName array
-          if (val.default) 
-            defaults[x] = val.default
+          if (val.default)
+            defaults[x] = val.default;
+          if(val.required)
+            require[x] = val.required;
+          if (val.validate)
+            schema['validate_' + x] = val.validate;
 
         }
 
@@ -72,22 +84,87 @@ export class SchemaHelper {
     // return schema object that will be used for query functions
     this.columns = columns.join(', ');
     this.keys = keys.join(', ');
-    this.allCol = colName,
+    this.allCol = colName;
     this.columnList = objDiff(colName, keys);
     this.keyList = keys;
     this.defaults = defaults;
+    this.require = require;
   }
+
 }
 
 export class Schema {
+  id = {
+    type: 'uuid',
+    default: 'uuid()'
+  };
 
   constructor(schema?: Schema | Object) {
-    if(schema && schema instanceof Schema)
-      for(let x in schema) {
-        if (typeof schema[x] === 'function')
-          this[x] = schema[x]
+    if (schema) {
+
+      if(schema instanceof Schema) {
+        for(let x in schema) {
+          if (x !== 'methods' && x !== 'pre' &&
+          x !== 'post' && x !== 'validate' &&
+          typeof schema[x] === 'function')
+            this[x] = schema[x];
+        }
       }
-    else for(let x in schema) this[x] = schema[x];      
+      else {
+        for(let x in schema) this[x] = schema[x];
+      }
+
+    }
+  }
+
+  methods(scope: Object): void {
+    for (let x in scope) this[x] = scope[x];
+  }
+
+  validate(path: string, fn: Function): void {
+    this['validate_' + path] = fn;
+  }
+
+  post(hook: string | Array<string>, fn: Function): void {
+    if (!Array.isArray(hook)) hook = [hook];
+
+    for (let x = 0; x < hook.length; x++) {
+      switch (hook[x]) {
+        case "create":
+          this['post_create'] = fn;
+          break;
+        case "update":
+          this['post_update'] = fn;
+          break;
+        case "find":
+            this['post_find'] = fn;
+          break;
+        case "remove":
+            this['post_remove'] = fn;
+          break;
+      }
+    }
+  }
+
+  pre(hook: string | Array<string>, fn: Function): void {
+    if (!Array.isArray(hook)) hook = [hook];
+
+    for (let x = 0; x < hook.length; x++) {
+      switch (hook[x]) {
+        case "create":
+          this['pre_create'] = fn;
+          break;
+        case "update":
+          this['pre_update'] = fn;
+          break;
+        case "find":
+            this['pre_find'] = fn;
+          break;
+        case "remove":
+            this['pre_remove'] = fn;
+          break;
+      }
+    }
   }
 
 }

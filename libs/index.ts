@@ -8,7 +8,6 @@ import { find, parseQuerySelect } from './find';
 import { findOne } from './findOne';
 import { findById } from './findById';
 import { seam } from './seam';
-import { post, pre } from './events';
 
 export {
 	Schema, SchemaHelper,
@@ -18,6 +17,5 @@ export {
 	remove, parseQueryDelete,
 	update, parseQueryUpdate,
 	find, findOne, findById, parseQuerySelect,
-	seam,
-	post, pre
-} 
+	seam
+}

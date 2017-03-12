@@ -1,4 +1,4 @@
-const cass = require('cassandra-driver');
+import * as cass from 'cassandra-driver';
 import * as Rx from 'rxjs';
 import * as _ from 'lodash';
 import { List, Map } from 'immutable';
@@ -11,15 +11,14 @@ import {
   remove, parseQueryDelete,
   update, parseQueryUpdate,
   find, findOne, findById, parseQuerySelect,
-  seam,
-  post, pre
+  seam
 } from './libs';
 
 export let client;
 
 export declare type BLOB = string;
 export declare type ASCII = string;
-export declare type TEXT = string; 
+export declare type TEXT = string;
 export declare type VARCHAR = string;
 export declare type BOOLEAN = boolean;
 export declare type DOUBLE = number;
@@ -40,7 +39,7 @@ export declare type COUNTER = number;
 // const values holding schema data types
 export const BLOB: string = 'blob';
 export const ASCII: string = 'ascii';
-export const TEXT: string = 'text'; 
+export const TEXT: string = 'text';
 export const VARCHAR: string = 'varchar';
 export const BOOLEAN: string = 'boolean';
 export const DOUBLE: string = 'double';
@@ -119,10 +118,10 @@ export class Model {
 
     public options: any;
 
-    constructor(modelName: string | Model, schema?: Schema | List<Rx.Observable<any>>, options?: any) {
+    constructor(modelName: string | Model, schema: Schema | List<Rx.Observable<any>>, options?: any) {
       if (modelName instanceof Model) {
 
-        if (schema) this.obs = schema as List<Rx.Observable<any>>;
+        this.obs = schema as List<Rx.Observable<any>>;
         this.schema = modelName.schema;
         this.schemaHelper = modelName.schemaHelper;
         this.options = modelName.options;
@@ -130,9 +129,9 @@ export class Model {
       } else {
         this.obs = List<Rx.Observable<any>>([]);
         this.schema = schema as Schema;
-        this.schemaHelper = new SchemaHelper(modelName, schema);
+        this.schemaHelper = new SchemaHelper(modelName, this.schema);
 
-        if (options) this.options = options; 
+        if (options) this.options = options;
 
       }
     }
@@ -146,17 +145,26 @@ export class Model {
 
     public remove = remove;
     public update = update;
-    public create = create;    
-    public find = find;   
+    public create = create;
+    public find = find;
     public findOne = findOne;
     public findById = findById;
     public seam = seam;
 
-    public post = post;
-    public pre = pre;
+    post(hook: string | Array<string>, fn: Function): void {
+      return this.schema.post(hook, fn);
+    }
+
+    pre(hook: string | Array<string>, fn: Function): void {
+      return this.schema.pre(hook, fn);
+    }
 
     methods(scope: Object): void {
-      for (let x in scope) this.schema[x] = scope[x];
+      return this.schema.methods(scope);
+    }
+
+    validate(path: string, fn: Function): void {
+      return this.schema.validate(path, fn);
     }
 
   }

@@ -3,11 +3,11 @@
 // Definitions by: Jason Thomas <https://github.com/JCThomas4214>
 
 import * as Rx from 'rxjs';
-import { Map } from 'immutable'; 
+import { Map } from 'immutable';
 
 declare type BLOB = string;
 declare type ASCII = string;
-declare type TEXT = string; 
+declare type TEXT = string;
 declare type VARCHAR = string;
 declare type BOOLEAN = boolean;
 declare type DOUBLE = number;
@@ -27,7 +27,7 @@ declare type COUNTER = number;
 
 declare const BLOB: string;
 declare const ASCII: string;
-declare const TEXT: string; 
+declare const TEXT: string;
 declare const VARCHAR: string;
 declare const BOOLEAN: string;
 declare const DOUBLE: string;
@@ -88,6 +88,12 @@ declare module "cassmask" {
 
 	class Schema {
 		 constructor(schema?: Schema | Object);
+
+		 methods(scope: Object): void;
+		 validate(path: string, fn: Function): void;
+
+		 post(hook: string | Array<string>, fn: Function): void;
+		 pre(hook: string | Array<string>, fn: Function): void;
 	}
 
 	class Model<J> {
@@ -103,10 +109,11 @@ declare module "cassmask" {
 
 		// batch(items: Array<Object>, opt?: BatchOptions): Rx.Observable<any>;
 
+		methods(scope: Object): void;
+		validate(path: string, fn: Function): void;
+
 		post(hook: string | Array<string>, fn: Function): void;
 		pre(hook: string | Array<string>, fn: Function): void;
-
-		methods(scope: Object): void;
 
 		schema: Schema;
 	}

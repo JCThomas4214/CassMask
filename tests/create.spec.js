@@ -41,14 +41,74 @@ describe('CassMask CREATE', function() {
 					info: 'this is a testing insert'
 				}).seam().subscribe(
 					test => newSubTest = test,
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			});
 
 			beforeAll(done => {
 				Item.find().seam().subscribe(
 					test => newTest = test,
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined()
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a error when "name" is not included', done => {
+				Item.create({
+					info: 'this is a testing insert'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual("'name' is a required field");
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a error when "info" is not included', done => {
+				Item.create({
+					name: 'testing'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual("Info is a must!!");
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a validation error when "name" is too short', done => {
+				Item.create({
+					name: 't',
+					info: 'this is a testing insert'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Name is not long enough!');
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a validation error when "info" is too short', done => {
+				Item.create({
+					name: 'testing',
+					info: 'info'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Info is not long enough!');
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
 					() => done());
 			});
 
@@ -93,14 +153,20 @@ describe('CassMask CREATE', function() {
 					info: 'this is a arrayInsert6 test'
 				}]).seam().subscribe(
 					test => arrayTest.push(test),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			});
 
 			beforeAll(done => {
 				Item.find().seam().subscribe(
 					tests => dbrows = tests,
-					error => console.log(err),
+					error => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			})
 
@@ -186,14 +252,74 @@ describe('CassMask CREATE', function() {
 					info: 'this is a testing insert'
 				}).seam().subscribe(
 					test => newSubTest = test,
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			});
 
 			beforeAll(done => {
 				ItemPost.find().seam().subscribe(
 					test => newTest = test,
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a error when "name" is not included', done => {
+				ItemPost.create({
+					info: 'this is a testing insert'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual("'name' is a required field");
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a error when "info" is not included', done => {
+				ItemPost.create({
+					name: 'testing'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual("Info is a must!!");
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a validation error when "name" is too short', done => {
+				ItemPost.create({
+					name: 't',
+					info: 'this is a testng insert'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Name is not long enough!');
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a validation error when "info" is too short', done => {
+				ItemPost.create({
+					name: 'testing',
+					info: 'info'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Info is not long enough!');
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
 					() => done());
 			});
 
@@ -239,7 +365,10 @@ describe('CassMask CREATE', function() {
 					info: 'this is a arrayInsert6 test'
 				}]).seam().subscribe(
 					test => arrayTest.push(test),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			});
 
@@ -342,14 +471,74 @@ describe('CassMask CREATE', function() {
 					info: 'this is a testing insert'
 				}).seam().subscribe(
 					test => newSubTest = test,
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			});
 
 			beforeAll(done => {
 				ItemPre.find().seam().subscribe(
 					test => newTest = test,
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a error when "name" is not included', done => {
+				ItemPre.create({
+					info: 'this is a testing insert'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual("'name' is a required field");
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a error when "info" is not included', done => {
+				ItemPre.create({
+					name: 'testing'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual("Info is a must!!");
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a validation error when "name" is too short', done => {
+				ItemPre.create({
+					name: 't',
+					info: 'this is a testng insert'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Name is not long enough!');
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a validation error when "info" is too short', done => {
+				ItemPre.create({
+					name: 'testing',
+					info: 'info'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Info is not long enough!');
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
 					() => done());
 			});
 
@@ -395,7 +584,10 @@ describe('CassMask CREATE', function() {
 					info: 'this is a arrayInsert6 test'
 				}]).seam().subscribe(
 					test => arrayTest.push(test),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			});
 
@@ -411,7 +603,7 @@ describe('CassMask CREATE', function() {
 			});
 
 			it('subscribe results should be the same as inserted', () => {
-				expect(arrayTest[0].name).toBe('arrayInsert1 create pre hooked!');				
+				expect(arrayTest[0].name).toBe('arrayInsert1 create pre hooked!');
 				expect(arrayTest[0].info).toBe('this is a arrayInsert1 test');
 				expect(arrayTest[0].created).toBe('toTimeStamp(now())');
 				expect(arrayTest[0].id).toBe('uuid()');
@@ -439,7 +631,7 @@ describe('CassMask CREATE', function() {
 
 			it('database should have same results as inserted', () => {
 				expect(dbrows).toEqual(jasmine.any(Array));
-				expect(dbrows[0].name).toBe('arrayInsert1 create pre hooked!');				
+				expect(dbrows[0].name).toBe('arrayInsert1 create pre hooked!');
 				expect(dbrows[0].info).toBe('this is a arrayInsert1 test');
 				expect(dbrows[0].created).not.toBe('toTimeStamp(now())');
 				expect(dbrows[0].id).not.toBe('uuid()');
@@ -503,14 +695,74 @@ describe('CassMask CREATE', function() {
 					info: 'this is a testing insert'
 				}).seam().subscribe(
 					test => newSubTestPrePost = test,
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			});
 
 			beforeAll(done => {
 				ItemPrePost.find().seam().subscribe(
 					test => newTestPrePost = test,
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a error when "name" is not included', done => {
+				ItemPrePost.create({
+					info: 'this is a testing insert'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual("'name' is a required field");
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a error when "info" is not included', done => {
+				ItemPrePost.create({
+					name: 'testing'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual("Info is a must!!");
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a validation error when "name" is too short', done => {
+				ItemPrePost.create({
+					name: 't',
+					info: 'this is a testng insert'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Name is not long enough!');
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
+					() => done());
+			});
+
+			it('should throw a validation error when "info" is too short', done => {
+				ItemPrePost.create({
+					name: 'testing',
+					info: 'info'
+				}).seam().subscribe(
+					test => expect(test).not.tobeDefined(),
+					err => {
+						expect(err.message).toEqual('Info is not long enough!');
+						expect(err.statusCode).toEqual(422);
+						done();
+					},
 					() => done());
 			});
 
@@ -558,7 +810,10 @@ describe('CassMask CREATE', function() {
 					info: 'this is a arrayInsert6 test'
 				}]).seam().subscribe(
 					test => arrayTest.push(test),
-					err => console.log(err),
+					err => {
+						expect(err).not.toBeDefined();
+						done();
+					},
 					() => done());
 			});
 
@@ -619,7 +874,7 @@ describe('CassMask CREATE', function() {
 				expect(post[4]).toEqual(dbrows[4].name + ' and post hooked!');
 				expect(post[5]).toEqual(dbrows[5].name + ' and post hooked!');
 			});
-		});		
+		});
 	});
-	
+
 });

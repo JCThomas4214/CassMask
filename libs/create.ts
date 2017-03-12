@@ -59,10 +59,12 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
         USES CASS DRIVER BATCH FUNCTION TO INSERT PARSED OBJECT ARRAY
  */
 
-export function create(items: any, options?: Object): Model { 
+export function create(items: any, options?: Object): Model {
   let obs: any = List<Rx.Observable<any>>(this.obs);
   items = Array.isArray(items) ? items : [items];
 
+  let validationArr = [];
+  let requireArr = [];
   let preArr = [];
   let parseArr = [];
 
@@ -75,9 +77,15 @@ export function create(items: any, options?: Object): Model {
     for(let y in defaults) { // go through all items in object
       if (!item[y]) item[y] = defaults[y]; // if a default property does not exist, make it
     }
-    item = new Entity(item, this);
+    item = new Entity(item, this, {validateChk: true, requireChk: true});
 
-    if (item['pre_create']) {
+    if(item['requireObs'])
+      requireArr.push(item['requireObs']);
+
+    if(item['validationObs'])
+      validationArr.push(item['validationObs']);
+
+    if(item['pre_create']) {
       preArr.push(Rx.Observable.create(observer => {
         item['pre_create'](() => {
           observer.next();
@@ -89,9 +97,12 @@ export function create(items: any, options?: Object): Model {
     parseArr.push(this.parseQueryInsert(item, options));
   }
 
-  if (this.schema['pre_create']) {
+  if(requireArr.length > 0)
+    obs = obs.push(requireArr.length > 1 ? Rx.Observable.merge.apply(this, requireArr) : requireArr[0])
+  if(validationArr.length > 0)
+    obs = obs.push(validationArr.length > 1 ? Rx.Observable.merge.apply(this, validationArr) : validationArr[0]);
+  if (this.schema['pre_create'])
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
-  }
 
   obs = obs.concat(parseArr);
 

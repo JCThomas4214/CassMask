@@ -64,7 +64,7 @@ export function parseQueryUpdate(item: Entity, options: SchemaOptions): Rx.Obser
 
 
 /*
-    USES THE PARSED OBJECT FROM FIND() OR FINDONE() 
+    USES THE PARSED OBJECT FROM FIND() OR FINDONE()
     AND CREATES THE QUERY STRING TO USE CASS DRIVER'S
     EXECUTE FUNCTION
 
@@ -73,16 +73,20 @@ export function parseQueryUpdate(item: Entity, options: SchemaOptions): Rx.Obser
  */
 
 export function update(items: UpdateObject | Array<UpdateObject>, options?: SchemaOptions): Model {
-  let obs: any = List<Rx.Observable<any>>(this.obs); // create new state object 
+  let obs: any = List<Rx.Observable<any>>(this.obs); // create new state object
   items = Array.isArray(items) ? items : [items]; // if items is not an array, make it one
 
+  let validationArr = [];
   let preArr = []; // array to hold the preHook Observables
   let parseArr = []; // array to hold Query Observables
   // iterate through all items in the items array
   for (let x = 0; x < items.length; x++) {
     const object = items[x];
-    let item = new Entity(object.set, this);
+    let item = new Entity(object.set, this, {validateChk: true});
     item.merge(object.where);
+
+    if (item['validationObs'])
+      validationArr.push(item['validationObs']);
 
     if (item['pre_update']) {
       preArr.push(Rx.Observable.create(observer => {
@@ -96,9 +100,10 @@ export function update(items: UpdateObject | Array<UpdateObject>, options?: Sche
     parseArr.push(this.parseQueryUpdate(item, options || {}));
   }
 
-  if (this.schema['pre_update']) {
+  if(validationArr.length > 0)
+    obs = obs.push(validationArr.length > 1 ? Rx.Observable.merge.apply(this, validationArr) : validationArr[0]);
+  if (this.schema['pre_update'])
     obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
-  }
 
   obs = obs.concat(parseArr);
 
