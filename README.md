@@ -201,6 +201,16 @@ Observables are fancy promises that operate under event streams which give us op
 
 In CassMask every query, event hook, and validation is executed inside an observable and it uses RxJS [concatenate](http://reactivex.io/documentation/operators/concat.html) to seam them together to ensure proper sequence on subscribe.
 
+<a name="eventSeq"></a>
+
+## Event Sequence Per QUERY
+
+_NOTE: require is create specific and validation is create/update specific_
+
+| REQUIRE -> | VALIDATION -> | PRE -> | QUERY -> | POST |
+|:-------:|:-------------:|:------:|:--------:|:----:|
+| condition | function | function | function | function |
+
 <a name="entityObject"></a>
 
 ## The Entity.
@@ -305,6 +315,8 @@ Model.remove().create([{
 When batching, multiple queries are condenced into a single query with multiple statements. If you would like event driven features you will need to keep in mind that the CassMask Event API will only be triggered (depending on the hook) once per query response. Depending on your use case an emit per INSERT, UPDATE, and/or DELETE may be preferable.
 -->
 <a name="validation"></a>
+
+## Validation
 
 Validation in
 
