@@ -64,8 +64,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual("'name' is a required field");
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.name.message).toEqual("'name' is a required field");
+						expect(err.errors.name.path).toEqual('name');
+						expect(err.errors.name.value).not.toBeDefined();
 						done();
 					},
 					() => done());
@@ -77,8 +78,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual("Info is a must!!");
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.info.message).toEqual("Info is a must!!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).not.toBeDefined();
 						done();
 					},
 					() => done());
@@ -91,8 +93,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Name is not long enough!');
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.name.message).toEqual("Name is not long enough!");
+						expect(err.errors.name.path).toEqual('name');
+						expect(err.errors.name.value).toEqual('t');
 						done();
 					},
 					() => done());
@@ -105,8 +108,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Info is not long enough!');
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.info.message).toEqual("Info is not long enough!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).toEqual('info');
 						done();
 					},
 					() => done());
@@ -275,8 +279,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual("'name' is a required field");
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.name.message).toEqual("'name' is a required field");
+						expect(err.errors.name.path).toEqual('name');
+						expect(err.errors.name.value).not.toBeDefined();
 						done();
 					},
 					() => done());
@@ -288,8 +293,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual("Info is a must!!");
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.info.message).toEqual("Info is a must!!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).not.toBeDefined();
 						done();
 					},
 					() => done());
@@ -302,8 +308,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Name is not long enough!');
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.name.message).toEqual("Name is not long enough!");
+						expect(err.errors.name.path).toEqual('name');
+						expect(err.errors.name.value).toEqual('t');
 						done();
 					},
 					() => done());
@@ -316,8 +323,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Info is not long enough!');
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.info.message).toEqual("Info is not long enough!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).toEqual('info');
 						done();
 					},
 					() => done());
@@ -494,8 +502,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual("'name' is a required field");
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.name.message).toEqual("'name' is a required field");
+						expect(err.errors.name.path).toEqual('name');
+						expect(err.errors.name.value).not.toBeDefined();
 						done();
 					},
 					() => done());
@@ -507,8 +516,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual("Info is a must!!");
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.info.message).toEqual("Info is a must!!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).not.toBeDefined();
 						done();
 					},
 					() => done());
@@ -521,8 +531,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Name is not long enough!');
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.name.message).toEqual("Name is not long enough!");
+						expect(err.errors.name.path).toEqual('name');
+						expect(err.errors.name.value).toEqual('t');
 						done();
 					},
 					() => done());
@@ -535,8 +546,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Info is not long enough!');
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.info.message).toEqual("Info is not long enough!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).toEqual('info');
 						done();
 					},
 					() => done());
@@ -718,8 +730,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual("'name' is a required field");
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.name.message).toEqual("'name' is a required field");
+						expect(err.errors.name.path).toEqual('name');
+						expect(err.errors.name.value).not.toBeDefined();
 						done();
 					},
 					() => done());
@@ -731,8 +744,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual("Info is a must!!");
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.info.message).toEqual("Info is a must!!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).not.toBeDefined();
 						done();
 					},
 					() => done());
@@ -745,8 +759,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Name is not long enough!');
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.name.message).toEqual("Name is not long enough!");
+						expect(err.errors.name.path).toEqual('name');
+						expect(err.errors.name.value).toEqual('t');
 						done();
 					},
 					() => done());
@@ -759,8 +774,9 @@ describe('CassMask CREATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Info is not long enough!');
-						expect(err.statusCode).toEqual(422);
+						expect(err.errors.info.message).toEqual("Info is not long enough!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).toEqual('info');
 						done();
 					},
 					() => done());

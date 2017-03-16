@@ -33,7 +33,6 @@ describe('CassMask REMOVE', function() {
 
 		describe('REMOVE all', function() {
 			var removeTest;
-			var removeTestErr;
 
 			beforeAll(done => {
 				Item.remove().seam().subscribe(
@@ -45,17 +44,15 @@ describe('CassMask REMOVE', function() {
 			beforeAll(done => {
 				Item.find().seam().subscribe(
 					test => removeTest = test,
-					err => {
-						removeTestErr = err
+					err => {						
+						expect(err.errors.message).toEqual('No Entities were found');
 						return done();
+
 					});
 			});
 
 			it('database table should be truncated', () => {
 				expect(removeTest).not.toBeDefined();
-				expect(removeTestErr).toBeDefined();			
-				expect(removeTestErr.message).toEqual('No Entities were found');
-				expect(removeTestErr.statusCode).toEqual(404);
 			});
 		});
 
@@ -241,16 +238,13 @@ describe('CassMask REMOVE', function() {
 				ItemPost.find().seam().subscribe(
 					test => removeTest = test,
 					err => {
-						removeTestErr = err
+						expect(err.errors.message).toEqual('No Entities were found');
 						return done();
 					});
 			});
 
 			it('database table should be truncated', () => {
 				expect(removeTest).not.toBeDefined();
-				expect(removeTestErr).toBeDefined();			
-				expect(removeTestErr.message).toEqual('No Entities were found');
-				expect(removeTestErr.statusCode).toEqual(404);
 			});
 		});
 
@@ -445,17 +439,14 @@ describe('CassMask REMOVE', function() {
 			beforeAll(done => {
 				ItemPre.find().seam().subscribe(
 					test => removeTest = test,
-					err => {
-						removeTestErr = err
+					err => {						
+						expect(err.errors.message).toEqual('No Entities were found');
 						return done();
 					});
 			});
 
 			it('database table should be truncated', () => {
 				expect(removeTest).not.toBeDefined();
-				expect(removeTestErr).toBeDefined();			
-				expect(removeTestErr.message).toEqual('No Entities were found');
-				expect(removeTestErr.statusCode).toEqual(404);
 			});
 		});
 
@@ -656,16 +647,13 @@ describe('REMOVE with PRE Events', function() {
 			ItemPrePost.find().seam().subscribe(
 				test => removeTest = test,
 				err => {
-					removeTestErr = err
+					expect(err.errors.message).toEqual('No Entities were found');
 					return done();
 				});
 		});
 
 		it('database table should be truncated', () => {
 			expect(removeTest).not.toBeDefined();
-			expect(removeTestErr).toBeDefined();			
-			expect(removeTestErr.message).toEqual('No Entities were found');
-			expect(removeTestErr.statusCode).toEqual(404);
 		});
 	});
 

@@ -3,6 +3,16 @@ import { Schema, SchemaHelper, Error } from './schema';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
 
+class ValidationError extends Error {
+  message: string;
+  name: string = 'ValidationError';
+
+  constructor(error: any, message: string) {
+    super(error);
+    this.message = message;
+  }
+}
+
 /*
      Entity class is the object that will be instantiated with the DB response row data
        Entity holds it's cooresponding schema's current state and the item properties that is passed into it
@@ -17,9 +27,12 @@ export class Entity extends Schema {
   constructor(item: any, parent: Model, options?: Object) {
     // super will be the Schema class with all defined event functions
     super(parent.schema);
+    delete this.id;
+    this.model = parent;
     // remove all exploitable properties from the item
     // when passed back through express response
     this.toJSON = function() {
+      delete this.model;
       delete this.validationObs;
       delete this.requireObs;
       delete this.schemaHelper;
@@ -52,8 +65,15 @@ export class Entity extends Schema {
             observer.complete();
           }
           else {
-            observer.error(typeof reqVal === 'boolean' ?
-              new Error(`'${prop}' is a required field`) : new Error(reqVal));
+            let err = {};
+            err[prop] = {
+              message: typeof reqVal === 'boolean' ? `'${prop}' is a required field` : reqVal,
+              kind: 'user defined',
+              path: prop,
+              value: val,
+              name: 'ValidationError'
+            };
+            observer.error(new ValidationError(err, `${this.schemaHelper.tableName} validation failed`));
           }
         }));
       }
@@ -64,7 +84,15 @@ export class Entity extends Schema {
         vali.push(Rx.Observable.create(observer => {
           return this['validate_' + prop](this[prop], err => {
             if (err) {
-              return observer.error(err ? new Error(err) : new Error(`${prop} could not be validated`) )
+              let error = {};
+              error[prop] = {
+                message: err ? err : `${prop} could not be validated`,
+                kind: 'user defined',
+                path: prop,
+                value: val,
+                name: 'ValidationError'
+              };
+              return observer.error(new ValidationError(error, `${this.schemaHelper.tableName} validation failed`))
             }
             observer.next();
             observer.complete();

@@ -13,14 +13,30 @@ export function createTable(obs: List<Rx.Observable<any>>): List<Rx.Observable<a
     const table = this.schemaHelper.tableName;
     const q1 = `CREATE TABLE IF NOT EXISTS ${ table } (${ this.schemaHelper.columns }, PRIMARY KEY (${ this.schemaHelper.keys }))`;   
     
-    // when subscribe() execute create table query
-    client.execute(q1).then(entity => { // observer will not pass any arguments from the query
-      const q2 = `CREATE CUSTOM INDEX ${ table }_id on ${ table } (id) using 'org.apache.index.sasi.SASIIndex'`;
+    let indexes = this.schemaHelper.indexes;
+    let createIndexes = [];
 
-      client.execute(q2).then(entity => {
-        observer.next();
-        observer.complete();
-      }).catch(err => {
+    client.execute(q1).then(entity => { // observer2 will not pass any arguments from the query
+      for(let x = 0; x < indexes.length; x++) {
+        const indexName = indexes[x].join('_');
+        const indexGroup = indexes[x].join(', ');
+
+        const q2 = `CREATE CUSTOM INDEX ${ table }_${indexName} on ${ table } (${indexGroup}) using 'org.apache.cassandra.index.sasi.SASIIndex'`;
+
+        createIndexes.push(Rx.Observable.create(observer2 => {
+          client.execute(q2).then(entity => {
+            observer2.next();
+            observer2.complete();
+          }).catch(err => {
+            observer2.next();
+            observer2.complete();
+          });   
+        }));
+      }
+
+      // when subscribe() execute create table query
+      const indexObs = createIndexes.length > 1 ? Rx.Observable.merge.apply(this, createIndexes) : createIndexes[0];
+      indexObs.subscribe(x => {}, err => observer.error(err), () => {
         observer.next();
         observer.complete();
       });

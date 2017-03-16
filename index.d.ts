@@ -9,21 +9,21 @@ declare type BLOB = string;
 declare type ASCII = string;
 declare type TEXT = string;
 declare type VARCHAR = string;
-declare type BOOLEAN = boolean;
-declare type DOUBLE = number;
-declare type FLOAT = number;
-declare type BIGINT = number;
-declare type INT = number;
-declare type SMALLINT = number;
-declare type TINYINT = number;
-declare type VARINT = number;
+declare type BOOLEAN = string;
+declare type DOUBLE = string;
+declare type FLOAT = string;
+declare type BIGINT = string;
+declare type INT = string;
+declare type SMALLINT = string;
+declare type TINYINT = string;
+declare type VARINT = string;
 declare type UUID = string;
 declare type TIMEUUID = string;
 declare type DATE = string;
 declare type TIME = string;
 declare type TIMESTAMP = string;
 declare type INET = string;
-declare type COUNTER = number;
+declare type COUNTER = string;
 
 declare const BLOB: string;
 declare const ASCII: string;
@@ -80,20 +80,22 @@ declare module "cassmask" {
 	function toTimeStamp(timeuuid: string): string;
 	function connect(config: any, cb?: Function): void;
 
-	function model<T>(modelName: string, schema: Schema, options?: any): Model<T>;
+	function model<T>(modelName: string, schema: Schema, indexes?: Array<string | Array<string>>): Model<T>;
 
 	interface ISchema {
 		id?: string
 	}
 
 	class Schema {
-		 constructor(schema?: Schema | Object);
+		model: Model<any>;
 
-		 methods(scope: Object): void;
-		 validate(path: string, fn: Function): void;
+		constructor(schema?: Schema | Object);
 
-		 post(hook: string | Array<string>, fn: Function): void;
-		 pre(hook: string | Array<string>, fn: Function): void;
+		methods(scope: Object): void;
+		validate(path: string, fn: Function): void;
+
+		post(hook: string | Array<string>, fn: Function): void;
+		pre(hook: string | Array<string>, fn: Function): void;
 	}
 
 	class Model<J> {
@@ -116,6 +118,8 @@ declare module "cassmask" {
 		pre(hook: string | Array<string>, fn: Function): void;
 
 		schema: Schema;
+
+		createIndex(property: string): void
 	}
 
 	class Entity {

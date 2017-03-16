@@ -1,6 +1,5 @@
 import * as cass from 'cassandra-driver';
 import * as Rx from 'rxjs';
-import * as _ from 'lodash';
 import { List, Map } from 'immutable';
 
 import {
@@ -20,21 +19,21 @@ export declare type BLOB = string;
 export declare type ASCII = string;
 export declare type TEXT = string;
 export declare type VARCHAR = string;
-export declare type BOOLEAN = boolean;
-export declare type DOUBLE = number;
-export declare type FLOAT = number;
-export declare type BIGINT = number;
-export declare type INT = number;
-export declare type SMALLINT = number;
-export declare type TINYINT = number;
-export declare type VARINT = number;
+export declare type BOOLEAN = string;
+export declare type DOUBLE = string;
+export declare type FLOAT = string;
+export declare type BIGINT = string;
+export declare type INT = string;
+export declare type SMALLINT = string;
+export declare type TINYINT = string;
+export declare type VARINT = string;
 export declare type UUID = string;
 export declare type TIMEUUID = string;
 export declare type DATE = string;
 export declare type TIME = string;
 export declare type TIMESTAMP = string;
 export declare type INET = string;
-export declare type COUNTER = number;
+export declare type COUNTER = string;
 
 // const values holding schema data types
 export const BLOB: string = 'blob';
@@ -107,8 +106,15 @@ export function connect(config: any, cb?: Function): void {
   });
 }
 
-export function model<T>(modelName: string, schema: Schema, options?: any): Model {
-  return new Model(modelName + 's', schema, options);
+export function model<T>(modelName: string, schema: Schema, indexes?: Array<Array<string> | string>): Model {
+  let helper = new SchemaHelper(modelName, schema);
+
+  if(indexes) {    
+    for(let i = 0; i < indexes.length; i++) 
+      helper.createIndex(indexes[i]);
+  }
+
+  return new Model(modelName + 's', schema, helper);
 }
 
 export class Model {
@@ -118,7 +124,7 @@ export class Model {
 
     public options: any;
 
-    constructor(modelName: string | Model, schema: Schema | List<Rx.Observable<any>>, options?: any) {
+    constructor(modelName: string | Model, schema: Schema | List<Rx.Observable<any>>, helper?: SchemaHelper, options?: any) {
       if (modelName instanceof Model) {
 
         this.obs = schema as List<Rx.Observable<any>>;
@@ -129,7 +135,7 @@ export class Model {
       } else {
         this.obs = List<Rx.Observable<any>>([]);
         this.schema = schema as Schema;
-        this.schemaHelper = new SchemaHelper(modelName, this.schema);
+        this.schemaHelper = helper;
 
         if (options) this.options = options;
 
@@ -165,6 +171,10 @@ export class Model {
 
     validate(path: string, fn: Function): void {
       return this.schema.validate(path, fn);
+    }
+
+    createIndex(property: string | Array<string>): void {
+      this.schemaHelper.createIndex(property);
     }
 
   }

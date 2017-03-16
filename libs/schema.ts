@@ -1,4 +1,5 @@
 import * as Rx from 'rxjs';
+import {Model} from '../index';
 
 // Returns the set difference of the first source array to the second
 export function objDiff(object: Array<string>, source: Array<string>) {
@@ -14,12 +15,12 @@ export function objDiff(object: Array<string>, source: Array<string>) {
 }
 
 export class Error {
-  message: string;
-  statusCode: number;
+  message: string = 'Error';
+  name: string = 'Model Error';
+  errors: any;
 
-  constructor(error: string) {
-    this.message = error;
-    this.statusCode = 422;
+  constructor(error: any) {
+    this.errors = error;
   }
 
 }
@@ -32,6 +33,7 @@ export class SchemaHelper {
   keyList: Array<string>;
   defaults;
   require;
+  indexes: Array<Array<string>> = [];
 
   tableName: string;
   tblChked: boolean = false;
@@ -39,6 +41,11 @@ export class SchemaHelper {
   constructor(tableName: string, schema: Schema) {
     this.tableName = tableName;
     this.parseModel(schema);
+    this.indexes.push(['id']);
+  }
+
+  createIndex(property: string | Array<string>): void {
+    this.indexes.push(Array.isArray(property) ? property : [property]);
   }
 
   /*
@@ -59,7 +66,7 @@ export class SchemaHelper {
     for (let x in schema) {
       const val = schema[x];
       // if key is not the PRIMARY KEYS, 'keys'
-      if(typeof val !== 'function' && x !== 'keys') {
+      if(typeof val !== 'function' && x !== 'keys' && x !== 'model') {
 
         if (typeof val === 'string') {
 
@@ -98,6 +105,8 @@ export class Schema {
     type: 'uuid',
     default: 'uuid()'
   };
+
+  model: Model;
 
   constructor(schema?: Schema | Object) {
     if (schema) {

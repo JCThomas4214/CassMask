@@ -1,8 +1,17 @@
 import { client, Model, FindOptions } from '../index';
 import { Entity } from './entity';
-import { objDiff } from './schema';
+import { objDiff, Error } from './schema';
 import * as Rx from 'rxjs';
 import { List, Map } from 'immutable';
+
+class NotFoundError extends Error {
+  message: string = "Row not found";
+  name: string = "NotFoundError";
+
+  constructor(error: any, message: string) {
+    super(error);
+  }
+}
 
 /*
     PARSES THE INPUTTED OBJECT
@@ -55,7 +64,12 @@ export function parseQuerySelect(item: Entity, options?: FindOptions): Rx.Observ
       let items;
 
       if (rows.length === 0) {
-        observer.error({ message: 'No Entities were found', statusCode: 404 });
+        let err = {
+          message: `No Entities were found`,
+          kind: 'library defined',
+          name: 'NotFoundError'
+        };
+        observer.error(new NotFoundError(err, 'No Entities were found'));
       } else if (rows.length > 1) {
         items = [];
         for (let z = 0; z < rows.length; z++) {

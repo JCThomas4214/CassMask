@@ -101,7 +101,9 @@ describe('CassMask UPDATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Info is not long enough!');
+						expect(err.errors.info.message).toEqual("Info is not long enough!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).toEqual('info');
 						done();
 					},
 					() => done());
@@ -430,7 +432,9 @@ describe('CassMask UPDATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Info is not long enough!');
+						expect(err.errors.info.message).toEqual("Info is not long enough!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).toEqual('info');
 						done();
 					},
 					() => done());
@@ -779,7 +783,9 @@ describe('CassMask UPDATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Info is not long enough!');
+						expect(err.errors.info.message).toEqual("Info is not long enough!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).toEqual('info');
 						done();
 					},
 					() => done());
@@ -1133,7 +1139,9 @@ describe('CassMask UPDATE', function() {
 				}).seam().subscribe(
 					test => expect(test).not.tobeDefined(),
 					err => {
-						expect(err.message).toEqual('Info is not long enough!');
+						expect(err.errors.info.message).toEqual("Info is not long enough!");
+						expect(err.errors.info.path).toEqual('info');
+						expect(err.errors.info.value).toEqual('info');
 						done();
 					},
 					() => done());

@@ -15,7 +15,7 @@ cassmask.connect({
   keyspace: 'cassmask'
 }, (err, result) => {
 	// callback after connection
-  			
+
 	jasmine.loadConfig({
 		spec_dir: 'tests',
 		spec_files: [
@@ -27,5 +27,5 @@ cassmask.connect({
 	jasmine.addReporter(new JasmineReporter());
 
 	jasmine.execute();
-	
+
 });

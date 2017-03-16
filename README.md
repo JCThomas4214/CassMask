@@ -11,32 +11,34 @@
 ## Table of Contents
 
 1. [Why Observables?](#whyObservables)
-  1. [Everything is an Observable.](#eqObservable)
+   1. [Everything is an Observable.](#eqObservable)
 2. [The Entity](#entityObject)
-  1. [Important Limitations](#eIssues)
-  2. [Entity Example](#entityExample)
+   1. [Important Limitations](#eIssues)
+   2. [Entity Example](#entityExample)
 3. [Validation](#validation)
 4. [Event Hooks](#eventHooks)
-  1. [Socket.io example](#sioEx)
+   1. [Socket.io example](#sioEx)
 5. [CassMask API](#cassmaskapi)
-  1. [connect](#connect)
+   1. [connect](#connect)
+   2. [model](#model)
 6. [Model API](#modelapi)
-  1. [seam](#seam)
-  2. [find](#find)
-  3. [findOne](#findOne)
-  4. [findById](#findById)
-  5. [create](#create)
-  6. [update](#update)
-  7. [remove](#remove)
-  8. [post](#post)
-  9. [pre](#pre)
-  10. [methods](#methods)
+   1. [seam](#seam)
+   2. [find](#find)
+   3. [findOne](#findOne)
+   4. [findById](#findById)
+   5. [create](#create)
+   6. [update](#update)
+   7. [remove](#remove)
+   8. [post](#post)
+   9. [pre](#pre)
+   10. [methods](#methods)
+   11. [createIndex](#createIndex)
 7. [Entity API](#entityAPI)
-  1. [constructor](#entityconstructor)
-  2. [isEmpty](#entityisempty)
-  2. [merge](#entitymerge)
-  2. [save](#entitysave)
-  3. [remove](#entityremove)
+   1. [constructor](#entityconstructor)
+   2. [isEmpty](#entityisempty)
+   3. [merge](#entitymerge)
+   4. [save](#entitysave)
+   5. [remove](#entityremove)
 8. [TODO](#TODO)
 
 ## Quick Start
@@ -63,7 +65,7 @@ connect(config, (err, result) => {
 });
 ```
 
-Create a model.
+Create a model ([click here](https://github.com/JCThomas4214/CassMask/wiki/Schema) for a ES5 example)
 
 ```ts
 import * as cassmask from 'cassmask';
@@ -136,7 +138,6 @@ class ModelSchema extends cassmask.Schema {
 
 export default cassmask.model<IModelSchema>('Model', new ModelSchema());
 ```
-_[click here](https://github.com/JCThomas4214/CassMask/wiki/ES5-Examples) for a ES5 example_
 
 Find, create, remove, update...
 
@@ -203,13 +204,13 @@ In CassMask every query, event hook, and validation is executed inside an observ
 
 <a name="eventSeq"></a>
 
-## Event Sequence Per QUERY
-
-_NOTE: require is create specific and validation is create/update specific_
+## Event Sequence Per Query Function/Query Object
 
 | REQUIRE -> | VALIDATION -> | PRE -> | QUERY -> | POST |
 |:-------:|:-------------:|:------:|:--------:|:----:|
 | condition | function | function | function | function |
+
+_NOTE: require is create specific and validation is create/update specific_
 
 <a name="entityObject"></a>
 
@@ -318,7 +319,46 @@ When batching, multiple queries are condenced into a single query with multiple 
 
 ## Validation
 
-Validation in
+Validation in CassMask can be configured per schema property basis. Configure a validation function to pass an error message and stop the event stream when conditions are not met.
+
+### Valiation Example ([click here](https://github.com/JCThomas4214/CassMask/wiki/Validation) for an ES5 example)  
+
+```ts
+interface IModelSchema extends cassmask.ISchema {
+  id?: cassmask.UUID;
+  name?: cassmask.TEXT;
+  points?: cassmask.INT;
+}
+
+class ModelSchema extends cassmask.Schema {
+  // declare schema type values
+  id = {
+    type: cassmask.UUID,
+    default: uuid()
+  };
+  name = {
+    type: cassmask.TEXT,
+    required: 'Must have name!'
+  };
+  points = cassmask.INT;
+  // Primary Keys (Partition & Clustering Column)
+  keys = ['id', 'name'];
+
+  constructor() {
+    super();
+  }
+
+  // Define validate_[column name] function to create
+  //    a validate function for that key
+
+  validate_name(name, next) {
+    if(name.length >= 5) next();
+    else next('name is not long enough!');
+  }
+}
+
+export default cassmask.model<IModelSchema>('Model', new ModelSchema());
+```
 
 <a name="eventHooks"></a>
 
@@ -417,6 +457,15 @@ execute modelRegister(socket) in your socketio.config onConnect function
 + connects to the cassandra nodes
 + cb function to be fired once connection sring returns
 
+<a name="model"></a>
+
+#### [model](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(tableName: string, schema: Schema, indexes?: Array\<string | Array\<string\>\>): Model
+
++ creates a Model object with querying capabilities 
++ indexes is an array of secondary indexes you can create for this model's table
+   + NOTE: to change/add the indexes you will need to drop the table for cassmask to create it again
+
+
 <a name="modelapi"></a>
 
 ## Model API
@@ -489,7 +538,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="post"></a>
 
-#### [post](https://github.com/JCThomas4214/CassMask/blob/master/libs/events.ts)(hook: string | Array<string>, cb: Function): void;
+#### [post](https://github.com/JCThomas4214/CassMask/blob/master/libs/events.ts)(hook: string | Array\<string\>, cb: Function): void;
 
 + specify one or multiple hooks ('create', 'update', 'remove', or 'find') as the first argument
 + specify the callback as the function to execute
@@ -499,7 +548,7 @@ execute modelRegister(socket) in your socketio.config onConnect function
 
 <a name="pre"></a>
 
-#### [pre](https://github.com/JCThomas4214/CassMask/blob/master/libs/events.ts)(hook: string | Array<string>, cb: Function): void;
+#### [pre](https://github.com/JCThomas4214/CassMask/blob/master/libs/events.ts)(hook: string | Array\<string\>, cb: Function): void;
 
 + specify one or multiple hooks ('create', 'update', 'remove', or 'find') as the first argument
 + specify the callback as the function to execute
@@ -512,6 +561,13 @@ execute modelRegister(socket) in your socketio.config onConnect function
 #### [methods](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(scope: Object): void;
 
 + scope object containing properties that will be integrated into all instantiated Entity objects
+
+<a name="createIndex"></a>
+
+#### [createIndex](https://github.com/JCThomas4214/CassMask/blob/master/index.ts)(indexes: string | Array\<string | Array\<string\>\>): void
+
++ creates a secondary index for the talbe on table creation
+   + NOTE: to change/add the indexes you will need to drop the table for cassmask to create it again
 
 <a name="updateobject"></a>
 
