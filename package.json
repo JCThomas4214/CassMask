@@ -1,6 +1,6 @@
 {
   "name": "cassmask",
-  "version": "1.5.5",
+  "version": "1.6.0",
   "description": "An Observable Driven Apache Cassandra ORM",
   "main": "index.js",
   "files": [
@@ -36,14 +36,12 @@
   "dependencies": {
     "cassandra-driver": "^3.2.0",
     "immutable": "^3.8.1",
-    "lodash": "^4.17.4",
     "rxjs": "^5.2.0"
   },
   "devDependencies": {
     "@types/cassandra-driver": "^0.8.10",
     "@types/es6-collections": "^0.5.29",
     "@types/es6-promise": "^0.0.32",
-    "@types/lodash": "^4.14.55",
     "@types/node": "^7.0.8",
     "awesome-typescript-loader": "^3.1.2",
     "compression-webpack-plugin": "^0.3.2",
