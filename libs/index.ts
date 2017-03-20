@@ -9,6 +9,7 @@ import { findOne } from './findOne';
 import { findById } from './findById';
 import { seam } from './seam';
 
+
 export {
 	Schema, SchemaHelper,
 	Entity,

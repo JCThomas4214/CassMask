@@ -19,7 +19,9 @@ cassmask.connect({
 	jasmine.loadConfig({
 		spec_dir: 'tests',
 		spec_files: [
-			'*.spec.js'
+			'setType.spec.js',
+			'listType.spec.js',
+			'mapType.spec.js'
 		]
 	});
 

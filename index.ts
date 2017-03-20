@@ -13,7 +13,23 @@ import {
   seam
 } from './libs';
 
+export interface MapAction {
+  action: string,
+  index?: any,
+  payload?: any
+}
+
+export interface ListAction {
+  action: string,
+  index?: any,
+  payload?: any
+}
+
 export let client;
+
+export declare type MAP = Object;
+export declare type LIST = Array<any>;
+export declare type SET = Object;
 
 export declare type BLOB = string;
 export declare type ASCII = string;
@@ -36,6 +52,123 @@ export declare type INET = string;
 export declare type COUNTER = string;
 
 // const values holding schema data types
+export function MAP(keyType: string, valType: string): string {
+  return MAP.schemaString(keyType, valType);
+}
+
+export namespace MAP {
+  export function schemaString(keyType: string, valType: string): string {
+    return `map<${keyType},${valType}>`;
+  }
+  export function append(keyVal: Object): MapAction {
+    return {
+      action: 'append',
+      payload: `+ ${keyVal}`
+    }
+  }
+  export function set(set: any, val: any): MapAction {
+    return {
+      action: 'set',
+      index: `[${set}]`,
+      payload: val
+    }
+  }
+  export function reset(keyVal: Object): MapAction {
+    return {
+      action: 'reset',
+      payload: keyVal
+    }
+  }
+  export function remove(keys: Array<string>): MapAction {
+    return {
+      action: 'remove',
+      payload: `- { ${keys.join(', ')} }`
+    }
+  }
+}
+
+export function LIST(valType: string): string {
+  return LIST.schemaString(valType);
+}
+
+export namespace LIST {
+  export function schemaString(valType: string): string {
+    return `list<${valType}>`;
+  }
+  export function append(keyVal: Object): ListAction {
+    return {
+      action: 'append',
+      payload: `+ ${keyVal}`
+    }
+  }
+  export function prepend(keyVal: Object): ListAction {
+    return {
+      action: 'prepend',
+      payload: `${keyVal} +`
+    }
+  }
+  export function set(set: any, val: any): ListAction {
+    return {
+      action: 'set',
+      index: `[${set}]`,
+      payload: val
+    }
+  }
+  export function reset(keyVal: Object): ListAction {
+    return {
+      action: 'reset',
+      payload: keyVal
+    }
+  }
+  export function remove(keys: number | string): ListAction {
+    return {
+      action: 'remove',
+      index: `[${keys}]`
+    }
+  }
+}
+
+export function SET(valType: string): string {
+  return SET.schemaString(valType);
+}
+
+export namespace SET {
+  export function schemaString(valType: string): string {
+    return `set<${valType}>`;
+  }
+  export function append(keyVal: Object): ListAction {
+    return {
+      action: 'append',
+      payload: `+ ${keyVal}`
+    }
+  }
+  export function prepend(keyVal: Object): ListAction {
+    return {
+      action: 'prepend',
+      payload: `${keyVal} +`
+    }
+  }
+  export function set(set: any, val: any): ListAction {
+    return {
+      action: 'set',
+      index: `[${set}]`,
+      payload: val
+    }
+  }
+  export function reset(keyVal: Object): ListAction {
+    return {
+      action: 'reset',
+      payload: keyVal
+    }
+  }
+  export function remove(keys: number | string): ListAction {
+    return {
+      action: 'remove',
+      index: `[${keys}]`
+    }
+  }
+}
+
 export const BLOB: string = 'blob';
 export const ASCII: string = 'ascii';
 export const TEXT: string = 'text';
@@ -107,7 +240,7 @@ export function connect(config: any, cb?: Function): void {
 }
 
 export function model<T>(modelName: string, schema: Schema, indexes?: Array<Array<string> | string>): Model {
-  let helper = new SchemaHelper(modelName, schema);
+  let helper = new SchemaHelper(modelName + 's', schema);
 
   if(indexes) {    
     for(let i = 0; i < indexes.length; i++) 

@@ -3,10 +3,39 @@
 
 # CassMask
 
-#### Currently unsupported data types
+#### DataTypes Thoroughly tested
 
-+ Counter (has not been tested yet)
-+ Maps, Sets, Lists, and User Defined Data types
++ TIMEUUID
++ UUID
++ TIMESTAMP
++ INT
++ TEXT
+
+#### DataTypes not tested but will probably work
+
++ ASCII
++ BIGINT
++ SMALLINT
++ TINYINT
++ VARCHAR
++ VARINT
++ FLOAT
++ DOUBLE
++ DECIMAL
++ BOOLEAN
+
+#### DataTypes not tested (probably will not work)
+
++ BLOB
++ INET
+
+#### DataTypes that WILL not work
+
++ COUNTER
++ MAP 
++ SET 
++ LIST 
++ User Defined Data types
 
 ## Table of Contents
 
