@@ -4,7 +4,10 @@ const { FuseBox, ReplacePlugin, TypeScriptHelpers, JSONPlugin, UglifyJSPlugin } 
 const path = require('path');
 
 const fuseBox = FuseBox.init({
-    package: 'cassmask',
+    package: {
+    	name: 'cassmask',
+    	main: 'index.ts'
+    },
     globals: { 'cassmask': '*' },
     homeDir: './',
     outFile: `index.js`,

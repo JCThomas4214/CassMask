@@ -13,8 +13,5 @@ export function seam(): Rx.Observable<any> {
   // else we will return the only observable in the array
     // in either case we will filter out the undefined args
   
-  // let obs = this.checkTable(this.obs);
-
-  // const seamed = obs.size > 1 ? Rx.Observable.concat.apply(this, obs) : obs[0];
   return this.obs.filter(x => x); // filter out any undefined arguments from observer.next()
 }
