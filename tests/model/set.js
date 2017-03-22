@@ -1,6 +1,7 @@
-var cassmask = require('cassmask');
-var now = require('cassmask').now;
-var toTimeStamp = require('cassmask').toTimeStamp;
+var cassmask = require('../../index.js');
+
+var now = cassmask.now;
+var toTimeStamp = cassmask.toTimeStamp;
 
 var ItemSet = new cassmask.Schema({
 	part: {

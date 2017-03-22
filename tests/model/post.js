@@ -1,4 +1,4 @@
-var cassmask = require('cassmask');
+var cassmask = require('../../index.js');
 
 var now = cassmask.now;
 var toTimeStamp = cassmask.toTimeStamp;
