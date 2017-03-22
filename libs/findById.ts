@@ -2,18 +2,17 @@ import { client, Model, FindOptions } from '../index';
 import { Entity } from './entity';
 import { objDiff } from './schema';
 import * as Rx from 'rxjs';
-import { List, Map } from 'immutable';
 
 /*
       SELECTS FROM THE DATABASE WITH ONLY AN ID
         IF NO ID SET IN THE MODEL THIS SHOULD BE A UUID THAT HAS A SECONDARY INDEX
  */
 export function findById(id: string, options?: FindOptions): Model {
-  let obs = List<Rx.Observable<any>>(this.obs);
+  let obs: Rx.Observable<any> = Rx.Observable.concat(this.obs);
   let item: Entity = new Entity({ id : id }, this);
 
   if (item['pre_find']) {
-    obs = obs.push(Rx.Observable.create(observer => {
+    obs = obs.concat(Rx.Observable.create(observer => {
       item['pre_find'](() => {
         observer.next();
         observer.complete();
@@ -21,7 +20,7 @@ export function findById(id: string, options?: FindOptions): Model {
     }));
   }
 
-  obs = obs.push(Rx.Observable.create(observer => {
+  obs = obs.concat(Rx.Observable.create(observer => {
     let sel: string; // column select holder
 
     if (options && options.attributes) { // if options and options.attributes exists

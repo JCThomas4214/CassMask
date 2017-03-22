@@ -1,7 +1,6 @@
 import { client, Model, SchemaOptions } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
-import { List, Map } from 'immutable';
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
@@ -51,7 +50,7 @@ export function parseQueryDelete(item: Entity, options: SchemaOptions): Rx.Obser
  */
 
 export function remove(items?: any, options?: SchemaOptions): Model { 
-  let obs: any = List<Rx.Observable<any>>(this.obs);
+  let obs: Rx.Observable<any> = Rx.Observable.concat(this.obs);
 
   if (items) { // if items passed into function
     if (!Array.isArray(items)) items = [items];
@@ -76,14 +75,14 @@ export function remove(items?: any, options?: SchemaOptions): Model {
 
     if (this.schema['pre_remove']) {
       let pre = preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0];
-      obs = obs.push(pre);
+      obs = obs.concat(pre);
     }
 
-    obs = obs.concat(parseArr);
+    obs = obs.concat(...parseArr);
 
   } else { // if no items sent to the remove function
 
-    obs = obs.push(Rx.Observable.create(observer => {
+    obs = obs.concat(Rx.Observable.create(observer => {
       client.execute(`TRUNCATE ${this.schemaHelper.tableName}`).then(entity => { // entity will be useless information about DB
         observer.next(); // no argument set for next()
         observer.complete();

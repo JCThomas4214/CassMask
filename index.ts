@@ -1,6 +1,5 @@
 import * as cass from 'cassandra-driver';
 import * as Rx from 'rxjs';
-import { List, Map } from 'immutable';
 
 import {
   Schema, SchemaHelper,
@@ -251,22 +250,22 @@ export function model<T>(modelName: string, schema: Schema, indexes?: Array<Arra
 }
 
 export class Model {
-    public obs: List<Rx.Observable<any>>;
+    public obs: Rx.Observable<any>;
     public schema: Schema;
     public schemaHelper: SchemaHelper;
 
     public options: any;
 
-    constructor(modelName: string | Model, schema: Schema | List<Rx.Observable<any>>, helper?: SchemaHelper, options?: any) {
+    constructor(modelName: string | Model, schema: Schema | Rx.Observable<any>, helper?: SchemaHelper, options?: any) {
       if (modelName instanceof Model) {
 
-        this.obs = schema as List<Rx.Observable<any>>;
+        this.obs = schema as Rx.Observable<any>;
         this.schema = modelName.schema;
         this.schemaHelper = modelName.schemaHelper;
         this.options = modelName.options;
 
       } else {
-        this.obs = List<Rx.Observable<any>>([]);
+        this.obs = Rx.Observable.empty();
         this.schema = schema as Schema;
         this.schemaHelper = helper;
 

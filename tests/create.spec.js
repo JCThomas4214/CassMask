@@ -52,7 +52,7 @@ describe('CassMask CREATE', function() {
 				Item.find().seam().subscribe(
 					test => newTest = test,
 					err => {
-						expect(err).not.toBeDefined()
+						expect(err).not.toBeDefined();
 						done();
 					},
 					() => done());

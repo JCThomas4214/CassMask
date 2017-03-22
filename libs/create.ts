@@ -1,7 +1,6 @@
 import { client, Model } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
-import { List, Map } from 'immutable';
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
@@ -60,7 +59,7 @@ export function parseQueryInsert(item: Entity, options: any): Rx.Observable<any>
  */
 
 export function create(items: any, options?: Object): Model {
-  let obs: any = List<Rx.Observable<any>>(this.obs);
+  let obs: Rx.Observable<any> = this.obs ? Rx.Observable.concat(this.obs) : null;
   items = Array.isArray(items) ? items : [items];
 
   let validationArr = [];
@@ -98,13 +97,11 @@ export function create(items: any, options?: Object): Model {
   }
 
   if(requireArr.length > 0)
-    obs = obs.push(requireArr.length > 1 ? Rx.Observable.merge.apply(this, requireArr) : requireArr[0])
+    obs = obs.concat(requireArr.length > 1 ? Rx.Observable.merge.apply(this, requireArr) : requireArr[0])
   if(validationArr.length > 0)
-    obs = obs.push(validationArr.length > 1 ? Rx.Observable.merge.apply(this, validationArr) : validationArr[0]);
+    obs = obs.concat(validationArr.length > 1 ? Rx.Observable.merge.apply(this, validationArr) : validationArr[0]);
   if (this.schema['pre_create'])
-    obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
+    obs = obs.concat(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
 
-  obs = obs.concat(parseArr);
-
-  return new Model(this, obs);
+  return new Model(this, obs.concat(...parseArr));
 }

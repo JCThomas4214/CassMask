@@ -1,7 +1,6 @@
 import { client, Model, SchemaOptions, UpdateObject } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
-import { List, Map } from 'immutable';
 
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
@@ -73,7 +72,7 @@ export function parseQueryUpdate(item: Entity, options: SchemaOptions): Rx.Obser
  */
 
 export function update(items: UpdateObject | Array<UpdateObject>, options?: SchemaOptions): Model {
-  let obs: any = List<Rx.Observable<any>>(this.obs); // create new state object
+  let obs: Rx.Observable<any> = Rx.Observable.concat(this.obs); // create new state object
   items = Array.isArray(items) ? items : [items]; // if items is not an array, make it one
 
   let validationArr = [];
@@ -101,11 +100,9 @@ export function update(items: UpdateObject | Array<UpdateObject>, options?: Sche
   }
 
   if(validationArr.length > 0)
-    obs = obs.push(validationArr.length > 1 ? Rx.Observable.merge.apply(this, validationArr) : validationArr[0]);
+    obs = obs.concat(validationArr.length > 1 ? Rx.Observable.merge.apply(this, validationArr) : validationArr[0]);
   if (this.schema['pre_update'])
-    obs = obs.push(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
+    obs = obs.concat(preArr.length > 1 ? Rx.Observable.merge.apply(this, preArr) : preArr[0]);
 
-  obs = obs.concat(parseArr);
-
-  return new Model(this, obs);
+  return new Model(this, obs.concat(...parseArr));
 }

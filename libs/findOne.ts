@@ -1,7 +1,6 @@
 import { Model, FindOptions } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
-import { List, Map } from 'immutable';
 
 
 /*
@@ -10,14 +9,14 @@ import { List, Map } from 'immutable';
  */
 
 export function findOne(object?: Object, options?: FindOptions): Model {
-  let obs = List<Rx.Observable<any>>(this.obs);
+  let obs: Rx.Observable<any> = Rx.Observable.concat(this.obs);
   let item: Entity = new Entity(object || {}, this);
 
   if (!options) options = {};
   options.limit = 1; // Make sure we limit the response to one row
 
   if (item['pre_find']) {
-    obs = obs.push(Rx.Observable.create(observer => {
+    obs = obs.concat(Rx.Observable.create(observer => {
       item['pre_find'](() => {
         observer.next();
         observer.complete();
@@ -25,7 +24,7 @@ export function findOne(object?: Object, options?: FindOptions): Model {
     }));
   }
   
-  obs = obs.push(this.parseQuerySelect(item, options));
+  obs = obs.concat(this.parseQuerySelect(item, options));
 
   return new Model(this, obs);
 }

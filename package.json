@@ -25,7 +25,6 @@
     "node",
     "rxjs",
     "CQL",
-    "immutable",
     "Observable-streams"
   ],
   "author": "JT",
@@ -36,7 +35,6 @@
   "homepage": "https://github.com/JCThomas4214/CassMask#readme",
   "dependencies": {
     "cassandra-driver": "^3.2.0",
-    "immutable": "^3.8.1",
     "rxjs": "^5.2.0"
   },
   "devDependencies": {
@@ -48,6 +46,7 @@
     "jasmine": "^2.5.3",
     "jasmine-spec-reporter": "^3.2.0",
     "rimraf": "^2.6.1",
-    "typescript": "^2.2.1"
+    "typescript": "^2.2.1",
+    "uglify-js": "^2.8.14"
   }
 }

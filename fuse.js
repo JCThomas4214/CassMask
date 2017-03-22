@@ -11,8 +11,6 @@ const fuseBox = FuseBox.init({
     plugins: [
         TypeScriptHelpers(),
         JSONPlugin(),
-        UglifyJSPlugin({
-			compress: { warnings: false }
-		})
+        UglifyJSPlugin()
     ]
 }).bundle('>[index.ts]');

@@ -3,7 +3,6 @@
 // Definitions by: Jason Thomas <https://github.com/JCThomas4214>
 
 import * as Rx from 'rxjs';
-import { Map } from 'immutable';
 
 declare type BLOB = string;
 declare type ASCII = string;

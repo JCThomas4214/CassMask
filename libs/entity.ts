@@ -1,7 +1,6 @@
 import { client, Model } from '../index';
 import { Schema, SchemaHelper, Error } from './schema';
 import * as Rx from 'rxjs';
-import { List, Map } from 'immutable';
 
 class ValidationError extends Error {
   message: string;
@@ -83,7 +82,7 @@ export class Entity extends Schema {
 
         vali.push(Rx.Observable.create(observer => {
           return this['validate_' + prop](this[prop], err => {
-            if (err) {
+            if (err) {              
               let error = {};
               error[prop] = {
                 message: err ? err : `${prop} could not be validated`,
