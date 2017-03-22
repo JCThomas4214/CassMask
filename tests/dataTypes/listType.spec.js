@@ -1,4 +1,4 @@
-var ItemList = require('./model/list');
+var ItemList = require('../model/list');
 
 describe('CassMask With LIST type', function() {
 	var newSubTest;

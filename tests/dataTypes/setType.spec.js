@@ -1,4 +1,4 @@
-var ItemSet = require('./model/set');
+var ItemSet = require('../model/set');
 
 describe('CassMask With SET type', function() {
 	var newSubTest;

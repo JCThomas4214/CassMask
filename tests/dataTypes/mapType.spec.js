@@ -1,4 +1,4 @@
-var ItemMap = require('./model/map');
+var ItemMap = require('../model/map');
 
 describe('CassMask With MAP type', function() {
 	var newSubTest;
