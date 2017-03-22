@@ -1,4 +1,3 @@
-var cassmask = require('cassmask');
 var ItemSet = require('./model/set');
 
 describe('CassMask With SET type', function() {

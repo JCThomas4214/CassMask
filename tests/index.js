@@ -6,7 +6,7 @@ var Jasmine = require('jasmine');
 var jasmine = new Jasmine();
 var JasmineReporter = require('jasmine-spec-reporter').SpecReporter;
 
-var cassmask = require('cassmask');
+var cassmask = require('../index.js');
 
 cassmask.connect({
   contactPoints: ['127.0.0.1'],
