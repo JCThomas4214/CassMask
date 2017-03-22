@@ -6,6 +6,7 @@ var Jasmine = require('jasmine');
 var jasmine = new Jasmine();
 var JasmineReporter = require('jasmine-spec-reporter').SpecReporter;
 
+var fsbx = require('fuse-box');
 var cassmask = require('../index.js');
 
 cassmask.connect({
