@@ -4,6 +4,10 @@
 
 import * as Rx from 'rxjs';
 
+export declare type MAP = Object;
+export declare type LIST<L> = Array<L>;
+export declare type SET<P> = Array<P>;
+
 declare type BLOB = string;
 declare type ASCII = string;
 declare type TEXT = string;
@@ -23,6 +27,10 @@ declare type TIME = string;
 declare type TIMESTAMP = string;
 declare type INET = string;
 declare type COUNTER = string;
+
+declare function MAP(keyType: string, valType: string): string;
+declare function LIST(valType: string): string;
+declare function SET(valType: string): string;
 
 declare const BLOB: string;
 declare const ASCII: string;
@@ -72,6 +80,50 @@ declare module "cassmask" {
 
 	interface BatchOptions {
 		using?: string
+	}
+
+	interface MapAction {
+	  action: string,
+	  index?: any,
+	  payload?: any
+	}
+
+	interface ListAction {
+	  action: string,
+	  index?: any,
+	  payload?: any
+	}
+
+	export interface SetAction {
+	  action: string,
+	  index?: any,
+	  payload?: any 
+	}
+
+	namespace MAP {
+		export function schemaString(keyType: string, valType: string): string;
+		export function append(keyVal: Object): MapAction;
+		export function set(set: any, val: any): MapAction;
+		export function reset(keyVal: Object): MapAction;
+		export function remove(keys: Array<string>): MapAction;
+	}
+
+	namespace LIST {
+		export function schemaString(valType: string): string;
+		export function append(keyVal: Object): ListAction;
+		export function prepend(keyVal: Object): ListAction;
+		export function set(set: any, val: any): ListAction;
+		export function reset(keyVal: Object): ListAction;
+		export function remove(keys: number | string): ListAction
+	}
+
+	namespace SET {
+		export function schemaString(valType: string): string;
+		export function append(keyVal: Object): SetAction;
+		export function prepend(keyVal: Object): SetAction;
+		export function set(set: any, val: any): SetAction;
+		export function reset(keyVal: Object): SetAction;
+		export function remove(keys: number | string): SetAction;
 	}
 
 	function now(): string;

@@ -24,6 +24,12 @@ export interface ListAction {
   payload?: any
 }
 
+export interface SetAction {
+  action: string,
+  index?: any,
+  payload?: any 
+}
+
 export let client;
 
 export declare type MAP = Object;
@@ -135,32 +141,32 @@ export namespace SET {
   export function schemaString(valType: string): string {
     return `set<${valType}>`;
   }
-  export function append(keyVal: Object): ListAction {
+  export function append(keyVal: Object): SetAction {
     return {
       action: 'append',
       payload: `+ ${keyVal}`
     }
   }
-  export function prepend(keyVal: Object): ListAction {
+  export function prepend(keyVal: Object): SetAction {
     return {
       action: 'prepend',
       payload: `${keyVal} +`
     }
   }
-  export function set(set: any, val: any): ListAction {
+  export function set(set: any, val: any): SetAction {
     return {
       action: 'set',
       index: `[${set}]`,
       payload: val
     }
   }
-  export function reset(keyVal: Object): ListAction {
+  export function reset(keyVal: Object): SetAction {
     return {
       action: 'reset',
       payload: keyVal
     }
   }
-  export function remove(keys: number | string): ListAction {
+  export function remove(keys: number | string): SetAction {
     return {
       action: 'remove',
       index: `[${keys}]`

@@ -2,6 +2,10 @@ import { client, Model, SchemaOptions, UpdateObject } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 
+function isCollection(item) {
+  
+}
+
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER

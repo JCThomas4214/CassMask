@@ -1,7 +1,7 @@
-var Item = require('./model');
-var ItemPost = require('./model/post');
-var ItemPre = require('./model/pre');
-var ItemPrePost = require('./model/prepost');
+var Item = require('./models');
+var ItemPost = require('./models/post');
+var ItemPre = require('./models/pre');
+var ItemPrePost = require('./models/prepost');
 
 describe('CassMask UPDATE', function() {
 

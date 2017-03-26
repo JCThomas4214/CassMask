@@ -1,9 +1,9 @@
-var cassmask = require('../../index.js');
+var cassmask = require('../../../../index.js');
 
 var now = cassmask.now;
 var toTimeStamp = cassmask.toTimeStamp;
 
-var ItemSchema = new cassmask.Schema({
+var ItemPostSchema = new cassmask.Schema({
 	part: {
 		type: cassmask.TEXT,
 		default: 'Item'
@@ -27,9 +27,9 @@ var ItemSchema = new cassmask.Schema({
 	keys: ['part', 'name']
 });
 
-ItemSchema.validate('info', function(info, next) {
+ItemPostSchema.validate('info', function(info, next) {
 	if(info.length > 5) next();
 	else next('Info is not long enough!');
 });
 
-module.exports = cassmask.model('Item', ItemSchema);
+module.exports = cassmask.model('ItemPost', ItemPostSchema);;

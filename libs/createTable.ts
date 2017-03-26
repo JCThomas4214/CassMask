@@ -8,8 +8,10 @@ import * as Rx from 'rxjs';
 
 export function createTable(obs: Rx.Observable<any>): Rx.Observable<any> {
 
+
+
   // object update to push to obs Array
-  return obs.concat(Rx.Observable.create(observer => {
+  let newObs = Rx.Observable.create(observer => {
       const table = this.schemaHelper.tableName;
       const q1 = `CREATE TABLE IF NOT EXISTS ${ table } (${ this.schemaHelper.columns }, PRIMARY KEY (${ this.schemaHelper.keys }))`;   
       
@@ -40,11 +42,15 @@ export function createTable(obs: Rx.Observable<any>): Rx.Observable<any> {
           observer.next();
           observer.complete();
         });
-      }).catch(err => observer.error(err));
+      }).catch(err => {
+        observer.error(err);
+      });
 
       return function () {};
 
-    }));
+    });
+
+    return newObs.concat(obs);
 }
 
 /*
