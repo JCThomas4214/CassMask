@@ -1,4 +1,5 @@
 
+[![Travis Build](https://travis-ci.org/JCThomas4214/CassMask.svg?branch=master)](https://travis-ci.org/JCThomas4214/CassMask)
 [![npm version](https://img.shields.io/npm/v/cassmask.svg)](https://www.npmjs.com/package/cassmask)
 
 # CassMask
