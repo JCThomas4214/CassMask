@@ -1,4 +1,4 @@
-var cassmask = require('../../../../index.js');
+import * as cassmask from '../../../index';
 
 var now = cassmask.now;
 var toTimeStamp = cassmask.toTimeStamp;
@@ -32,4 +32,4 @@ ItemSchema.validate('info', function(info, next) {
 	else next('Info is not long enough!');
 });
 
-module.exports = cassmask.model('Item', ItemSchema);
+export default cassmask.model('Item', ItemSchema);

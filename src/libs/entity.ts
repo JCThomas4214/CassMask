@@ -50,6 +50,14 @@ export class Entity extends Schema {
     let req = [];
     const cols = this.schemaHelper.allCol;
 
+    if (options.useDefaults) {
+      const defaults = this.schemaHelper.defaults;
+
+      for(let y in defaults) { // go through all items in object
+        if (!item[y]) item[y] = defaults[y]; // if a default property does not exist, make it
+      }
+    }
+
     for (let y = 0; y < cols.length; y++) {
       let prop = cols[y];
       let val = item[prop];

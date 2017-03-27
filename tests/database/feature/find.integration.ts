@@ -1,7 +1,7 @@
-var Item = require('./models');
-var ItemPost = require('./models/post');
-var ItemPre = require('./models/pre');
-var ItemPrePost = require('./models/prepost');
+import Item from './models';
+import ItemPost from './models/post';
+import ItemPre from './models/pre';
+import ItemPrePost from './models/prepost';
 
 describe('CassMask FIND', function() {
 

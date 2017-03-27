@@ -1,9 +1,9 @@
-var cassmask = require('../../../../index.js');
+import * as cassmask from '../../../index';
 
 var now = cassmask.now;
 var toTimeStamp = cassmask.toTimeStamp;
 
-var ItemMap = new cassmask.Schema({
+var ItemSet = new cassmask.Schema({
 	part: {
 		type: cassmask.TEXT,
 		default: 'Item'
@@ -16,9 +16,8 @@ var ItemMap = new cassmask.Schema({
 		type: cassmask.TEXT,
 		required: true
 	},
-	tmp: cassmask.MAP(
-		cassmask.INT, cassmask.TEXT),
+	tmp: cassmask.SET(cassmask.TEXT),
 	keys: ['part', 'name']
 });
 
-module.exports = cassmask.model('ItemMap', ItemMap);
+export default cassmask.model('ItemSet', ItemSet);

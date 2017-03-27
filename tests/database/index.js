@@ -1,3 +1,5 @@
+var exec = require('child_process').exec;
+var glob = require('glob');
 
 var Jasmine = require('jasmine');
 var jasmine = new Jasmine();
@@ -14,17 +16,23 @@ cassmask.connect({
 }, (err, result) => {
 	// callback after connection
 
-	jasmine.loadConfig({
-		spec_dir: 'tests/database',
-		spec_files: [
-			'feature/*.integration.js',
-			'dataTypes/*.integration.js'
-		]
+	glob('tests/database/**/*.integration.ts', function(err, files) {	
+		exec(`tsc ${files.join(' ')} --outDir tmp`, () => {
+
+			jasmine.loadConfig({
+				spec_dir: 'tmp',
+				spec_files: [
+					'feature/*.integration.js',
+					'dataTypes/*.integration.js'
+				]
+			});
+
+			jasmine.env.clearReporters();
+			jasmine.addReporter(new JasmineReporter());
+
+			jasmine.execute();
+
+		});
 	});
-
-	jasmine.env.clearReporters();
-	jasmine.addReporter(new JasmineReporter());
-
-	jasmine.execute();
 
 });

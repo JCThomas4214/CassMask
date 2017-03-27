@@ -1,20 +1,20 @@
-var ItemSet = require('./models/set');
+import ItemList from './models/list';
 
-describe('CassMask With SET type', function() {
+describe('CassMask With LIST type', function() {
 	var newSubTest;
 	var newTest;
 
 	beforeAll(done => {
-		ItemSet.post('create', null);
-		ItemSet.post('find', null);
-		ItemSet.post('remove', null);
-		ItemSet.post('update', null);
+		ItemList.post('create', null);
+		ItemList.post('find', null);
+		ItemList.post('remove', null);
+		ItemList.post('update', null);
 
 		done();
 	});
 
 	beforeAll(done => {
-		ItemSet.remove().create({
+		ItemList.remove().create({
 			name: 'testing',
 			tmp: ['jack','jill','jason']
 		}).seam().subscribe(
@@ -28,7 +28,7 @@ describe('CassMask With SET type', function() {
 
 
 	beforeAll(done => {
-		ItemSet.find().seam().subscribe(
+		ItemList.find().seam().subscribe(
 			test => newTest = test,
 			err => {
 				expect(err).not.toBeDefined();
@@ -37,16 +37,16 @@ describe('CassMask With SET type', function() {
 			() => done());	
 	});	
 
-	it('should respond with and Entity with a SET datatype', () => {
+	it('should respond with and Entity with a LIST datatype', () => {
 		expect(newSubTest.tmp[0]).toEqual('jack');
 		expect(newSubTest.tmp[1]).toEqual('jill');
 		expect(newSubTest.tmp[2]).toEqual('jason');
 	});
 
-	it('should find row with a SET datatype that is ordered', () => {
+	it('should find row with a LIST datatype', () => {
 		expect(newTest.tmp[0]).toEqual('jack');
-		expect(newTest.tmp[2]).toEqual('jill');
-		expect(newTest.tmp[1]).toEqual('jason');
+		expect(newTest.tmp[1]).toEqual('jill');
+		expect(newTest.tmp[2]).toEqual('jason');
 	});
 
 });

@@ -398,11 +398,7 @@ export class Model {
       // merge default values with each item in the items array
       for(let x = 0; x < items.length; x++) {
         let item = items[x];
-        // Any value that has a default but is not indicated in the item will be default
-        for(let y in defaults) { // go through all items in object
-          if (!item[y]) item[y] = defaults[y]; // if a default property does not exist, make it
-        }
-        item = new Entity(item, this, {validateChk: true, requireChk: true});
+        item = new Entity(item, this, {validateChk: true, requireChk: true, useDefaults: true});
 
         if(item['requireObs'])
           requireArr.push(item['requireObs']);

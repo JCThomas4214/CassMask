@@ -1,4 +1,4 @@
-var cassmask = require('../../../../index.js');
+import * as cassmask from '../../../index';
 
 var now = cassmask.now;
 var toTimeStamp = cassmask.toTimeStamp;
@@ -20,4 +20,4 @@ var ItemList = new cassmask.Schema({
 	keys: ['part', 'name']
 });
 
-module.exports = cassmask.model('ItemList', ItemList);
+export default cassmask.model('ItemList', ItemList);
