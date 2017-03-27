@@ -21,7 +21,7 @@ export class Entity extends Schema {
   public toJSON: Function;
   private modified: Object = {};
   public attributes: Object = {};
-  private schemaHelper: SchemaHelper;
+  public schemaHelper: SchemaHelper;
 
   constructor(item: any, parent: Model, options?: Object) {
     // super will be the Schema class with all defined event functions

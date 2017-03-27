@@ -1,4 +1,5 @@
 import { client } from '../index';
+import { SchemaHelper } from './schema';
 import * as Rx from 'rxjs';
 
 /*
@@ -6,16 +7,14 @@ import * as Rx from 'rxjs';
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
 
-export function createTable(obs: Rx.Observable<any>): Rx.Observable<any> {
-
-
+export function createTable(obs: Rx.Observable<any>, schemaHelper: SchemaHelper): Rx.Observable<any> {
 
   // object update to push to obs Array
   let newObs = Rx.Observable.create(observer => {
-      const table = this.schemaHelper.tableName;
-      const q1 = `CREATE TABLE IF NOT EXISTS ${ table } (${ this.schemaHelper.columns }, PRIMARY KEY (${ this.schemaHelper.keys }))`;   
+      const table = schemaHelper.tableName;
+      const q1 = `CREATE TABLE IF NOT EXISTS ${ table } (${ schemaHelper.columns }, PRIMARY KEY (${ schemaHelper.keys }))`;   
       
-      let indexes = this.schemaHelper.indexes;
+      let indexes = schemaHelper.indexes;
       let createIndexes = [];
 
       client.execute(q1).then(entity => { // observer2 will not pass any arguments from the query
@@ -58,10 +57,10 @@ export function createTable(obs: Rx.Observable<any>): Rx.Observable<any> {
       if false, append create table query observable to obs Array and return new state
       else, return passed state
  */
-export function checkTable(obs: Rx.Observable<any>): Rx.Observable<any> {
-  if (!this.schemaHelper.tblChked) { // if state.tblChked === false
-    this.schemaHelper.tblChked = true; // state.tblChked = true
-    return this.createTable(obs); // createTable() will return new state with appended obs List
+export function checkTable(obs: Rx.Observable<any>, schemaHelper: SchemaHelper): Rx.Observable<any> {
+  if (!schemaHelper.tblChked) { // if state.tblChked === false
+    schemaHelper.tblChked = true; // state.tblChked = true
+    return createTable(obs, schemaHelper); // createTable() will return new state with appended obs List
   }
   return obs;
 }

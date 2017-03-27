@@ -14,8 +14,7 @@
         "rootDir": "./",
         "typeRoots": [
             "./node_modules/@types"
-        ],
-        "types": ["cassmask"]
+        ]
     },
     "exclude": [
       "node_modules"

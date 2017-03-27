@@ -16,4 +16,4 @@ const fuseBox = FuseBox.init({
         JSONPlugin(),
         UglifyJSPlugin()
     ]
-}).bundle('>[index.ts]');
+}).bundle('>[src/index.ts]');
