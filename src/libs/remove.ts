@@ -18,15 +18,16 @@ export function parseQueryDelete(item: Entity, options: SchemaOptions) {
   for(let y in item.attributes) {
     const val = item[y];
     tmp += ` ${y} = ? AND`; // append key to query string
-    params.push(val); // push value to params array          
+    params.push(val); // push value to params array
   }
   let query = tmp.substring(0, tmp.length-4); // truncate last ' AND' on the string
-  if (options && options.if) query += ` IF ${options.if}`;
+  if (options && options.if) query += ` IF ${options.if}`
 
   return {
     query: query,
     params: params
   };
+  
 }
 
 export function executeQueryDelete(item: Entity, options: SchemaOptions): Rx.Observable<any> {

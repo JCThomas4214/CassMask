@@ -1,4 +1,4 @@
-import { client, Model } from '../index';
+import { client, Model, SchemaOptions } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 
@@ -6,7 +6,7 @@ import * as Rx from 'rxjs';
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
  */
-export function parseQueryInsert(item: Entity, options: any) {
+export function parseQueryInsert(item: Entity, options: SchemaOptions) {
 
   let params = [];
   // INSERT is a more complicated query that requires more feness
@@ -30,7 +30,7 @@ export function parseQueryInsert(item: Entity, options: any) {
 
   let query = tmp1.substring(0, tmp1.length-2) + tmp2.substring(0, tmp2.length-2) + ')'; // q's query string set to concat of columns and values string
   if (options) {
-    if (options.if) query += ` IF NOT EXISTS`;
+    if (options.if) query += ` IF ${options.if}`;
     if (options.using) query += ` USING ${options.using}`;
   }
 
@@ -40,7 +40,7 @@ export function parseQueryInsert(item: Entity, options: any) {
   };
 }
 
-export function executeQueryInsert(item: Entity, options: any): Rx.Observable<any> {
+export function executeQueryInsert(item: Entity, options: SchemaOptions): Rx.Observable<any> {
   return Rx.Observable.create(observer => {
 
     const q = parseQueryInsert(item, options);

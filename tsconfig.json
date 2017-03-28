@@ -13,11 +13,7 @@
         "suppressImplicitAnyIndexErrors": true,
         "rootDir": "./",
         "typeRoots": [
-            "./node_modules/@types",
-            "./"
-        ],
-        "types": [
-            "cassmask"
+            "./node_modules/@types"
         ]
     },
     "exclude": [

@@ -23,9 +23,9 @@ export function parseQuerySelect(item: Entity, options?: FindOptions) {
   if (options && options.attributes) { // if options and options.attributes exists
     const attr = options.attributes; // attr is a ref holder
     if (Array.isArray(attr)) // if attr is an array
-      sel = attr.join(','); // join array into string
+      sel = attr.join(', '); // join array into string
     else if (attr.exclude) {
-      sel = objDiff(item.schemaHelper.allCol, attr.exclude).join(','); // fidn set difference and join
+      sel = objDiff(item.schemaHelper.allCol, attr.exclude).join(', '); // fidn set difference and join
     }
   } else sel = '*'; // else select all columns
 
@@ -48,7 +48,7 @@ export function parseQuerySelect(item: Entity, options?: FindOptions) {
     // if orderBy 
     if (options.orderBy) query += ` ORDER BY ${options.orderBy}`;
     // if options for limit 1
-    if (options.perPartitionLimit) query += ` PRE PARTITION LIMIT ${options.perPartitionLimit}`;
+    if (options.perPartitionLimit) query += ` PER PARTITION LIMIT ${options.perPartitionLimit}`;
     // if options for limit 1
     if (options.limit) query += ` LIMIT ${options.limit}`;
     // options for allow filtering
