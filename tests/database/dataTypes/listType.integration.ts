@@ -96,6 +96,44 @@ describe('CassMask With LIST type', function() {
 		it('should have responded with an Entity with an actions object', done => {
 			ItemList.update({
 				set: {
+					infolist: cassmask.LIST.prepend(['preNewVal'])
+				},
+				where: {
+					part: 'Item',
+					name: 'testing'
+				}
+			}).seam().subscribe(
+				test => {
+					expect(test.infolist.type).toEqual('LIST');
+					expect(test.infolist.action).toEqual('prepend');
+					expect(test.infolist.payload).toEqual(['preNewVal']);
+				},
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
+				() => done());
+		});
+
+		it('should have prepended the new value to the LIST', done => {
+			ItemList.find().seam().subscribe(
+				test => {
+					expect(test.infolist[0]).toEqual('preNewVal');
+					expect(test.infolist[1]).toEqual('jack');
+					expect(test.infolist[2]).toEqual('jill');
+					expect(test.infolist[3]).toEqual('jason');
+					expect(test.infolist[4]).toEqual('newVal');
+				},
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
+				() => done());
+		});
+
+		it('should have responded with an Entity with an actions object', done => {
+			ItemList.update({
+				set: {
 					infolist: cassmask.LIST.set(1, 'bananaVal')
 				},
 				where: {
@@ -119,10 +157,47 @@ describe('CassMask With LIST type', function() {
 		it('should have set the value at index in the LIST', done => {
 			ItemList.find().seam().subscribe(
 				test => {
-					expect(test.infolist[0]).toEqual('jack');
+					expect(test.infolist[0]).toEqual('preNewVal');
 					expect(test.infolist[1]).toEqual('bananaVal');
-					expect(test.infolist[2]).toEqual('jason');
-					expect(test.infolist[3]).toEqual('newVal');
+					expect(test.infolist[2]).toEqual('jill');
+					expect(test.infolist[3]).toEqual('jason');
+					expect(test.infolist[4]).toEqual('newVal');
+				},
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
+				() => done());
+		});
+
+		it('should have responded with an Entity with an actions object', done => {
+			ItemList.update({
+				set: {
+					infolist: cassmask.LIST.remove(['bananaVal', 'jill'])
+				},
+				where: {
+					part: 'Item',
+					name: 'testing'
+				}
+			}).seam().subscribe(
+				test => {
+					expect(test.infolist.type).toEqual('LIST');
+					expect(test.infolist.action).toEqual('remove');
+					expect(test.infolist.payload).toEqual(['bananaVal', 'jill']);
+				},
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
+				() => done());
+		});
+
+		it('should have removed the values from the LIST', done => {
+			ItemList.find().seam().subscribe(
+				test => {
+					expect(test.infolist[0]).toEqual('preNewVal');
+					expect(test.infolist[1]).toEqual('jason');
+					expect(test.infolist[2]).toEqual('newVal');
 				},
 				err => {
 					expect(err).not.toBeDefined();

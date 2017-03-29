@@ -93,44 +93,40 @@ describe('CassMask With SET type', function() {
 				() => done());
 		});
 
-		// it('should have responded with an Entity with an actions object', done => {
-		// 	ItemSet.update({
-		// 		set: {
-		// 			infoset: cassmask.SET.set('jill', 'bananaVal')
-		// 		},
-		// 		where: {
-		// 			part: 'Item',
-		// 			name: 'testing'
-		// 		}
-		// 	}).seam().subscribe(
-		// 		test => {
-		// 			expect(test.infoset.type).toEqual('SET');
-		// 			expect(test.infoset.action).toEqual('set');
-		// 			expect(test.infoset.index).toEqual('jill');
-		// 			expect(test.infoset.payload).toEqual('bananaVal');
-		// 		},
-		// 		err => {
-		// 			console.log(err);
-		// 			expect(err).not.toBeDefined();
-		// 			done();
-		// 		},
-		// 		() => done());
-		// });
+		it('should have responded with an Entity with an actions object', done => {
+			ItemSet.update({
+				set: {
+					infoset: cassmask.SET.remove(['jason', 'jill'])
+				},
+				where: {
+					part: 'Item',
+					name: 'testing'
+				}
+			}).seam().subscribe(
+				test => {
+					expect(test.infoset.type).toEqual('SET');
+					expect(test.infoset.action).toEqual('remove');
+					expect(test.infoset.payload).toEqual(['jason', 'jill']);
+				},
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
+				() => done());
+		});
 
-		// it('should have set the value at index in the SET', done => {
-		// 	ItemSet.find().seam().subscribe(
-		// 		test => {
-		// 			expect(test.infoset[0]).toEqual('bananaVal');
-		// 			expect(test.infoset[1]).toEqual('jack');
-		// 			expect(test.infoset[2]).toEqual('jason');
-		// 			expect(test.infoset[3]).toEqual('newVal');
-		// 		},
-		// 		err => {
-		// 			expect(err).not.toBeDefined();
-		// 			done();
-		// 		},
-		// 		() => done());
-		// });
+		it('should have removed the values from the SET', done => {
+			ItemSet.find().seam().subscribe(
+				test => {
+					expect(test.infoset[0]).toEqual('jack');
+					expect(test.infoset[1]).toEqual('newVal');
+				},
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
+				() => done());
+		});
 
 		it('should have responded with an Entity with an actions object', done => {
 			ItemSet.update({

@@ -38,15 +38,8 @@ export function setVal(itemVal, columnVal, params): string {
           return ` ${columnVal} = ? + ${columnVal},`;
         }
         else if (itemVal.action === 'remove') {
-          let err = {};
-          err[columnVal] = {
-            message: `'remove' action is for remove query only`,
-            kind: 'user defined',
-            path: columnVal,
-            value: itemVal.payload,
-            name: 'InvalidActionError'
-          };
-          Rx.Observable.throw(new InvalidActionError(err, 'LIST Remove is only usable in a remove query!!'));
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ${columnVal} - ?,`;
         }
         else if (itemVal.action === 'set') {
           params.push(itemVal.index);
@@ -65,20 +58,8 @@ export function setVal(itemVal, columnVal, params): string {
           return ` ${columnVal} = ${columnVal} + ?,`;
         }
         else if (itemVal.action === 'remove') {
-          let err = {};
-          err[columnVal] = {
-            message: `'remove' action is for remove query only`,
-            kind: 'user defined',
-            path: columnVal,
-            value: itemVal.payload,
-            name: 'InvalidActionError'
-          };
-          Rx.Observable.throw(new InvalidActionError(err, 'SET Remove is only usable in a remove query!!'));
-        }
-        else if (itemVal.action === 'set') {
-          params.push(itemVal.index);
           params.push(itemVal.payload);
-          return ` ${columnVal}[?] = ?,`;
+          return ` ${columnVal} = ${columnVal} - ?,`;
         }
         else if (itemVal.action === 'reset') {
           params.push(itemVal.payload);

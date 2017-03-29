@@ -93,11 +93,11 @@ export namespace LIST {
       payload: keyVal
     }
   }
-  export function remove(keys: number | Array<number>): CollectionAction {
+  export function remove(keys: Array<any>): CollectionAction {
     return {
       type: 'LIST',
-      action: 'removeOne',
-      index: keys
+      action: 'remove',
+      payload: keys
     }
   }
 }
@@ -117,14 +117,6 @@ export namespace SET {
       payload: keyVal
     }
   }
-  export function set(set: any, val: any): CollectionAction {
-    return {
-      type: 'SET',
-      action: 'set',
-      index: set,
-      payload: val
-    }
-  }
   export function reset(keyVal: Object): CollectionAction {
     return {
       type: 'SET',
@@ -132,11 +124,11 @@ export namespace SET {
       payload: keyVal
     }
   }
-  export function remove(keys: number | Array<number>): CollectionAction {
+  export function remove(keys: Array<any>): CollectionAction {
     return {
       type: 'SET',
       action: 'remove',
-      index: keys
+      payload: keys
     }
   }
 }
