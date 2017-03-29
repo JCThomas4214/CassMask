@@ -7,8 +7,8 @@
     "index.d.ts"
   ],
   "scripts": {
-    "test": "rimraf tmp && node ./tests/api",
-    "test:db": "rimraf tmp && node ./tests/database",
+    "test": "node ./tests/api && rimraf tmp",
+    "test:db": "node ./tests/database && rimraf tmp",
     "prefuse": "rimraf index.js",
     "fuse": "node fuse"
   },

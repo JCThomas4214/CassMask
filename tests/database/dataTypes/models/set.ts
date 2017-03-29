@@ -16,7 +16,7 @@ var ItemSet = new cassmask.Schema({
 		type: cassmask.TEXT,
 		required: true
 	},
-	tmp: cassmask.SET(cassmask.TEXT),
+	infoset: cassmask.SET(cassmask.TEXT),
 	keys: ['part', 'name']
 });
 

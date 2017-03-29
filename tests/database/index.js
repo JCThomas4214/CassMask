@@ -23,7 +23,7 @@ cassmask.connect({
 				spec_dir: 'tmp',
 				spec_files: [
 					// 'feature/*.integration.js',
-					'dataTypes/mapType.integration.js'
+					'dataTypes/*.integration.js'
 				]
 			});
 

@@ -117,7 +117,7 @@ export namespace SET {
       payload: keyVal
     }
   }
-  export function set(set: number, val: any): CollectionAction {
+  export function set(set: any, val: any): CollectionAction {
     return {
       type: 'SET',
       action: 'set',

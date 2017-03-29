@@ -18,6 +18,8 @@ var ItemMap = new cassmask.Schema({
 	},
 	infomap: cassmask.MAP(
 		cassmask.INT, cassmask.TEXT),
+	infomap2: cassmask.MAP(
+		cassmask.TEXT, cassmask.TEXT),
 	keys: ['part', 'name']
 });
 

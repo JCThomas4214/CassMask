@@ -16,7 +16,7 @@ var ItemList = new cassmask.Schema({
 		type: cassmask.TEXT,
 		required: true
 	},
-	tmp: cassmask.LIST(cassmask.TEXT),
+	infolist: cassmask.LIST(cassmask.TEXT),
 	keys: ['part', 'name']
 });
 

@@ -23,6 +23,11 @@ describe('CassMask With MAP type', function() {
 					1: 'jack',
 					2: 'jill',
 					3: 'jason'
+				},
+				infomap2: {
+					awesome: 'tots',
+					tower: 'leaning',
+					tome: 'raider'
 				}
 			}).seam().subscribe(
 				test => newSubTest = test,
@@ -97,7 +102,7 @@ describe('CassMask With MAP type', function() {
 				() => done());
 		});
 
-		it('should have responded with an Entity with an actions object', done => {
+		it('should have responded with an Entity with an actions object (infomap<int, text>)', done => {
 			ItemMap.update({
 				set: {
 					infomap: cassmask.MAP.set(10, 'awesomeVal')
@@ -114,6 +119,44 @@ describe('CassMask With MAP type', function() {
 					expect(test.infomap.payload).toEqual('awesomeVal');
 				},
 				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
+				() => done());
+		});
+
+		it('should have set the keyValue pair in the MAP (infomap<int, text>)', done => {
+			ItemMap.find().seam().subscribe(
+				test => {
+					expect(test.infomap[1]).toEqual('jack');
+					expect(test.infomap[2]).toEqual('jill');
+					expect(test.infomap[3]).toEqual('jason');
+					expect(test.infomap[10]).toEqual('awesomeVal');
+				},
+				err => {
+					expect(err).not.toBeDefined();
+					done();
+				},
+				() => done());
+		});
+
+		it('should have responded with an Entity with an actions object (infomap<text, text>)', done => {
+			ItemMap.update({
+				set: {
+					infomap2: cassmask.MAP.set('awesome', 'awesomeVal')
+				},
+				where: {
+					part: 'Item',
+					name: 'testing'
+				}
+			}).seam().subscribe(
+				test => {
+					expect(test.infomap2.type).toEqual('MAP');
+					expect(test.infomap2.action).toEqual('set');
+					expect(test.infomap2.index).toEqual('awesome');
+					expect(test.infomap2.payload).toEqual('awesomeVal');
+				},
+				err => {
 					console.log(err);
 					expect(err).not.toBeDefined();
 					done();
@@ -121,13 +164,12 @@ describe('CassMask With MAP type', function() {
 				() => done());
 		});
 
-		it('should have set the keyValue pair in the MAP', done => {
+		it('should have set the keyValue pair in the MAP (infomap<text, text>)', done => {
 			ItemMap.find().seam().subscribe(
 				test => {
-					expect(test.infomap[1]).toEqual('jack');
-					expect(test.infomap[2]).toEqual('jill');
-					expect(test.infomap[3]).toEqual('jason');
-					expect(test.infomap[10]).toEqual('awesomeVal');
+					expect(test.infomap2.awesome).toEqual('awesomeVal');
+					expect(test.infomap2.tower).toEqual('leaning');
+					expect(test.infomap2.tome).toEqual('raider');
 				},
 				err => {
 					expect(err).not.toBeDefined();
@@ -157,6 +199,8 @@ describe('CassMask With MAP type', function() {
 				},
 				() => done());
 		});
+
+
 
 		it('should have removed the keyValue pair from the MAP', done => {
 			ItemMap.find().seam().subscribe(
