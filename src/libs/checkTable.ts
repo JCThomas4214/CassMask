@@ -2,6 +2,14 @@ import { client } from '../index';
 import { SchemaHelper } from './schema';
 import * as Rx from 'rxjs';
 
+export function createTableQuery(schemaHelper: SchemaHelper) {
+  return `CREATE TABLE IF NOT EXISTS ${ schemaHelper.tableName } (${ schemaHelper.columns }, PRIMARY KEY (${ schemaHelper.keys }))`;
+}
+
+export function indexQuery(indexName: string, indexGroup: string, schemaHelper: SchemaHelper) {
+  return `CREATE CUSTOM INDEX ${ schemaHelper.tableName }_${indexName} on ${ schemaHelper.tableName } (${indexGroup}) using 'org.apache.cassandra.index.sasi.SASIIndex'`;
+}
+
 /*
     PARSES THE INPUTTED OBJECT ARRAY INTO A SEPARATE ARRAYS
       THEN CREATED THE BATCH QUERY ARRAY FOR CASS DRIVER
@@ -11,8 +19,7 @@ export function createTable(obs: Rx.Observable<any>, schemaHelper: SchemaHelper)
 
   // object update to push to obs Array
   let newObs = Rx.Observable.create(observer => {
-      const table = schemaHelper.tableName;
-      const q1 = `CREATE TABLE IF NOT EXISTS ${ table } (${ schemaHelper.columns }, PRIMARY KEY (${ schemaHelper.keys }))`;   
+      const q1 = createTableQuery(schemaHelper);   
       
       let indexes = schemaHelper.indexes;
       let createIndexes = [];
@@ -22,7 +29,7 @@ export function createTable(obs: Rx.Observable<any>, schemaHelper: SchemaHelper)
           const indexName = indexes[x].join('_');
           const indexGroup = indexes[x].join(', ');
 
-          const q2 = `CREATE CUSTOM INDEX ${ table }_${indexName} on ${ table } (${indexGroup}) using 'org.apache.cassandra.index.sasi.SASIIndex'`;
+          const q2 = indexQuery(indexName, indexGroup, schemaHelper); 
 
           createIndexes.push(Rx.Observable.create(observer2 => {
             client.execute(q2).then(entity => {

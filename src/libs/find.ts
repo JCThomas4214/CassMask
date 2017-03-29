@@ -3,14 +3,7 @@ import { Entity } from './entity';
 import { objDiff, Error } from './schema';
 import * as Rx from 'rxjs';
 
-class NotFoundError extends Error {
-  message: string = "Row not found";
-  name: string = "NotFoundError";
-
-  constructor(error: any, message: string) {
-    super(error);
-  }
-}
+import { NotFoundError } from './errors';
 
 /*
     PARSES THE INPUTTED OBJECT

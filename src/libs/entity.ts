@@ -2,15 +2,7 @@ import { client, Model } from '../index';
 import { Schema, SchemaHelper, Error } from './schema';
 import * as Rx from 'rxjs';
 
-class ValidationError extends Error {
-  message: string;
-  name: string = 'ValidationError';
-
-  constructor(error: any, message: string) {
-    super(error);
-    this.message = message;
-  }
-}
+import { ValidationError } from './errors';
 
 /*
      Entity class is the object that will be instantiated with the DB response row data

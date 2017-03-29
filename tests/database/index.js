@@ -22,8 +22,8 @@ cassmask.connect({
 			jasmine.loadConfig({
 				spec_dir: 'tmp',
 				spec_files: [
-					'feature/*.integration.js',
-					'dataTypes/*.integration.js'
+					// 'feature/*.integration.js',
+					'dataTypes/mapType.integration.js'
 				]
 			});
 

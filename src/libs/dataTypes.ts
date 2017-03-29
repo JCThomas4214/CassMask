@@ -10,22 +10,11 @@ export function toTimeStamp(timeuuid: string) {
   return `toTimeStamp(${timeuuid})`;
 }
 
-export interface MapAction {
+export interface CollectionAction {
+  type: string,
   action: string,
   index?: any,
   payload?: any
-}
-
-export interface ListAction {
-  action: string,
-  index?: any,
-  payload?: any
-}
-
-export interface SetAction {
-  action: string,
-  index?: any,
-  payload?: any 
 }
 
 export function MAP(keyType: string, valType: string): string {
@@ -36,29 +25,33 @@ export namespace MAP {
   export function schemaString(keyType: string, valType: string): string {
     return `map<${keyType},${valType}>`;
   }
-  export function append(keyVal: Object): MapAction {
+  export function append(keyVal: Object): CollectionAction {
     return {
+      type: 'MAP',
       action: 'append',
-      payload: `+ ${keyVal}`
+      payload: keyVal
     }
   }
-  export function set(set: any, val: any): MapAction {
+  export function set(set: any, val: any): CollectionAction {
     return {
+      type: 'MAP',
       action: 'set',
-      index: `[${set}]`,
+      index: set,
       payload: val
     }
   }
-  export function reset(keyVal: Object): MapAction {
+  export function reset(keyVal: Object): CollectionAction {
     return {
+      type: 'MAP',
       action: 'reset',
       payload: keyVal
     }
   }
-  export function remove(keys: Array<string>): MapAction {
+  export function remove(keys: Array<string>): CollectionAction {
     return {
+      type: 'MAP',
       action: 'remove',
-      payload: `- { ${keys.join(', ')} }`
+      payload: keys
     }
   }
 }
@@ -71,35 +64,40 @@ export namespace LIST {
   export function schemaString(valType: string): string {
     return `list<${valType}>`;
   }
-  export function append(keyVal: Object): ListAction {
+  export function append(keyVal: Array<any>): CollectionAction {
     return {
+      type: 'LIST',
       action: 'append',
-      payload: `+ ${keyVal}`
+      payload: keyVal
     }
   }
-  export function prepend(keyVal: Object): ListAction {
+  export function prepend(keyVal: Array<any>): CollectionAction {
     return {
+      type: 'LIST',
       action: 'prepend',
-      payload: `${keyVal} +`
+      payload: keyVal
     }
   }
-  export function set(set: any, val: any): ListAction {
+  export function set(set: number, val: any): CollectionAction {
     return {
+      type: 'LIST',
       action: 'set',
-      index: `[${set}]`,
+      index: set,
       payload: val
     }
   }
-  export function reset(keyVal: Object): ListAction {
+  export function reset(keyVal: Object): CollectionAction {
     return {
+      type: 'LIST',
       action: 'reset',
       payload: keyVal
     }
   }
-  export function remove(keys: number | string): ListAction {
+  export function remove(keys: number | Array<number>): CollectionAction {
     return {
-      action: 'remove',
-      index: `[${keys}]`
+      type: 'LIST',
+      action: 'removeOne',
+      index: keys
     }
   }
 }
@@ -112,35 +110,33 @@ export namespace SET {
   export function schemaString(valType: string): string {
     return `set<${valType}>`;
   }
-  export function append(keyVal: Object): SetAction {
+  export function append(keyVal: Object): CollectionAction {
     return {
+      type: 'SET',
       action: 'append',
-      payload: `+ ${keyVal}`
+      payload: keyVal
     }
   }
-  export function prepend(keyVal: Object): SetAction {
+  export function set(set: number, val: any): CollectionAction {
     return {
-      action: 'prepend',
-      payload: `${keyVal} +`
-    }
-  }
-  export function set(set: any, val: any): SetAction {
-    return {
+      type: 'SET',
       action: 'set',
-      index: `[${set}]`,
+      index: set,
       payload: val
     }
   }
-  export function reset(keyVal: Object): SetAction {
+  export function reset(keyVal: Object): CollectionAction {
     return {
+      type: 'SET',
       action: 'reset',
       payload: keyVal
     }
   }
-  export function remove(keys: number | string): SetAction {
+  export function remove(keys: number | Array<number>): CollectionAction {
     return {
+      type: 'SET',
       action: 'remove',
-      index: `[${keys}]`
+      index: keys
     }
   }
 }

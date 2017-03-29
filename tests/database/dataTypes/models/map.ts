@@ -16,7 +16,7 @@ var ItemMap = new cassmask.Schema({
 		type: cassmask.TEXT,
 		required: true
 	},
-	tmp: cassmask.MAP(
+	infomap: cassmask.MAP(
 		cassmask.INT, cassmask.TEXT),
 	keys: ['part', 'name']
 });

@@ -1,23 +1,96 @@
-import { client, Model, SchemaOptions, UpdateObject,
-  MapAction, ListAction, SetAction } from '../index';
+import { client, Model, SchemaOptions, UpdateObject } from '../index';
 import { Entity } from './entity';
 import * as Rx from 'rxjs';
 
-export function isCollection(itemVal, columnVal): string {
-  // if (itemVal instanceof MapAction) {
-  //   // switch (itemVal.action) {
-  //   //   case: 
-  //   // }
-  // }
-  // else if (itemVal instanceof ListAction) {
+import { InvalidActionError } from './errors';
 
-  // } 
-  // else if (itemVal instanceof SetAction) {
+export function setVal(itemVal, columnVal, params): string {
+  if (itemVal.type) {
+    switch (itemVal.type) {
+      case 'MAP':
 
-  // } 
-  // else {
-    return ` ${columnVal} = ?, `;
-  // }
+        if (itemVal.action === 'append') {
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ${columnVal} + ?,`;
+        }
+        else if (itemVal.action === 'remove') {
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ${columnVal} - ?,`;
+        }
+        else if (itemVal.action === 'set') {
+          params.push(itemVal.index);
+          params.push(itemVal.payload);
+          return ` ${columnVal}[?] = ?,`;
+        }
+        else {
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ?,`;
+        }
+
+      case 'LIST':
+        
+        if (itemVal.action === 'append') {
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ${columnVal} + ?,`;
+        }
+        else if (itemVal.action === 'prepend') {
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ? + ${columnVal},`;
+        }
+        else if (itemVal.action === 'remove') {
+          let err = {};
+          err[columnVal] = {
+            message: `'remove' action is for remove query only`,
+            kind: 'user defined',
+            path: columnVal,
+            value: itemVal.payload,
+            name: 'InvalidActionError'
+          };
+          Rx.Observable.throw(new InvalidActionError(err, 'LIST Remove is only usable in a remove query!!'));
+        }
+        else if (itemVal.action === 'set') {
+          params.push(itemVal.index);
+          params.push(itemVal.payload);
+          return ` ${columnVal}[?] = ?,`;
+        }
+        else if (itemVal.action === 'reset') {
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ?,`;
+        }
+
+      case 'SET':
+        
+        if (itemVal.action === 'append') {
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ${columnVal} + ?,`;
+        }
+        else if (itemVal.action === 'remove') {
+          let err = {};
+          err[columnVal] = {
+            message: `'remove' action is for remove query only`,
+            kind: 'user defined',
+            path: columnVal,
+            value: itemVal.payload,
+            name: 'InvalidActionError'
+          };
+          Rx.Observable.throw(new InvalidActionError(err, 'SET Remove is only usable in a remove query!!'));
+        }
+        else if (itemVal.action === 'set') {
+          params.push(itemVal.index);
+          params.push(itemVal.payload);
+          return ` ${columnVal}[?] = ?,`;
+        }
+        else if (itemVal.action === 'reset') {
+          params.push(itemVal.payload);
+          return ` ${columnVal} = ?,`;
+        }
+
+    }
+  }
+  else {
+    params.push(itemVal);
+    return ` ${columnVal} = ?,`;
+  }
 }
 
 /*
@@ -40,11 +113,10 @@ export function parseQueryUpdate(item: Entity, options: SchemaOptions) {
     const columnVal = columnList[y];
     const itemVal = item.attributes[columnVal];
     if (itemVal) {
-      tmp += isCollection(itemVal, columnVal); // append set attributes to query string
-      params.push(itemVal); // push values to params array
+      tmp += setVal(itemVal, columnVal, params); // append set attributes to query string
     }
   }
-  tmp = tmp.substring(0, tmp.length-2) + ' WHERE'; // truncate the last ', ' from the query string
+  tmp = tmp.substring(0, tmp.length-1) + ' WHERE'; // truncate the last ', ' from the query string
   // append WHERE to continue the query string with keys in 'in' object
   // for all keys in the 'in' object
   for(let z = 0; z < keyList.length; z++) {
