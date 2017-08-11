@@ -238,22 +238,22 @@ describe('UPDATE Query Parsing', function() {
 
 		});
 
-		it('update SET.set query object should have the correct query string and params', () => {
+		// it('update SET.set query object should have the correct query string and params', () => {
 
-			let q = parseQueryUpdate(new Entity({
-				part: 'Item',
-				name: 'testing',
-				infoset: cassmask.SET.set(2, 'bro');
-			}, testModel), {});
+		// 	let q = parseQueryUpdate(new Entity({
+		// 		part: 'Item',
+		// 		name: 'testing',
+		// 		infoset: cassmask.SET.set(2, 'bro');
+		// 	}, testModel), {});
 
-			expect(q.query).toEqual('UPDATE schemas SET infoset[?] = ? WHERE part = ? AND name = ? IF EXISTS');
+		// 	expect(q.query).toEqual('UPDATE schemas SET infoset[?] = ? WHERE part = ? AND name = ? IF EXISTS');
 
-			expect(q.params[0]).toEqual(2);
-			expect(q.params[1]).toEqual('bro');
-			expect(q.params[2]).toEqual('Item');
-			expect(q.params[3]).toEqual('testing');
+		// 	expect(q.params[0]).toEqual(2);
+		// 	expect(q.params[1]).toEqual('bro');
+		// 	expect(q.params[2]).toEqual('Item');
+		// 	expect(q.params[3]).toEqual('testing');
 
-		});
+		// });
 
 		it('update SET.reset query object should have the correct query string and params', () => {
 

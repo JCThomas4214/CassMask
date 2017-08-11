@@ -294,6 +294,23 @@ export class Model {
       this.schemaHelper.createIndex(property);
     }
 
+    insertJsonBatch(obj: Array<Object>, options: Object): Rx.Observable<any> {
+      return Rx.Observable.create(observer => {
+
+        let queries = [];
+
+        for(let x = 0; x < obj.length; x++) { 
+          queries.push({query: `INSERT INTO ${this.schemaHelper.tableName} JSON '${JSON.stringify(obj[x])}'`});
+        }
+        
+        client.batch(queries).then(entity => {
+          observer.next();
+          observer.complete();
+        }).catch(err => observer.error(err));
+
+      });
+    }
+
   }
 
   export * from './libs/dataTypes';

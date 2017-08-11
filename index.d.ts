@@ -160,6 +160,9 @@ declare module "cassmask" {
 		create(items: J | Array<J>, opts?: SchemaOptions): Model<J>;
 		seam(): Rx.Observable<any>;
 
+		cdExecute(query: string, params?: Array<string|number>, options?, cb?: Function);
+		cdBatch(queries: Array<string>|Array<{ query:string, params:Array<string|number> }>, options?, cb: Function);
+
 		// batch(items: Array<Object>, opt?: BatchOptions): Rx.Observable<any>;
 
 		methods(scope: Object): void;
@@ -170,7 +173,8 @@ declare module "cassmask" {
 
 		schema: Schema;
 
-		createIndex(property: string): void
+		createIndex(property: string): void;
+		insertJsonBatch(obj: Array<Object>, options: Object): Rx.Observable<any>;
 	}
 
 	class Entity {
